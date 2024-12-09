@@ -1,14 +1,19 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player()
+Player::Player(EventDispatcher& dispatcher)
     : m_frameWidth(192), m_frameHeight(192), m_elapsedTime(0.f),
     m_startFrame(0), m_endFrame(0), m_currentFrame(0), m_frameTime(0.1f), m_speed(200.f), m_state(AnimationState::Idle) {
+    
     const char* spriteSheetPath = "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png";
 
     if (!m_texture.loadFromFile(spriteSheetPath)) {
         std::cerr << "Failed to load sprite sheet: " << spriteSheetPath << std::endl;
     }
+
+    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
+        this->onDraw(event);
+    });
 
     m_texture.setSmooth(false);
     m_sprite.setTexture(m_texture);
@@ -40,9 +45,10 @@ void Player::update(float deltaTime) {
     }
 }
 
-void Player::draw(sf::RenderWindow& window) {
-    window.draw(m_sprite);
+void Player::onDraw(DrawEvent& event) {
+    event.GetWindow().draw(m_sprite);
 }
+
 
 void Player::setPosition(float x, float y) {
     m_sprite.setPosition(x, y);

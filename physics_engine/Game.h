@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Event.h"
 
 class Game {
 public:
@@ -11,4 +12,5 @@ public:
 
 private:
     sf::RenderWindow m_window;
+    EventDispatcher m_eventDispatcher;
 };

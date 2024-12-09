@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Event.h"
 
 enum class AnimationState {
     Idle,
@@ -15,10 +16,10 @@ enum class AnimationState {
 
 class Player {
 public:
-    Player();
+    Player(EventDispatcher& dispatcher);
 
     void update(float deltaTime); // update animation
-    void draw(sf::RenderWindow& window); // draw the player
+    void onDraw(DrawEvent& event); // draw the player
 
     void setPosition(float x, float y); // set the player's position
     void setAnimation(AnimationState state); 

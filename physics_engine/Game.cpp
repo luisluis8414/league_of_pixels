@@ -1,9 +1,11 @@
 #include "Building.h"
 #include "Game.h"
 #include "Player.h"
+#include "Event.h"
+#include <iostream>
 
 Game::Game()
-    : m_window(sf::VideoMode(800, 800), "My game") {
+    : m_window(sf::VideoMode(800, 800), "Knightly") {
 }
 
 Game::~Game() {
@@ -15,9 +17,10 @@ Game::~Game() {
 void Game::run() {
     sf::Clock clock;
 
-    Building building("resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2);
+    Building building(m_eventDispatcher,"resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2);
 
-    Player player;
+    Player player(m_eventDispatcher);
+
     player.setPosition(300.f, 300.f);
 
     player.setAnimation(AnimationState::Idle);
@@ -35,11 +38,12 @@ void Game::run() {
 
         player.handleInput(deltaTime);
         player.update(deltaTime);
-
+            
         m_window.clear(); 
-        building.draw(m_window);
-        player.draw(m_window);
+        DrawEvent drawEvent(m_window);
+        m_eventDispatcher.emit(drawEvent);
 
         m_window.display(); 
     }
 }
+
