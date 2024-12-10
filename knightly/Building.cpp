@@ -6,14 +6,14 @@ Building::Building(EventDispatcher& dispatcher, const std::string& texturePath, 
         std::cerr << "Failed to load " << texturePath << std::endl;
     }
 
-    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
-        this->onDraw(event);
-        });
-
     m_texture.setSmooth(false);        
     m_sprite.setTexture(m_texture);   
     m_sprite.setPosition(x, y);      
     m_sprite.setScale(scale, scale); 
+
+    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
+        this->onDraw(event);
+        });
 }
 
 

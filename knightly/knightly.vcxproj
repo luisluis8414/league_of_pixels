@@ -154,6 +154,9 @@
   <ItemGroup>
     <Image Include="resources\tiny_swords\Factions\Knights\Troops\Warrior\Blue\Warrior_Blue.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

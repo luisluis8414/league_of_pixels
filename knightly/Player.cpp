@@ -11,18 +11,23 @@ Player::Player(EventDispatcher& dispatcher)
         std::cerr << "Failed to load sprite sheet: " << spriteSheetPath << std::endl;
     }
 
-    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
-        this->onDraw(event);
-    });
-
     m_texture.setSmooth(false);
     m_sprite.setTexture(m_texture);
 
     m_frameRect = sf::IntRect(0, 0, m_frameWidth, m_frameHeight);
     m_sprite.setTextureRect(m_frameRect);
+
+    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
+        this->onDraw(event);
+    });
+
+    dispatcher.subscribe<UpdateEvent>([this](UpdateEvent& event) {
+        this->updatePlayer(event.GetDeltaTime());
+        this->updateAnimation(event.GetDeltaTime());
+    });
 }
 
-void Player::update(float deltaTime) {
+void Player::updateAnimation(float deltaTime) {
     m_elapsedTime += deltaTime;
 
     if (m_elapsedTime >= m_frameTime) {
@@ -88,7 +93,7 @@ void Player::setAnimation(AnimationState animationState) {
         m_currentFrame = m_startFrame;
         break;
     case AnimationState::SlashForwardRight:
-        m_startFrame = 32;
+        m_startFrame = 30;
         m_endFrame = 35;
         m_frameTime = 0.1f;
         m_currentFrame = m_startFrame;
@@ -116,15 +121,11 @@ void Player::move(float deltaX, float deltaY) {
     m_sprite.move(deltaX, deltaY);
 }
 
-void Player::handleInput(float deltaTime) {
+void Player::updatePlayer(float deltaTime) {
+    if (isHitting()) return;
     float deltaX = 0.f;
     float deltaY = 0.f;
 
-    bool isHitting = m_state != AnimationState::Idle && m_state != AnimationState::Walking;
-
-
-    // check movement keys
-    if (!isHitting) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             deltaY -= m_speed * deltaTime;
             if (m_state != AnimationState::Walking) {
@@ -149,15 +150,7 @@ void Player::handleInput(float deltaTime) {
                 setAnimation(AnimationState::Walking);
             }
         }
-    }
 
-
-    // if no movement keys are pressed, return to idle (only if not hitting)
-    if (deltaX == 0 && deltaY == 0 && m_state == AnimationState::Walking) {
-        setAnimation(AnimationState::Idle);
-    }
-
-    if (!isHitting) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             setAnimation(AnimationState::SlashDown);
         }
@@ -173,11 +166,19 @@ void Player::handleInput(float deltaTime) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
             setAnimation(AnimationState::SlashBehindLeft);
         }
+
+        // if no movement keys are pressed, return to idle (only if not hitting)
+        if (deltaX == 0.f && deltaY == 0.f && m_state == AnimationState::Walking) {
+            setAnimation(AnimationState::Idle);
     }
 
     move(deltaX, deltaY);
 }
 
+
+bool Player::isHitting() const  {
+    return (m_state != AnimationState::Idle && m_state != AnimationState::Walking);
+}
 
 
 

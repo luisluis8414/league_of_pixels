@@ -18,14 +18,15 @@ class Player {
 public:
     Player(EventDispatcher& dispatcher);
 
-    void update(float deltaTime); // update animation
+    void updateAnimation(float deltaTime); // update animation
     void onDraw(DrawEvent& event); // draw the player
 
     void setPosition(float x, float y); // set the player's position
     void setAnimation(AnimationState state); 
 
     void move(float deltaX, float deltaY); // move the player
-    void handleInput(float deltaTime);    // handle WASD input
+    void updatePlayer(float deltaTime);   
+
 
 private:
     sf::Texture m_texture;     // the sprite sheet
@@ -43,7 +44,7 @@ private:
 
     float m_speed;             // movement speed
 
-    AnimationState m_state;    // current animation state
-    //bool m_isHitAnimating;     // flag to indicate if hit animation is active
+    AnimationState m_state;// current animation state
+    bool isHitting() const;     // flag to indicate if hit animation is active
 };
 

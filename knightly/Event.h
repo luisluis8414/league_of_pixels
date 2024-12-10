@@ -7,18 +7,22 @@
 
 enum class EventType {
 	DRAW,
-	WINDOW_RESIZE,
-	ATTACK
+	UPDATE,
+	KEYPRESSED,
+	WINDOW_RESIZE
 };
 
 class Event {
 	friend class EventDispatcher;
 public:
-	virtual EventType GetEventType() const = 0;
 	virtual const char* GetName() const = 0;
+
+	virtual EventType GetEventType() const { return m_eventType; };
 	virtual std::string ToString() const { return GetName(); }
 
 protected:
+	Event(EventType type) : m_eventType(type) {}
+	EventType m_eventType;
 	bool m_handled = false;
 };	
 
@@ -39,14 +43,37 @@ protected:
 
 class DrawEvent : public Event {
 public:
-	DrawEvent(sf::RenderWindow& window) : m_window(window) {};
+	DrawEvent(sf::RenderWindow& window) : Event(EventType::DRAW), m_window(window) {};
+	
 	sf::RenderWindow& GetWindow() const { return m_window; }
-
-	EventType GetEventType() const override { return EventType::DRAW; }
 	const char* GetName() const override { return "Draw Event"; }
 	
 private:
 	sf::RenderWindow& m_window;
+};
+
+class UpdateEvent : public Event {
+public:
+	UpdateEvent(const float& deltaTime) : Event(EventType::UPDATE), m_detlaTime(deltaTime) {};
+
+	float GetDeltaTime() const { return m_detlaTime; }
+	const char* GetName() const override { return "Update Event"; }
+
+private:
+	float m_detlaTime;
+};
+
+class KeyPressedEvent : public Event {
+public:
+	KeyPressedEvent(sf::Event::KeyEvent key_event, float deltaTime) : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_deltaTime(deltaTime) {};
+
+	const sf::Event::KeyEvent& GetKeyboardEvent() const { return m_keyEvent; }
+	const char* GetName() const override { return "Key Pressed Event"; }
+	const float& GetDeltaTime() const { return m_deltaTime; }
+
+private:
+	const float m_deltaTime;
+	sf::Event::KeyEvent m_keyEvent;
 };
 
 
