@@ -2,8 +2,8 @@
 #include <iostream>
 
 Player::Player(EventDispatcher& dispatcher)
-    : m_frameWidth(192), m_frameHeight(192), m_elapsedTime(0.f),
-    m_startFrame(0), m_endFrame(0), m_currentFrame(0), m_frameTime(0.1f), m_speed(200.f), m_state(AnimationState::Idle) {
+    : m_dispatcher(dispatcher), m_frameWidth(192), m_frameHeight(192), m_elapsedTime(0.f),
+    m_startFrame(0), m_endFrame(5), m_currentFrame(0), m_frameTime(0.1f), m_speed(200.f), m_state(AnimationState::Idle), m_maxHealth(100.f), m_currentHealth(m_maxHealth) {
     
     const char* spriteSheetPath = "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png";
 
@@ -16,6 +16,14 @@ Player::Player(EventDispatcher& dispatcher)
 
     m_frameRect = sf::IntRect(0, 0, m_frameWidth, m_frameHeight);
     m_sprite.setTextureRect(m_frameRect);
+
+    m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
+    m_healthBarBackground.setFillColor(sf::Color::Red);
+    m_healthBarBackground.setPosition(10.f, 10.f);
+
+    m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
+    m_healthBarForeground.setFillColor(sf::Color::Green);
+    m_healthBarForeground.setPosition(10.f, 10.f);
 
     dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
         this->onDraw(event);
@@ -51,7 +59,20 @@ void Player::updateAnimation(float deltaTime) {
 }
 
 void Player::onDraw(DrawEvent& event) {
-    event.GetWindow().draw(m_sprite);
+    sf::RenderWindow& window = event.GetWindow();
+    window.draw(m_sprite);
+
+    window.draw(m_healthBarBackground);
+    window.draw(m_healthBarForeground);
+
+    sf::RectangleShape hitboxShape;
+    hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
+    hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
+    hitboxShape.setFillColor(sf::Color::Transparent); 
+    hitboxShape.setOutlineColor(sf::Color::Red);
+    hitboxShape.setOutlineThickness(1.f);
+
+    window.draw(hitboxShape);
 }
 
 
@@ -60,60 +81,13 @@ void Player::setPosition(float x, float y) {
 }
 
 void Player::setAnimation(AnimationState animationState) {
-    switch (animationState)
-    {
-    case AnimationState::Idle:
-        m_startFrame = 0;
-        m_endFrame = 5;
-        m_frameTime = 0.1f;
+    if (m_animationConfigs.count(animationState) > 0) {
+        const auto& config = m_animationConfigs.at(animationState);
+        m_startFrame = config.startFrame;
+        m_endFrame = config.endFrame;
+        m_frameTime = config.frameTime;
         m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::Walking:
-        m_startFrame = 6;
-        m_endFrame = 11;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::SlashDown:
-        m_startFrame = 12;
-        m_endFrame = 17;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::SlashUp:
-        m_startFrame = 18;
-        m_endFrame = 23;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::SlashForwardLeft:
-        m_startFrame = 24;
-        m_endFrame = 29;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::SlashForwardRight:
-        m_startFrame = 30;
-        m_endFrame = 35;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::SlashBehindLeft:
-        m_startFrame = 36;
-        m_endFrame = 41;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    case AnimationState::SlashBehindRight:
-        m_startFrame = 42;
-        m_endFrame = 47;
-        m_frameTime = 0.1f;
-        m_currentFrame = m_startFrame;
-        break;
-    default:
-        break;
     }
-
     m_state = animationState;
 }
 
@@ -121,7 +95,10 @@ void Player::move(float deltaX, float deltaY) {
     m_sprite.move(deltaX, deltaY);
 }
 
-void Player::updatePlayer(float deltaTime) {
+void Player::updatePlayer(const float deltaTime) {
+    updateHealthBar();
+    updateHitbox();
+
     if (isHitting()) return;
     float deltaX = 0.f;
     float deltaY = 0.f;
@@ -168,11 +145,39 @@ void Player::updatePlayer(float deltaTime) {
         }
 
         // if no movement keys are pressed, return to idle (only if not hitting)
+        // the check in the animation loop isnt sufficient cause it only changes animation after finished
         if (deltaX == 0.f && deltaY == 0.f && m_state == AnimationState::Walking) {
             setAnimation(AnimationState::Idle);
     }
 
     move(deltaX, deltaY);
+}
+
+void Player::updateHealthBar() {
+    if (m_currentHealth <= 0) {
+        GameOverEvent gameOver;
+        m_dispatcher.emit(gameOver);
+    }
+    float healthPercentage = m_currentHealth / m_maxHealth;
+    m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
+
+    sf::FloatRect bounds = m_sprite.getGlobalBounds();
+    float healthBarX = bounds.left + (bounds.width / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
+    float healthBarY = bounds.top - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
+    m_healthBarBackground.setPosition(healthBarX, healthBarY);
+    m_healthBarForeground.setPosition(healthBarX, healthBarY);
+}
+
+void Player::updateHitbox() {
+    sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
+
+    float hitboxWidth = spriteBounds.width * 0.3f;
+    float hitboxHeight = spriteBounds.height * 0.4f;
+
+    float hitboxLeft = spriteBounds.left + (spriteBounds.width - hitboxWidth) / 2.f;
+    float hitboxTop = spriteBounds.top + (spriteBounds.height - hitboxHeight) / 2.f;
+
+    m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
 }
 
 

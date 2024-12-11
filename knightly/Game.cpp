@@ -4,7 +4,10 @@
 #include <iostream>
 
 Game::Game()
-    : m_window(sf::VideoMode(800, 800), "Knightly") {
+    : m_window(sf::VideoMode(800, 800), "Knightly"), m_eventDispatcher() {
+     m_eventDispatcher.subscribe<GameOverEvent>([this](GameOverEvent& event) {
+        this->endGame();
+     });
 }
 
 Game::~Game() {
@@ -12,6 +15,14 @@ Game::~Game() {
         m_window.close();
     }
 }
+
+void Game::endGame() {
+    if (m_window.isOpen()) {
+        m_window.close();  
+    }
+    std::cout << "Game Over!" << std::endl;  
+}
+
 void Game::run() {
     const float targetFrameTime = 1.0f / 60.0f;  // 60fps and ticks
     int fps = 0;
@@ -34,14 +45,12 @@ void Game::run() {
 
     Building building(m_eventDispatcher, "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2f);
     Player player(m_eventDispatcher);
-    player.setPosition(300.f, 300.f);
-    player.setAnimation(AnimationState::Idle);
 
     sf::Event e;
     while (m_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
 
-        // process events
+        // process SFML events
         while (m_window.pollEvent(e)) {
             if (e.type == sf::Event::Closed) {
                 m_window.close();
@@ -58,7 +67,7 @@ void Game::run() {
             }
         }
 
-        TickEvent tickEvent(targetFrameTime);
+        TickEvent tickEvent(deltaTime.asSeconds());
         m_eventDispatcher.emit(tickEvent);
 
         // render frame
@@ -67,6 +76,7 @@ void Game::run() {
         m_eventDispatcher.emit(drawEvent);
         m_window.draw(fpsText);
         m_window.display();
+
         fps++;
 
         // update fps/ticks counters every second

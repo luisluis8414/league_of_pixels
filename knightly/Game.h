@@ -10,6 +10,8 @@ public:
 
     void run(); 
 
+    void endGame();
+
 private:
     sf::RenderWindow m_window;
     EventDispatcher m_eventDispatcher;
