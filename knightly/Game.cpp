@@ -13,13 +13,12 @@ Game::~Game() {
     }
 }
 void Game::run() {
-    const float targetFrameTime = 1.0f / 60.0f;
+    const float targetFrameTime = 1.0f / 60.0f;  // 60fps and ticks
+    int fps = 0;
+
     sf::Clock clock;
-    sf::Time accumulatedTime;
 
     sf::Clock fpsClock;
-    int ticks = 0;
-    int fps = 0;
 
     sf::Font font;
     if (!font.loadFromFile("resources/fonts/arial.ttf")) {
@@ -33,21 +32,14 @@ void Game::run() {
     fpsText.setFillColor(sf::Color::Green);
     fpsText.setPosition(5.f, 10.f);
 
-    sf::Text updatesText;
-    updatesText.setFont(font);
-    updatesText.setCharacterSize(10);
-    updatesText.setFillColor(sf::Color::Yellow);
-    updatesText.setPosition(5.f, 20.f);
-
-    Building building(m_eventDispatcher, "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2);
+    Building building(m_eventDispatcher, "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2f);
     Player player(m_eventDispatcher);
     player.setPosition(300.f, 300.f);
     player.setAnimation(AnimationState::Idle);
 
     sf::Event e;
     while (m_window.isOpen()) {
-        sf::Time timeSinceLastFrame = clock.restart();
-        accumulatedTime = std::min((accumulatedTime + timeSinceLastFrame), sf::seconds(0.2f));
+        sf::Time deltaTime = clock.restart();
 
         // process events
         while (m_window.pollEvent(e)) {
@@ -56,41 +48,37 @@ void Game::run() {
             }
 
             if (e.type == sf::Event::KeyPressed) {
-                KeyPressedEvent keyEvent(e.key, accumulatedTime.asSeconds());
+                KeyPressedEvent keyEvent(e.key);
                 m_eventDispatcher.emit(keyEvent);
+            }
+
+            if (e.type == sf::Event::Resized) {
+                sf::View newView(sf::FloatRect(0.f, 0.f, (float)e.size.width, (float)e.size.height));
+                m_window.setView(newView);
             }
         }
 
-        // update logic if enough time has passed
-        while (accumulatedTime.asSeconds() >= targetFrameTime) {
-            UpdateEvent updateEvent(targetFrameTime);
-            m_eventDispatcher.emit(updateEvent);
-            accumulatedTime -= sf::seconds(targetFrameTime);
+        TickEvent tickEvent(targetFrameTime);
+        m_eventDispatcher.emit(tickEvent);
 
-            ticks++;
-        }
+        // render frame
+        m_window.clear();
+        DrawEvent drawEvent(m_window);
+        m_eventDispatcher.emit(drawEvent);
+        m_window.draw(fpsText);
+        m_window.display();
+        fps++;
 
-        // log updates pro sekunde
+        // update fps/ticks counters every second
         if (fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
             fpsText.setString("FPS: " + std::to_string(fps));
-            updatesText.setString("Ticks: " + std::to_string(ticks));
-
-            ticks = 0;
             fps = 0;
             fpsClock.restart();
         }
 
-        m_window.clear();
-        DrawEvent drawEvent(m_window);
-        m_eventDispatcher.emit(drawEvent);
-
-        m_window.draw(fpsText);
-        m_window.draw(updatesText);
-
-        m_window.display();
-        fps++;
-
-        sf::sleep(sf::seconds(targetFrameTime) - clock.getElapsedTime());
+        // cap frame rate
+        sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
+        if (frameEnd > sf::Time::Zero) sf::sleep(frameEnd);
     }
 }
 

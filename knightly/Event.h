@@ -7,7 +7,8 @@
 
 enum class EventType {
 	DRAW,
-	UPDATE,
+	TICK_UPDATE,
+	ANIMATION_UPDATE,
 	KEYPRESSED,
 	WINDOW_RESIZE
 };
@@ -52,9 +53,9 @@ private:
 	sf::RenderWindow& m_window;
 };
 
-class UpdateEvent : public Event {
+class TickEvent : public Event {
 public:
-	UpdateEvent(const float& deltaTime) : Event(EventType::UPDATE), m_detlaTime(deltaTime) {};
+	TickEvent(const float& deltaTime) : Event(EventType::TICK_UPDATE), m_detlaTime(deltaTime) {};
 
 	float GetDeltaTime() const { return m_detlaTime; }
 	const char* GetName() const override { return "Update Event"; }
@@ -65,14 +66,12 @@ private:
 
 class KeyPressedEvent : public Event {
 public:
-	KeyPressedEvent(sf::Event::KeyEvent key_event, float deltaTime) : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_deltaTime(deltaTime) {};
+	KeyPressedEvent(sf::Event::KeyEvent key_event) : Event(EventType::KEYPRESSED), m_keyEvent(key_event) {};
 
 	const sf::Event::KeyEvent& GetKeyboardEvent() const { return m_keyEvent; }
 	const char* GetName() const override { return "Key Pressed Event"; }
-	const float& GetDeltaTime() const { return m_deltaTime; }
 
 private:
-	const float m_deltaTime;
 	sf::Event::KeyEvent m_keyEvent;
 };
 

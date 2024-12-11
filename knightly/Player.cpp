@@ -21,7 +21,7 @@ Player::Player(EventDispatcher& dispatcher)
         this->onDraw(event);
     });
 
-    dispatcher.subscribe<UpdateEvent>([this](UpdateEvent& event) {
+    dispatcher.subscribe<TickEvent>([this](TickEvent& event) {
         this->updatePlayer(event.GetDeltaTime());
         this->updateAnimation(event.GetDeltaTime());
     });
