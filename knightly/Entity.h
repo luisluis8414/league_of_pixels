@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "Event.h"
+#include <vector>
 
 struct AnimationConfig {
     int startFrame;
@@ -9,15 +10,31 @@ struct AnimationConfig {
     float frameTime;
 };
 
+struct HitboxConfig {
+    float widthFactor;
+    float heightFactor;
+    float offsetXFactor;
+    float offsetYFactor;
+};
+
+enum class EntityType {
+    Player,
+    Enemy,
+};
+
+
 class Entity {
 public:
-    explicit Entity(
+    Entity(
         EventDispatcher& dispatcher,
         int frameWidth,
         int frameHeight,
+        float x_posi,
+        float y_posi,
         float frameTime,
         float speed,
-        float maxHealth
+        float maxHealth,
+        EntityType type
     )
         : m_dispatcher(dispatcher),
         m_frameWidth(frameWidth),
@@ -29,11 +46,16 @@ public:
         m_frameTime(frameTime),
         m_speed(speed),
         m_maxHealth(maxHealth),
-        m_currentHealth(maxHealth) {
+        m_currentHealth(maxHealth),
+        m_type(type) {
+        m_sprite.setPosition(x_posi, y_posi);
+
     }
 
-    virtual ~Entity() = default;  
 
+    virtual ~Entity() { }
+
+    EntityType getType() const { return m_type; }
 protected:
     EventDispatcher& m_dispatcher;
 
@@ -69,5 +91,9 @@ protected:
     virtual void setPosition(float x, float y) = 0; 
 
     virtual void onUpdate(float deltaTime) = 0; 
-    virtual void onDraw(DrawEvent& event) = 0;  
+    virtual void onDraw(DrawEvent& event) = 0; 
+
+  
+private:
+    EntityType m_type;
 };

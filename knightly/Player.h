@@ -5,7 +5,7 @@
 #include "Entity.h"
 #include <unordered_map>
 
-enum class AnimationState {
+enum class PlayerAnimationState {
     Idle,
     Walking,
     SlashDown,
@@ -16,20 +16,14 @@ enum class AnimationState {
     SlashBehindRight
 };
 
-struct HitboxConfig {
-    float widthFactor;
-    float heightFactor;
-    float offsetXFactor;
-    float offsetYFactor;
-};
 
 class Player : public Entity {
 public:
-    explicit Player(EventDispatcher& dispatcher);
+    Player(EventDispatcher& dispatcher, float x, float y);
 
     ~Player() = default;
 private:
-    AnimationState m_state; 
+    PlayerAnimationState m_state;
     sf::FloatRect m_attackHitbox;
 
     bool isHitting() const;
@@ -44,24 +38,24 @@ private:
     void onUpdate(float deltaTime) override;
     void onDraw(DrawEvent& event) override;
 
-    void setAnimation(AnimationState state);
+    void setAnimation(PlayerAnimationState state);
 
-    const std::unordered_map<AnimationState, AnimationConfig> m_animationConfigs = {
-        {AnimationState::Idle, {0, 5, 0.1f}},
-        {AnimationState::Walking, {6, 11, 0.1f}},
-        {AnimationState::SlashDown, {12, 17, 0.1f}},
-        {AnimationState::SlashUp, {18, 23, 0.1f}},
-        {AnimationState::SlashForwardLeft, {24, 29, 0.1f}},
-        {AnimationState::SlashForwardRight, {30, 35, 0.1f}},
-        {AnimationState::SlashBehindLeft, {36, 41, 0.1f}},
-        {AnimationState::SlashBehindRight, {42, 47, 0.1f}}
+    const std::unordered_map<PlayerAnimationState, AnimationConfig> m_animationConfigs = {
+        {PlayerAnimationState::Idle, {0, 5, 0.1f}},
+        {PlayerAnimationState::Walking, {6, 11, 0.1f}},
+        {PlayerAnimationState::SlashDown, {12, 17, 0.1f}},
+        {PlayerAnimationState::SlashUp, {18, 23, 0.1f}},
+        {PlayerAnimationState::SlashForwardLeft, {24, 29, 0.1f}},
+        {PlayerAnimationState::SlashForwardRight, {30, 35, 0.1f}},
+        {PlayerAnimationState::SlashBehindLeft, {36, 41, 0.1f}},
+        {PlayerAnimationState::SlashBehindRight, {42, 47, 0.1f}}
     };
 
-    std::unordered_map<AnimationState, HitboxConfig> m_attackHitboxConfigs = {
+    std::unordered_map<PlayerAnimationState, HitboxConfig> m_attackHitboxConfigs = {
     //{float widthFactor; heightFactor; offsetXFactor; offsetYFactor; }
-    {AnimationState::SlashDown, {0.35f, 0.5f, 0.6f, 0.2f}}, 
-    {AnimationState::SlashUp, {0.6f, 0.25f, 0.4f, 0.4f}},
-    {AnimationState::SlashForwardRight, {0.6f, 0.3f, 0.3f, 0.55f}}, 
-    {AnimationState::SlashBehindLeft, {0.6f, 0.25f, 0.2f, 0.2f}},  
+    {PlayerAnimationState::SlashDown, {0.35f, 0.5f, 0.6f, 0.2f}},
+    {PlayerAnimationState::SlashUp, {0.6f, 0.25f, 0.4f, 0.4f}},
+    {PlayerAnimationState::SlashForwardRight, {0.6f, 0.3f, 0.3f, 0.55f}},
+    {PlayerAnimationState::SlashBehindLeft, {0.6f, 0.25f, 0.2f, 0.2f}},
     };
 };

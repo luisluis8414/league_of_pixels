@@ -2,12 +2,10 @@
 #include "Game.h"
 #include "Player.h"
 #include <iostream>
+#include "Enemy.h"
 
 Game::Game()
     : m_window(sf::VideoMode(800, 800), "Knightly"), m_eventDispatcher() {
-     m_eventDispatcher.subscribe<GameOverEvent>([this](GameOverEvent& event) {
-        this->endGame();
-     });
 }
 
 Game::~Game() {
@@ -44,7 +42,9 @@ void Game::run() {
     fpsText.setPosition(5.f, 10.f);
 
     Building building(m_eventDispatcher, "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2f);
-    Player player(m_eventDispatcher);
+    spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/Torch/Red/Torch_Red.png", 100.f, 100.f);
+    spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/TNT/Red/TNT_Red.png", 200.f, 200.f);
+    Player player(m_eventDispatcher, 0.f, 0.f);
 
     sf::Event e;
     while (m_window.isOpen()) {
@@ -92,4 +92,8 @@ void Game::run() {
     }
 }
 
+void Game::spawnEnemy(const std::string& texturePath, float x, float y) {
+    auto* newEnemy = new Enemy(m_eventDispatcher, texturePath, x, y); 
+    m_enemies.push_back(newEnemy); 
+}
 

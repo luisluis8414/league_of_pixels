@@ -1,8 +1,8 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player(EventDispatcher& dispatcher)
-    : Entity(dispatcher, 192, 192, 0.1f, 200.f, 100.f), m_state(AnimationState::Idle) {
+Player::Player(EventDispatcher& dispatcher,float x, float y)
+    : Entity(dispatcher, 192, 192, x, y, 0.1f, 200.f, 100.f, EntityType::Player), m_state(PlayerAnimationState::Idle) {
     const char* spriteSheetPath = "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png";
 
     if (!m_texture.loadFromFile(spriteSheetPath)) {
@@ -40,8 +40,8 @@ void Player::updateAnimation(float deltaTime) {
 
         m_currentFrame++;
         if (m_currentFrame > m_endFrame) {
-            if (m_state != AnimationState::Idle) {
-                setAnimation(AnimationState::Idle);
+            if (m_state != PlayerAnimationState::Idle) {
+                setAnimation(PlayerAnimationState::Idle);
             }
             else {
                 m_currentFrame = m_startFrame;
@@ -87,7 +87,7 @@ void Player::setPosition(float x, float y) {
     m_sprite.setPosition(x, y);
 }
 
-void Player::setAnimation(AnimationState animationState) {
+void Player::setAnimation(PlayerAnimationState animationState) {
     if (m_animationConfigs.count(animationState) > 0) {
         const auto& config = m_animationConfigs.at(animationState);
         m_startFrame = config.startFrame;
@@ -100,6 +100,16 @@ void Player::setAnimation(AnimationState animationState) {
 
 void Player::move(float deltaX, float deltaY) {
     m_sprite.move(deltaX, deltaY);
+    
+    // flip sprite when walking in other direction
+    if (deltaX < 0) {
+        m_sprite.setScale(-1.f, 1.f);
+        m_sprite.setOrigin(m_frameWidth, 0.f); 
+    }
+    else if (deltaX > 0) {
+        m_sprite.setScale(1.f, 1.f); 
+        m_sprite.setOrigin(0, 0); 
+    }
 }
 
 void Player::onUpdate(const float deltaTime) {
@@ -113,49 +123,49 @@ void Player::onUpdate(const float deltaTime) {
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             deltaY -= m_speed * deltaTime;
-            if (m_state != AnimationState::Walking) {
-                setAnimation(AnimationState::Walking);
+            if (m_state != PlayerAnimationState::Walking) {
+                setAnimation(PlayerAnimationState::Walking);
             }
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
             deltaY += m_speed * deltaTime;
-            if (m_state != AnimationState::Walking) {
-                setAnimation(AnimationState::Walking);
+            if (m_state != PlayerAnimationState::Walking) {
+                setAnimation(PlayerAnimationState::Walking);
             }
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
             deltaX -= m_speed * deltaTime;
-            if (m_state != AnimationState::Walking) {
-                setAnimation(AnimationState::Walking);
+            if (m_state != PlayerAnimationState::Walking) {
+                setAnimation(PlayerAnimationState::Walking);
             }
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
             deltaX += m_speed * deltaTime;
-            if (m_state != AnimationState::Walking) {
-                setAnimation(AnimationState::Walking);
+            if (m_state != PlayerAnimationState::Walking) {
+                setAnimation(PlayerAnimationState::Walking);
             }
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            setAnimation(AnimationState::SlashDown);
+            setAnimation(PlayerAnimationState::SlashDown);
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-            setAnimation(AnimationState::SlashUp);
+            setAnimation(PlayerAnimationState::SlashUp);
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
-            setAnimation(AnimationState::SlashForwardRight);
+            setAnimation(PlayerAnimationState::SlashForwardRight);
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-            setAnimation(AnimationState::SlashBehindLeft);
+            setAnimation(PlayerAnimationState::SlashBehindLeft);
         }
 
         // if no movement keys are pressed, return to idle (only if not hitting)
         // the check in the animation loop isnt sufficient cause it only changes animation after finished
-        if (deltaX == 0.f && deltaY == 0.f && m_state == AnimationState::Walking) {
-            setAnimation(AnimationState::Idle);
+        if (deltaX == 0.f && deltaY == 0.f && m_state == PlayerAnimationState::Walking) {
+            setAnimation(PlayerAnimationState::Idle);
     }
 
     move(deltaX, deltaY);
@@ -163,10 +173,12 @@ void Player::onUpdate(const float deltaTime) {
 }
 
 void Player::updateHealthBar() {
-    if (m_currentHealth <= 0) {
-        GameOverEvent gameOver;
-        m_dispatcher.emit(gameOver);
-    }
+    //m_currentHealth--;
+ /*   if (m_currentHealth <= 0) {
+        DestroyEntityEvent destroyEvent(this);
+        m_dispatcher.emit(destroyEvent);
+        return;
+    }*/
     float healthPercentage = m_currentHealth / m_maxHealth;
     m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
@@ -193,7 +205,7 @@ void Player::updateHitbox() {
         const auto& config = m_attackHitboxConfigs.at(m_state);
 
         // check if current frame is within the last two frames of the animation
-        if (m_currentFrame >= (m_endFrame - 1)) {
+        if (m_currentFrame >= (m_endFrame - 2)) {
             float attackHitboxWidth = spriteBounds.width * config.widthFactor;
             float attackHitboxHeight = spriteBounds.height * config.heightFactor;
 
@@ -212,7 +224,7 @@ void Player::updateHitbox() {
 
 
 bool Player::isHitting() const  {
-    return (m_state != AnimationState::Idle && m_state != AnimationState::Walking);
+    return (m_state != PlayerAnimationState::Idle && m_state != PlayerAnimationState::Walking);
 }
 
 
