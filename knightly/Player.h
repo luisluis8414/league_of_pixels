@@ -2,13 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 #include "Event.h"
-
-struct AnimationConfig {
-    int startFrame;
-    int endFrame;
-    float frameTime; 
-};
-
+#include "Entity.h"
+#include <unordered_map>
 
 enum class AnimationState {
     Idle,
@@ -21,61 +16,52 @@ enum class AnimationState {
     SlashBehindRight
 };
 
-class Player {
+struct HitboxConfig {
+    float widthFactor;
+    float heightFactor;
+    float offsetXFactor;
+    float offsetYFactor;
+};
+
+class Player : public Entity {
 public:
-    Player(EventDispatcher& dispatcher);
+    explicit Player(EventDispatcher& dispatcher);
 
+    ~Player() = default;
 private:
-    EventDispatcher& m_dispatcher;
+    AnimationState m_state; 
+    sf::FloatRect m_attackHitbox;
 
-    sf::FloatRect m_hitbox;
+    bool isHitting() const;
 
-    sf::Texture m_texture;     // the sprite sheet
-    sf::Sprite m_sprite;       // the player's sprite
-    sf::IntRect m_frameRect;   // rectangle defining the current frame
+    void updateHealthBar() override;
+    void updateHitbox() override;
 
-    int m_startFrame;          // start of the animation
-    int m_endFrame;            // end of the animation
-    int m_currentFrame;        // current frame index
-    float m_frameTime;         // time per frame
-    float m_elapsedTime;       // time elapsed since last frame change
+    void move(float deltaX, float deltaY) override;
+    void updateAnimation(float deltaTime) override;
+    void setPosition(float x, float y) override;
 
-    int m_frameWidth;          // width of one frame
-    int m_frameHeight;         // height of one frame
+    void onUpdate(float deltaTime) override;
+    void onDraw(DrawEvent& event) override;
 
-    float m_speed;             // movement speed
-
-
-    float m_maxHealth; // maximum health
-    float m_currentHealth; // current health
-
-    AnimationState m_state;// current animation state
-    bool isHitting() const;     // flag to indicate if hit animation is active
-
-    sf::RectangleShape m_healthBarBackground; // health bar background
-    sf::RectangleShape m_healthBarForeground; // health bar foreground
-
-    void updateHealthBar();
-    void updateHitbox();
-
-    void move(float deltaX, float deltaY); // move the player
-    void updatePlayer(float deltaTime);
-
-    void updateAnimation(float deltaTime); // update animation
-    void onDraw(DrawEvent& event); // draw the player
-
-    void setPosition(float x, float y); // set the player's position
     void setAnimation(AnimationState state);
 
     const std::unordered_map<AnimationState, AnimationConfig> m_animationConfigs = {
-    {AnimationState::Idle, {0, 5, 0.1f}},
-    {AnimationState::Walking, {6, 11, 0.1f}},
-    {AnimationState::SlashDown, {12, 17, 0.1f}},
-    {AnimationState::SlashUp, {18, 23, 0.1f}},
-    {AnimationState::SlashForwardLeft, {24, 29, 0.1f}},
-    {AnimationState::SlashForwardRight, {30, 35, 0.1f}},
-    {AnimationState::SlashBehindLeft, {36, 41, 0.1f}},
-    {AnimationState::SlashBehindRight, {42, 47, 0.1f}}
+        {AnimationState::Idle, {0, 5, 0.1f}},
+        {AnimationState::Walking, {6, 11, 0.1f}},
+        {AnimationState::SlashDown, {12, 17, 0.1f}},
+        {AnimationState::SlashUp, {18, 23, 0.1f}},
+        {AnimationState::SlashForwardLeft, {24, 29, 0.1f}},
+        {AnimationState::SlashForwardRight, {30, 35, 0.1f}},
+        {AnimationState::SlashBehindLeft, {36, 41, 0.1f}},
+        {AnimationState::SlashBehindRight, {42, 47, 0.1f}}
+    };
+
+    std::unordered_map<AnimationState, HitboxConfig> m_attackHitboxConfigs = {
+    //{float widthFactor; heightFactor; offsetXFactor; offsetYFactor; }
+    {AnimationState::SlashDown, {0.35f, 0.5f, 0.6f, 0.2f}}, 
+    {AnimationState::SlashUp, {0.6f, 0.25f, 0.4f, 0.4f}},
+    {AnimationState::SlashForwardRight, {0.6f, 0.3f, 0.3f, 0.55f}}, 
+    {AnimationState::SlashBehindLeft, {0.6f, 0.25f, 0.2f, 0.2f}},  
     };
 };
-

@@ -2,9 +2,7 @@
 #include <iostream>
 
 Player::Player(EventDispatcher& dispatcher)
-    : m_dispatcher(dispatcher), m_frameWidth(192), m_frameHeight(192), m_elapsedTime(0.f),
-    m_startFrame(0), m_endFrame(5), m_currentFrame(0), m_frameTime(0.1f), m_speed(200.f), m_state(AnimationState::Idle), m_maxHealth(100.f), m_currentHealth(m_maxHealth) {
-    
+    : Entity(dispatcher, 192, 192, 0.1f, 200.f, 100.f), m_state(AnimationState::Idle) {
     const char* spriteSheetPath = "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png";
 
     if (!m_texture.loadFromFile(spriteSheetPath)) {
@@ -30,8 +28,7 @@ Player::Player(EventDispatcher& dispatcher)
     });
 
     dispatcher.subscribe<TickEvent>([this](TickEvent& event) {
-        this->updatePlayer(event.GetDeltaTime());
-        this->updateAnimation(event.GetDeltaTime());
+        this->onUpdate(event.GetDeltaTime());
     });
 }
 
@@ -73,6 +70,16 @@ void Player::onDraw(DrawEvent& event) {
     hitboxShape.setOutlineThickness(1.f);
 
     window.draw(hitboxShape);
+
+    if (isHitting()) {
+        sf::RectangleShape attackHitboxShape;
+        attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
+        attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
+        attackHitboxShape.setFillColor(sf::Color::Transparent);
+        attackHitboxShape.setOutlineColor(sf::Color::Green);
+        attackHitboxShape.setOutlineThickness(1.f);
+        window.draw(attackHitboxShape);
+    }
 }
 
 
@@ -95,9 +102,10 @@ void Player::move(float deltaX, float deltaY) {
     m_sprite.move(deltaX, deltaY);
 }
 
-void Player::updatePlayer(const float deltaTime) {
+void Player::onUpdate(const float deltaTime) {
     updateHealthBar();
     updateHitbox();
+    updateAnimation(deltaTime);
 
     if (isHitting()) return;
     float deltaX = 0.f;
@@ -151,6 +159,7 @@ void Player::updatePlayer(const float deltaTime) {
     }
 
     move(deltaX, deltaY);
+
 }
 
 void Player::updateHealthBar() {
@@ -178,6 +187,27 @@ void Player::updateHitbox() {
     float hitboxTop = spriteBounds.top + (spriteBounds.height - hitboxHeight) / 2.f;
 
     m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
+
+    // attack hitbox based on animation state
+    if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
+        const auto& config = m_attackHitboxConfigs.at(m_state);
+
+        // check if current frame is within the last two frames of the animation
+        if (m_currentFrame >= (m_endFrame - 1)) {
+            float attackHitboxWidth = spriteBounds.width * config.widthFactor;
+            float attackHitboxHeight = spriteBounds.height * config.heightFactor;
+
+            float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
+            float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
+
+            m_attackHitbox = sf::FloatRect(attackHitboxLeft, attackHitboxTop, attackHitboxWidth, attackHitboxHeight);
+        }
+       
+    }
+    else {
+        // reset when not attacking
+        m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f); 
+    }
 }
 
 
