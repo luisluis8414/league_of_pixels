@@ -6,6 +6,10 @@
 
 Game::Game()
     : m_window(sf::VideoMode(800, 800), "Knightly"), m_eventDispatcher() {
+    m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
+        m_entitiesToDestroy.push_back(event.GetEntity());
+     });
+
 }
 
 Game::~Game() {
@@ -86,6 +90,8 @@ void Game::run() {
             fpsClock.restart();
         }
 
+        cleanUp();
+
         // cap frame rate
         sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
         if (frameEnd > sf::Time::Zero) sf::sleep(frameEnd);
@@ -97,3 +103,16 @@ void Game::spawnEnemy(const std::string& texturePath, float x, float y) {
     m_enemies.push_back(newEnemy); 
 }
 
+void Game::cleanUp() {
+    for (auto it = m_entitiesToDestroy.begin(); it != m_entitiesToDestroy.end(); ++it) {
+        auto enemyIt = std::find(m_enemies.begin(), m_enemies.end(), *it);
+
+        if (enemyIt != m_enemies.end()) {
+            m_enemies.erase(enemyIt);
+        }
+
+        delete* it;
+    }
+
+    m_entitiesToDestroy.clear();
+}

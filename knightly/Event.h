@@ -4,12 +4,14 @@
 #include <functional>
 #include <unordered_map>
 #include <typeindex>
+class Entity;
 
 enum class EventType {
 	DRAW,
 	TICK_UPDATE,
 	ANIMATION_UPDATE,
 	GAME_OVER,
+	DESTROY_ENTITY,
 	KEYPRESSED,
 	WINDOW_RESIZE
 };
@@ -83,6 +85,17 @@ public:
 	const char* GetName() const override { return "Key Pressed Event"; }
 };
 
+class DestroyEntityEvent : public Event {
+public:
+	DestroyEntityEvent(Entity* entity) : Event(EventType::DESTROY_ENTITY), m_entity(entity) {};
+
+	const char* GetName() const override { return "Destroy Entity Event"; }
+	Entity* GetEntity() { return m_entity; }
+private:
+	Entity* m_entity;
+};
+
+
 
 class EventDispatcher {
 public:
@@ -90,23 +103,53 @@ public:
 	using EventFn = std::function<void(T&)>;
 
 	template <typename T>
-	void subscribe(const EventFn<T>& listener) {
-		auto& listeners = m_listeners[std::type_index(typeid(T))];
-		listeners.push_back([listener](Event& e) {
-			listener(static_cast<T&>(e));
-			});
+	void subscribe(void* entity, const EventFn<T>& listener) {
+		auto& listeners = m_subscriptions[std::type_index(typeid(T))];
+		listeners.push_back({
+			entity,
+			[listener](Event& event) {
+				listener(static_cast<T&>(event)); 
+			}
+		});
+	}
+
+	void unsubscribe(void* entity) {
+		for (auto it = m_subscriptions.begin(); it != m_subscriptions.end(); ++it) {
+			auto& listeners = it->second; 
+
+			listeners.erase(
+				std::remove_if(
+					listeners.begin(),
+					listeners.end(),
+					[entity](const Subscription& sub) {
+						return sub.subscriber == entity;
+					}
+				),
+				listeners.end()
+			);
+
+			
+			if (listeners.empty()) {
+				it = m_subscriptions.erase(it); 
+			}
+		}
 	}
 
 	void emit(Event& event) {
-		auto it = m_listeners.find(std::type_index(typeid(event)));
-		if (it != m_listeners.end()) {
-			for (auto& listener : it->second) {
+		auto it = m_subscriptions.find(std::type_index(typeid(event)));
+		if (it != m_subscriptions.end()) {
+			for (auto& subscription : it->second) {
 				if (event.m_handled) break;
-				listener(event);
+				subscription.callback(event);
 			}
 		}
 	}
 
 private:
-	std::unordered_map<std::type_index, std::vector<std::function<void(Event&)>>> m_listeners;
+	struct Subscription {
+		void* subscriber; 
+		std::function<void(Event&)> callback;
+	};
+
+	std::unordered_map<std::type_index, std::vector<Subscription>> m_subscriptions;
 };

@@ -22,13 +22,17 @@ Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, float 
     m_healthBarForeground.setFillColor(sf::Color::Green);
     m_healthBarForeground.setPosition(10.f, 10.f);
 
-    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
+    dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         this->onDraw(event);
         });
 
-    dispatcher.subscribe<TickEvent>([this](TickEvent& event) {
+    dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
         this->onUpdate(event.GetDeltaTime());
         });
+}
+
+Enemy::~Enemy() {
+    m_dispatcher.unsubscribe(this);
 }
 
 void Enemy::updateAnimation(float deltaTime) {
@@ -103,7 +107,7 @@ void Enemy::move(float deltaX, float deltaY) {
     // flip sprite when walking in other direction
     if (deltaX < 0) {
         m_sprite.setScale(-1.f, 1.f);
-        m_sprite.setOrigin(m_frameWidth, 0);
+        m_sprite.setOrigin((float)m_frameWidth, 0.f);
     }
     else if (deltaX > 0) {
         m_sprite.setScale(1.f, 1.f);
@@ -131,12 +135,12 @@ void Enemy::onUpdate(const float deltaTime) {
 }
 
 void Enemy::updateHealthBar() {
-    //m_currentHealth--;
-    //if (m_currentHealth <= 0) {
-    //    DestroyEntityEvent destroyEvent(this);
-    //    m_dispatcher.emit(destroyEvent); 
-    //    return;
-    //}
+    m_currentHealth--;
+    if (m_currentHealth <= 0) {
+        DestroyEntityEvent destroyEvent(this);
+        m_dispatcher.emit(destroyEvent);
+        return; 
+    }
     float healthPercentage = m_currentHealth / m_maxHealth;
     m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
@@ -163,7 +167,4 @@ void Enemy::updateHitbox() {
 bool Enemy::isHitting() const {
     return (m_state != EnemyAnimationState::Idle && m_state != EnemyAnimationState::Walking);
 }
-
-
-
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "Event.h"
 #include <vector>
+#include "Event.h"
 
 struct AnimationConfig {
     int startFrame;

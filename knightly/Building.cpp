@@ -11,7 +11,7 @@ Building::Building(EventDispatcher& dispatcher, const std::string& texturePath, 
     m_sprite.setPosition(x, y);      
     m_sprite.setScale(scale, scale); 
 
-    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
+    dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         this->onDraw(event);
         });
 }

@@ -23,11 +23,11 @@ Player::Player(EventDispatcher& dispatcher,float x, float y)
     m_healthBarForeground.setFillColor(sf::Color::Green);
     m_healthBarForeground.setPosition(10.f, 10.f);
 
-    dispatcher.subscribe<DrawEvent>([this](DrawEvent& event) {
+    dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         this->onDraw(event);
     });
 
-    dispatcher.subscribe<TickEvent>([this](TickEvent& event) {
+    dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
         this->onUpdate(event.GetDeltaTime());
     });
 }
@@ -104,7 +104,7 @@ void Player::move(float deltaX, float deltaY) {
     // flip sprite when walking in other direction
     if (deltaX < 0) {
         m_sprite.setScale(-1.f, 1.f);
-        m_sprite.setOrigin(m_frameWidth, 0.f); 
+        m_sprite.setOrigin((float)m_frameWidth, 0.f); 
     }
     else if (deltaX > 0) {
         m_sprite.setScale(1.f, 1.f); 
