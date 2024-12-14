@@ -3,6 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "Event.h"
+#include <random>
+
+enum class EntityType {
+    Player,
+    Enemy,
+};
 
 struct AnimationConfig {
     int startFrame;
@@ -17,10 +23,12 @@ struct HitboxConfig {
     float offsetYFactor;
 };
 
-enum class EntityType {
-    Player,
-    Enemy,
-};
+inline uint64_t generateRandomId() {
+    static std::random_device rd;
+    static std::mt19937_64 gen(rd());
+    static std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX);
+    return dist(gen);
+}
 
 
 class Entity {
@@ -47,16 +55,22 @@ public:
         m_speed(speed),
         m_maxHealth(maxHealth),
         m_currentHealth(maxHealth),
-        m_type(type) {
+        m_type(type),
+        m_uuid(generateRandomId())
+    {
         m_sprite.setPosition(x_posi, y_posi);
-
     }
 
 
-    virtual ~Entity() { }
+    ~Entity() {
+        m_dispatcher.unsubscribe(this);
+    }
 
     EntityType getType() const { return m_type; }
+    const sf::FloatRect& getHitbox() const { return m_hitbox; }
+    const uint64_t getUUID() const { return m_uuid; }
 protected:
+    uint64_t m_uuid;
     EventDispatcher& m_dispatcher;
 
     sf::FloatRect m_hitbox;
@@ -93,7 +107,7 @@ protected:
     virtual void onUpdate(float deltaTime) = 0; 
     virtual void onDraw(DrawEvent& event) = 0; 
 
-  
-private:
+    virtual void onCollision() = 0;
+
     EntityType m_type;
 };

@@ -13,7 +13,8 @@ enum class EventType {
 	GAME_OVER,
 	DESTROY_ENTITY,
 	KEYPRESSED,
-	WINDOW_RESIZE
+	WINDOW_RESIZE,
+	COLLISION_EVENT
 };
 
 class Event {
@@ -87,12 +88,18 @@ public:
 
 class DestroyEntityEvent : public Event {
 public:
-	DestroyEntityEvent(Entity* entity) : Event(EventType::DESTROY_ENTITY), m_entity(entity) {};
+	DestroyEntityEvent(uint64_t uuid) : Event(EventType::DESTROY_ENTITY), m_uuid(uuid) {};
 
 	const char* GetName() const override { return "Destroy Entity Event"; }
-	Entity* GetEntity() { return m_entity; }
+	const uint64_t GetUUID() const { return m_uuid; }
 private:
-	Entity* m_entity;
+	uint64_t m_uuid;
+};
+
+class CollisionEvent : public Event {
+public:
+	CollisionEvent() : Event(EventType::COLLISION_EVENT) {};
+	const char* GetName() const override { return "Collision Event"; }
 };
 
 
@@ -112,25 +119,27 @@ public:
 			}
 		});
 	}
+	
 
-	void unsubscribe(void* entity) {
-		for (auto it = m_subscriptions.begin(); it != m_subscriptions.end(); ++it) {
-			auto& listeners = it->second; 
-
-			listeners.erase(
+	void unsubscribe(void* ref) {
+		for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
+			std::vector<Subscription> subscriptions = it->second;
+			subscriptions.erase(
 				std::remove_if(
-					listeners.begin(),
-					listeners.end(),
-					[entity](const Subscription& sub) {
-						return sub.subscriber == entity;
+					subscriptions.begin(),
+					subscriptions.end(),
+					[ref](const Subscription& sub) {
+						return sub.subscriber == ref;
 					}
 				),
-				listeners.end()
+				subscriptions.end()
 			);
 
-			
-			if (listeners.empty()) {
-				it = m_subscriptions.erase(it); 
+			if (subscriptions.empty()) {
+				it = m_subscriptions.erase(it);
+			}
+			else {
+				++it;
 			}
 		}
 	}

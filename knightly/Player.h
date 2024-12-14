@@ -31,6 +31,8 @@ private:
     void updateHealthBar() override;
     void updateHitbox() override;
 
+    void onCollision() override;
+
     void move(float deltaX, float deltaY) override;
     void updateAnimation(float deltaTime) override;
     void setPosition(float x, float y) override;

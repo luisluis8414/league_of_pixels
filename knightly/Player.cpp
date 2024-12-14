@@ -23,14 +23,19 @@ Player::Player(EventDispatcher& dispatcher,float x, float y)
     m_healthBarForeground.setFillColor(sf::Color::Green);
     m_healthBarForeground.setPosition(10.f, 10.f);
 
-    dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
-        this->onDraw(event);
+    m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
+        onDraw(event);
     });
 
-    dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
-        this->onUpdate(event.GetDeltaTime());
+    m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
+        onUpdate(event.GetDeltaTime());
     });
+
+    //m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
+    //    onCollision();
+    //});
 }
+
 
 void Player::updateAnimation(float deltaTime) {
     m_elapsedTime += deltaTime;
@@ -173,12 +178,11 @@ void Player::onUpdate(const float deltaTime) {
 }
 
 void Player::updateHealthBar() {
-    //m_currentHealth--;
- /*   if (m_currentHealth <= 0) {
-        DestroyEntityEvent destroyEvent(this);
+    if (m_currentHealth <= 0) {
+        DestroyEntityEvent destroyEvent(m_uuid);
         m_dispatcher.emit(destroyEvent);
         return;
-    }*/
+    }
     float healthPercentage = m_currentHealth / m_maxHealth;
     m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
@@ -212,14 +216,26 @@ void Player::updateHitbox() {
             float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
             float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
 
+            // flip the attack hitbox if facing left
+            float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
+            if (direction < 0.f) {
+                float centerX = spriteBounds.left + spriteBounds.width * 0.5f;
+                float offsetFromCenter = attackHitboxLeft - centerX;
+                attackHitboxLeft = centerX - offsetFromCenter - attackHitboxWidth;
+            }
+
             m_attackHitbox = sf::FloatRect(attackHitboxLeft, attackHitboxTop, attackHitboxWidth, attackHitboxHeight);
         }
-       
+
     }
     else {
         // reset when not attacking
-        m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f); 
+        m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f);
     }
+}
+
+void Player::onCollision() {
+    m_currentHealth -= 0.1f;
 }
 
 

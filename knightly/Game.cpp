@@ -3,11 +3,12 @@
 #include "Player.h"
 #include <iostream>
 #include "Enemy.h"
+#include "CollisionSystem.h"
 
 Game::Game()
     : m_window(sf::VideoMode(800, 800), "Knightly"), m_eventDispatcher() {
     m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
-        m_entitiesToDestroy.push_back(event.GetEntity());
+        m_entitiesToDestroy.push_back(event.GetUUID());
      });
 
 }
@@ -33,6 +34,8 @@ void Game::run() {
 
     sf::Clock fpsClock;
 
+    CollisionSystem collisionSystem(m_eventDispatcher);
+
     sf::Font font;
     if (!font.loadFromFile("resources/fonts/arial.ttf")) {
         std::cerr << "Couldn't load font arial at: resources/fonts/arial.ttf!" << std::endl;
@@ -46,9 +49,11 @@ void Game::run() {
     fpsText.setPosition(5.f, 10.f);
 
     Building building(m_eventDispatcher, "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2f);
+    m_entitys.push_back(std::make_unique<Player>(m_eventDispatcher, 0.f, 0.f));
     spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/Torch/Red/Torch_Red.png", 100.f, 100.f);
     spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/TNT/Red/TNT_Red.png", 200.f, 200.f);
-    Player player(m_eventDispatcher, 0.f, 0.f);
+    
+
 
     sf::Event e;
     while (m_window.isOpen()) {
@@ -74,6 +79,8 @@ void Game::run() {
         TickEvent tickEvent(deltaTime.asSeconds());
         m_eventDispatcher.emit(tickEvent);
 
+        collisionSystem.update(m_entitys);
+
         // render frame
         m_window.clear();
         DrawEvent drawEvent(m_window);
@@ -90,7 +97,9 @@ void Game::run() {
             fpsClock.restart();
         }
 
-        cleanUp();
+        if (m_entitiesToDestroy.size() > 0) {
+            cleanUp();
+        }
 
         // cap frame rate
         sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
@@ -99,20 +108,20 @@ void Game::run() {
 }
 
 void Game::spawnEnemy(const std::string& texturePath, float x, float y) {
-    auto* newEnemy = new Enemy(m_eventDispatcher, texturePath, x, y); 
-    m_enemies.push_back(newEnemy); 
+    m_entitys.push_back(std::make_unique<Enemy>(m_eventDispatcher, texturePath, x, y));
 }
 
 void Game::cleanUp() {
-    for (auto it = m_entitiesToDestroy.begin(); it != m_entitiesToDestroy.end(); ++it) {
-        auto enemyIt = std::find(m_enemies.begin(), m_enemies.end(), *it);
+    for (uint64_t uuid : m_entitiesToDestroy) {
+        auto it = std::find_if(m_entitys.begin(), m_entitys.end(), [uuid](const std::unique_ptr<Entity>& entity) {
+            return entity->getUUID() == uuid;
+            });
 
-        if (enemyIt != m_enemies.end()) {
-            m_enemies.erase(enemyIt);
+        if (it != m_entitys.end()) {
+            m_entitys.erase(it);
         }
-
-        delete* it;
     }
-
     m_entitiesToDestroy.clear();
 }
+
+

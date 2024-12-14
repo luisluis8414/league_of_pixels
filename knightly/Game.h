@@ -17,8 +17,8 @@ private:
     sf::RenderWindow m_window;
     EventDispatcher m_eventDispatcher;
 
-    std::vector<Enemy*> m_enemies;
-    std::vector<Entity*> m_entitiesToDestroy;
+    std::vector<std::unique_ptr<Entity>> m_entitys;
+    std::vector<uint64_t> m_entitiesToDestroy;
     
     void spawnEnemy(const std::string& texturePath, float x, float y);
     void cleanUp();

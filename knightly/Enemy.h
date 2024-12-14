@@ -15,7 +15,7 @@ class Enemy : public Entity {
 public:
     explicit Enemy(EventDispatcher& dispatcher, const std::string& texturePath, float x, float y);
 
-    ~Enemy();
+    ~Enemy() = default;
 private:
     EnemyAnimationState m_state;
     sf::FloatRect m_attackHitbox;
@@ -31,6 +31,8 @@ private:
 
     void onUpdate(float deltaTime) override;
     void onDraw(DrawEvent& event) override;
+
+    void onCollision() override;
 
     void setAnimation(EnemyAnimationState state);
 
