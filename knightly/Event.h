@@ -110,12 +110,12 @@ public:
 	using EventFn = std::function<void(T&)>;
 
 	template <typename T>
-	void subscribe(void* entity, const EventFn<T>& listener) {
-		auto& listeners = m_subscriptions[std::type_index(typeid(T))];
-		listeners.push_back({
+	void subscribe(void* entity, const EventFn<T>& subscriber) {
+		std::vector<Subscription>& subscribers = m_subscriptions[std::type_index(typeid(T))];
+		subscribers.push_back({
 			entity,
-			[listener](Event& event) {
-				listener(static_cast<T&>(event)); 
+			[subscriber](Event& event) {
+				subscriber(static_cast<T&>(event)); 
 			}
 		});
 	}
@@ -123,7 +123,7 @@ public:
 
 	void unsubscribe(void* ref) {
 		for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
-			std::vector<Subscription> subscriptions = it->second;
+			std::vector<Subscription>& subscriptions = it->second;
 			subscriptions.erase(
 				std::remove_if(
 					subscriptions.begin(),
@@ -147,7 +147,7 @@ public:
 	void emit(Event& event) {
 		auto it = m_subscriptions.find(std::type_index(typeid(event)));
 		if (it != m_subscriptions.end()) {
-			for (auto& subscription : it->second) {
+			for (Subscription& subscription : it->second) {
 				if (event.m_handled) break;
 				subscription.callback(event);
 			}
