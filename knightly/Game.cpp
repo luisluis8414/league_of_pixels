@@ -8,7 +8,7 @@
 Game::Game()
     : m_window(sf::VideoMode(800, 800), "Knightly"), m_eventDispatcher() {
     m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
-        m_entitiesToDestroy.push_back(event.GetUUID());
+        m_entitiesToDestroy.push_back(event.GetEntity());
      });
 
 }
@@ -49,10 +49,10 @@ void Game::run() {
     fpsText.setPosition(5.f, 10.f);
 
     Building building(m_eventDispatcher, "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png", 200, 200, 1.2f);
-    m_entitys.push_back(std::make_unique<Player>(m_eventDispatcher, 0.f, 0.f));
     spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/Torch/Red/Torch_Red.png", 100.f, 100.f);
     spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/TNT/Red/TNT_Red.png", 200.f, 200.f);
     
+    m_entitys.push_back(std::make_unique<Player>(m_eventDispatcher, 0.f, 0.f));
 
 
     sf::Event e;
@@ -112,16 +112,17 @@ void Game::spawnEnemy(const std::string& texturePath, float x, float y) {
 }
 
 void Game::cleanUp() {
-    for (uint64_t uuid : m_entitiesToDestroy) {
-        auto it = std::find_if(m_entitys.begin(), m_entitys.end(), [uuid](const std::unique_ptr<Entity>& entity) {
-            return entity->getUUID() == uuid;
-            });
-
-        if (it != m_entitys.end()) {
-            m_entitys.erase(it);
+    for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
+        for (int j = 0; j < m_entitys.size(); ++j) {
+            if (m_entitys[j].get() == m_entitiesToDestroy[i]) {
+                m_entitys.erase(m_entitys.begin() + j);  
+                break;  
+            }
         }
     }
     m_entitiesToDestroy.clear();
 }
+
+
 
 

@@ -88,18 +88,29 @@ public:
 
 class DestroyEntityEvent : public Event {
 public:
-	DestroyEntityEvent(uint64_t uuid) : Event(EventType::DESTROY_ENTITY), m_uuid(uuid) {};
+	DestroyEntityEvent(Entity* entity)
+		: Event(EventType::DESTROY_ENTITY), m_entity(entity) {
+	}
 
 	const char* GetName() const override { return "Destroy Entity Event"; }
-	const uint64_t GetUUID() const { return m_uuid; }
+	Entity* GetEntity() const { return m_entity; }
+
 private:
-	uint64_t m_uuid;
+	Entity* m_entity;
 };
+
 
 class CollisionEvent : public Event {
 public:
-	CollisionEvent() : Event(EventType::COLLISION_EVENT) {};
+	CollisionEvent(Entity& entityA, Entity& entityB) : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
 	const char* GetName() const override { return "Collision Event"; }
+
+	const Entity& getEntityA() const { return m_entityA; }
+	const Entity& getEntityB() const { return m_entityB; }
+
+private:
+	Entity& m_entityA;
+	Entity& m_entityB;
 };
 
 

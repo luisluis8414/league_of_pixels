@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "Event.h"
+#include "Player.h"
 
 void CollisionSystem::update(std::vector<std::unique_ptr<Entity>>& entities) {
     for (size_t i = 0; i < entities.size(); ++i) {
@@ -9,25 +10,22 @@ void CollisionSystem::update(std::vector<std::unique_ptr<Entity>>& entities) {
             auto& entityA = *(entities[i]);
             auto& entityB = *(entities[j]);
 
-            if (checkCollision(entityA, entityB)) {
-                CollisionEvent collisionEvent;
+            if (entityA.getType() == EntityType::Player &&
+                dynamic_cast<Player*>(&entityA)->isHitting() &&
+                aabbCollision(dynamic_cast<Player*>(&entityA)->getAttackHitbox(), entityB.getHitbox())) {
+                CollisionEvent collisionEvent(entityA, entityB); 
+                m_eventDisptacher.emit(collisionEvent);
+            }
+
+            if (entityB.getType() == EntityType::Player &&
+                dynamic_cast<Player*>(&entityB)->isHitting() &&
+                aabbCollision(dynamic_cast<Player*>(&entityB)->getAttackHitbox(), entityA.getHitbox())) {
+                CollisionEvent collisionEvent(entityB, entityA);
                 m_eventDisptacher.emit(collisionEvent);
             }
         }
     }
 }
-
-bool CollisionSystem::checkCollision(const Entity& a, const Entity& b) {
-    const sf::FloatRect& hitboxA = a.getHitbox();
-    const sf::FloatRect& hitboxB = b.getHitbox();
-    
-    if (a.getType() != b.getType()) {
-        return aabbCollision(hitboxA, hitboxB);
-    }
-
-    return false;
-}
-
 
 bool CollisionSystem::aabbCollision(const sf::FloatRect& a, const sf::FloatRect& b) {
     return (a.left + a.width > b.left &&  

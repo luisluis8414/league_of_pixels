@@ -22,11 +22,15 @@ public:
     Player(EventDispatcher& dispatcher, float x, float y);
 
     ~Player() = default;
+
+    const sf::FloatRect& getAttackHitbox() const {
+        return m_attackHitbox;
+    };
+
+     bool isHitting() const;
 private:
     PlayerAnimationState m_state;
     sf::FloatRect m_attackHitbox;
-
-    bool isHitting() const;
 
     void updateHealthBar() override;
     void updateHitbox() override;

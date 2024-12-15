@@ -31,8 +31,13 @@
             });
 
         dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
+            const Entity& entityA = event.getEntityA();
+            const Entity& entityB = event.getEntityB();
+
+            if (&entityA == this || &entityB == this) {
             onCollision();
-            });
+            }
+        });
     }
 
 
@@ -137,7 +142,7 @@
 
     void Enemy::updateHealthBar() {
         if (m_currentHealth <= 0) {
-            DestroyEntityEvent destroyEvent(m_uuid);
+            DestroyEntityEvent destroyEvent(this);
             m_dispatcher.emit(destroyEvent);
             return; 
         }

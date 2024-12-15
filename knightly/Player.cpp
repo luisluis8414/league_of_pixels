@@ -179,7 +179,7 @@ void Player::onUpdate(const float deltaTime) {
 
 void Player::updateHealthBar() {
     if (m_currentHealth <= 0) {
-        DestroyEntityEvent destroyEvent(m_uuid);
+        DestroyEntityEvent destroyEvent(this);
         m_dispatcher.emit(destroyEvent);
         return;
     }
@@ -237,7 +237,6 @@ void Player::updateHitbox() {
 void Player::onCollision() {
     m_currentHealth -= 0.1f;
 }
-
 
 bool Player::isHitting() const  {
     return (m_state != PlayerAnimationState::Idle && m_state != PlayerAnimationState::Walking);

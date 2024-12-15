@@ -18,7 +18,7 @@ private:
     EventDispatcher m_eventDispatcher;
 
     std::vector<std::unique_ptr<Entity>> m_entitys;
-    std::vector<uint64_t> m_entitiesToDestroy;
+    std::vector<Entity*> m_entitiesToDestroy;
     
     void spawnEnemy(const std::string& texturePath, float x, float y);
     void cleanUp();

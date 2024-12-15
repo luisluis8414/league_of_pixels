@@ -13,7 +13,5 @@ public:
 private:
 	EventDispatcher& m_eventDisptacher;
 
-	bool checkCollision(const Entity& a, const Entity& b);
-
 	bool aabbCollision(const sf::FloatRect& hitboxA,const sf::FloatRect& hitboxB);
 };
