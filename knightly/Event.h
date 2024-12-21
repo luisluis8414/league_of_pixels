@@ -102,15 +102,15 @@ private:
 
 class CollisionEvent : public Event {
 public:
-	CollisionEvent(Entity& entityA, Entity& entityB) : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
+	CollisionEvent(const Entity& entityA,const Entity& entityB) : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
 	const char* GetName() const override { return "Collision Event"; }
 
 	const Entity& getEntityA() const { return m_entityA; }
 	const Entity& getEntityB() const { return m_entityB; }
 
 private:
-	Entity& m_entityA;
-	Entity& m_entityB;
+	const Entity& m_entityA;
+	const Entity& m_entityB;
 };
 
 

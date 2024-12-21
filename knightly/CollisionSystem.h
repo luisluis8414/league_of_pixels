@@ -1,7 +1,11 @@
 #pragma once
 #include "Entity.h"
-#include <vector>
 #include "Event.h"
+#include "Player.h"
+#include "Enemy.h"
+#include <vector>
+#include <memory>
+
 
 class CollisionSystem {
 public:
@@ -9,7 +13,7 @@ public:
 
 	~CollisionSystem() = default;
 
-	void update(std::vector<std::unique_ptr<Entity>>& entities);
+	void update(const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemys);
 private:
 	EventDispatcher& m_eventDisptacher;
 

@@ -52,8 +52,7 @@ void Game::run() {
     spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/Torch/Red/Torch_Red.png", 100.f, 100.f);
     spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/TNT/Red/TNT_Red.png", 200.f, 200.f);
     
-    m_entitys.push_back(std::make_unique<Player>(m_eventDispatcher, 0.f, 0.f));
-
+    Player player(m_eventDispatcher, 0.f, 0.f);
 
     sf::Event e;
     while (m_window.isOpen()) {
@@ -79,7 +78,7 @@ void Game::run() {
         TickEvent tickEvent(deltaTime.asSeconds());
         m_eventDispatcher.emit(tickEvent);
 
-        collisionSystem.update(m_entitys);
+        collisionSystem.update(player, m_enemies);
 
         // render frame
         m_window.clear();
@@ -108,14 +107,14 @@ void Game::run() {
 }
 
 void Game::spawnEnemy(const std::string& texturePath, float x, float y) {
-    m_entitys.push_back(std::make_unique<Enemy>(m_eventDispatcher, texturePath, x, y));
+    m_enemies.push_back(std::make_unique<Enemy>(m_eventDispatcher, texturePath, x, y));
 }
 
 void Game::cleanUp() {
     for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
-        for (int j = 0; j < m_entitys.size(); ++j) {
-            if (m_entitys[j].get() == m_entitiesToDestroy[i]) {
-                m_entitys.erase(m_entitys.begin() + j);  
+        for (int j = 0; j < m_enemies.size(); ++j) {
+            if (m_enemies[j].get() == m_entitiesToDestroy[i]) {
+                m_enemies.erase(m_enemies.begin() + j);
                 break;  
             }
         }
