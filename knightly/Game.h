@@ -4,6 +4,7 @@
 #include "Event.h"
 #include "Enemy.h"
 #include "Player.h"
+#include "Map.h"
 
 class Game {
 public:
@@ -17,6 +18,8 @@ public:
 private:
     sf::RenderWindow m_window;
     EventDispatcher m_eventDispatcher;
+
+    Map::Rift m_rift;
 
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<Entity*> m_entitiesToDestroy;
