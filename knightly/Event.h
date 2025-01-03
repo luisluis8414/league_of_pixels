@@ -14,7 +14,8 @@ enum class EventType {
 	DESTROY_ENTITY,
 	KEYPRESSED,
 	WINDOW_RESIZE,
-	COLLISION_EVENT
+	COLLISION_EVENT,
+	MOVE_EVENT
 };
 
 class Event {
@@ -113,7 +114,18 @@ private:
 	const Entity& m_entityB;
 };
 
+class MoveEvent : public Event {
+public:
+	MoveEvent(sf::Sprite& sprite, float x, float y) : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_x(x), m_y(y) {};
+	const char* GetName() const override { return "Move Event"; }
 
+	sf::Sprite& getSprite() const { return m_sprite; }
+	const std::pair<float, float> getDestination() { return { m_x, m_y }; }
+private:
+	sf::Sprite& m_sprite;
+	float m_x;
+	float m_y;
+};
 
 class EventDispatcher {
 public:

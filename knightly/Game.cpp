@@ -5,9 +5,9 @@
 #include "Enemy.h"
 #include "CollisionSystem.h"
 
+
 Game::Game()
-	: m_window(sf::VideoMode(1024, 1024), "Knightly"), m_eventDispatcher(),
-	m_rift() {
+	: m_window(sf::VideoMode(1920, 1080), "Knightly"), m_eventDispatcher(), m_map(m_eventDispatcher){
 
 	m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
 		m_entitiesToDestroy.push_back(event.GetEntity());
@@ -36,8 +36,6 @@ Game::Game()
 
 		sf::Clock fpsClock;
 
-		CollisionSystem collisionSystem(m_eventDispatcher);
-
 		sf::Font font;
 		if (!font.loadFromFile("resources/fonts/arial.ttf")) {
 			std::cerr << "Couldn't load font arial at: resources/fonts/arial.ttf!" << std::endl;
@@ -54,7 +52,9 @@ Game::Game()
 		spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/Torch/Red/Torch_Red.png", 100.f, 100.f);
 		spawnEnemy("resources/tiny_swords/Factions/Goblins/Troops/TNT/Red/TNT_Red.png", 200.f, 200.f);
 
-		Player player(m_eventDispatcher, 0.f, 0.f);
+		Player player(m_eventDispatcher, 600.f, 600.f);
+
+		CollisionSystem collisionSystem(m_eventDispatcher, player, m_enemies);
 
 		sf::Event e;
 		while (m_window.isOpen()) {
@@ -80,11 +80,10 @@ Game::Game()
 			TickEvent tickEvent(deltaTime.asSeconds());
 			m_eventDispatcher.emit(tickEvent);
 
-			collisionSystem.update(player, m_enemies);
+			collisionSystem.update();
 
 			// render frame
 			m_window.clear();
-			m_rift.draw(m_window);
 			DrawEvent drawEvent(m_window);
 			m_eventDispatcher.emit(drawEvent);
 			m_window.draw(fpsText);

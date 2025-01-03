@@ -31,6 +31,7 @@ public:
 private:
     PlayerAnimationState m_state;
     sf::FloatRect m_attackHitbox;
+    //CollisionSystem& m_collisionSystem;
 
     void updateHealthBar() override;
     void updateHitbox() override;

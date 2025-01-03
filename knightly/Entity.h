@@ -23,13 +23,12 @@ struct HitboxConfig {
     float offsetYFactor;
 };
 
-inline uint64_t generateRandomId() {
-    static std::random_device rd;
-    static std::mt19937_64 gen(rd());
-    static std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX);
-    return dist(gen);
-}
-
+//inline uint64_t generateRandomId() {
+//    static std::random_device rd;
+//    static std::mt19937_64 gen(rd());
+//    static std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX);
+//    return dist(gen);
+//}
 
 class Entity {
 public:
@@ -55,8 +54,7 @@ public:
         m_speed(speed),
         m_maxHealth(maxHealth),
         m_currentHealth(maxHealth),
-        m_type(type),
-        m_uuid(generateRandomId())
+        m_type(type)
     {
         m_sprite.setPosition(x_posi, y_posi);
     }
@@ -68,9 +66,7 @@ public:
 
     EntityType getType() const { return m_type; }
     const sf::FloatRect& getHitbox() const { return m_hitbox; }
-    const uint64_t getUUID() const { return m_uuid; }
 protected:
-    uint64_t m_uuid;
     EventDispatcher& m_dispatcher;
 
     sf::FloatRect m_hitbox;

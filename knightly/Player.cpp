@@ -1,7 +1,8 @@
 #include "Player.h"
 #include <iostream>
+#include "CollisionSystem.h"
 
-Player::Player(EventDispatcher& dispatcher,float x, float y)
+Player::Player(EventDispatcher& dispatcher, float x, float y)
     : Entity(dispatcher, 192, 192, x, y, 0.1f, 200.f, 100.f, EntityType::Player), m_state(PlayerAnimationState::Idle) {
     const char* spriteSheetPath = "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png";
 
@@ -104,8 +105,11 @@ void Player::setAnimation(PlayerAnimationState animationState) {
 }
 
 void Player::move(float deltaX, float deltaY) {
-    m_sprite.move(deltaX, deltaY);
-    
+    /*if (!m_collisionSystem.isTerrainCollision(deltaX, deltaY)) {
+    }
+    */
+    MoveEvent moveEvent(m_sprite, deltaX, deltaY);
+    m_dispatcher.emit(moveEvent);
     // flip sprite when walking in other direction
     if (deltaX < 0) {
         m_sprite.setScale(-1.f, 1.f);

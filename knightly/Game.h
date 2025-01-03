@@ -19,7 +19,7 @@ private:
     sf::RenderWindow m_window;
     EventDispatcher m_eventDispatcher;
 
-    Map::Rift m_rift;
+    Map::Rift m_map;
 
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<Entity*> m_entitiesToDestroy;
