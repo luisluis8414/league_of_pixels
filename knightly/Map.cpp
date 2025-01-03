@@ -65,8 +65,8 @@ namespace Map {
         }
 
         m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
-            draw(event.GetWindow());
-        });
+            draw(event.getWindow());
+        }, RenderLayer::MAP);
     }
 
     void Rift::draw(sf::RenderWindow& window) {

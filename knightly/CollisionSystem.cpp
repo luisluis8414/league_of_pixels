@@ -74,6 +74,14 @@ void CollisionSystem::handleEntityMove(sf::Sprite& sprite, std::pair<float, floa
 		gridYTop + 1 < 0 || gridYBottom >= Map::IslandMap.size()) ||
 		(Map::IslandMap[safeGridYTopPlusOne][safeGridXLeftPlusOne] == 0 ||
 			Map::IslandMap[safeGridYBottomMinusOne][safeGridXRightMinusOne] == 0))) {
+		if (destination.first < 0) {
+			sprite.setScale(-1.f, 1.f);
+			sprite.setOrigin((float)sprite.getTextureRect().width, 0.f);
+		}
+		else if (destination.first > 0) {
+			sprite.setScale(1.f, 1.f);
+			sprite.setOrigin(0, 0);
+		}
 		sprite.move(destination.first, destination.second);
 	}
 }

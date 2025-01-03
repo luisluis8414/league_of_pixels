@@ -5,6 +5,8 @@
 #include "Enemy.h"
 #include "Player.h"
 #include "Map.h"
+#include "TextRenderer.h"
+#include "CollisionSystem.h"
 
 class Game {
 public:
@@ -18,6 +20,10 @@ public:
 private:
     sf::RenderWindow m_window;
     EventDispatcher m_eventDispatcher;
+
+    Player m_player;
+    TextRenderer m_textRenderer;
+    CollisionSystem m_collisionSystem;
 
     Map::Rift m_map;
 

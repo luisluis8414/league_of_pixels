@@ -6,8 +6,19 @@
 #include <typeindex>
 class Entity;
 
+enum class RenderLayer {
+	BACKGROUND = -1,
+	MAP,
+	ENTITIES,
+	PLAYER,
+	TEXT,
+	UI
+};
+
 enum class EventType {
 	DRAW,
+	TEXT_DRAW,
+	MAP_DRAW,
 	TICK_UPDATE,
 	ANIMATION_UPDATE,
 	GAME_OVER,
@@ -21,10 +32,10 @@ enum class EventType {
 class Event {
 	friend class EventDispatcher;
 public:
-	virtual const char* GetName() const = 0;
+	virtual const char* getName() const = 0;
 
-	virtual EventType GetEventType() const { return m_eventType; };
-	virtual std::string ToString() const { return GetName(); }
+	virtual EventType getEventType() const { return m_eventType; };
+	virtual std::string toString() const { return getName(); }
 
 protected:
 	Event(EventType type) : m_eventType(type) {}
@@ -51,8 +62,8 @@ class DrawEvent : public Event {
 public:
 	DrawEvent(sf::RenderWindow& window) : Event(EventType::DRAW), m_window(window) {};
 	
-	sf::RenderWindow& GetWindow() const { return m_window; }
-	const char* GetName() const override { return "Draw Event"; }
+	sf::RenderWindow& getWindow() const { return m_window; }
+	const char* getName() const override { return "Draw Event"; }
 	
 private:
 	sf::RenderWindow& m_window;
@@ -62,8 +73,8 @@ class TickEvent : public Event {
 public:
 	TickEvent(const float& deltaTime) : Event(EventType::TICK_UPDATE), m_detlaTime(deltaTime) {};
 
-	const float GetDeltaTime() const { return m_detlaTime; }
-	const char* GetName() const override { return "Update Event"; }
+	const float getDeltaTime() const { return m_detlaTime; }
+	const char* getName() const override { return "Update Event"; }
 
 private:
 	const float m_detlaTime;
@@ -73,8 +84,8 @@ class KeyPressedEvent : public Event {
 public:
 	KeyPressedEvent(sf::Event::KeyEvent key_event) : Event(EventType::KEYPRESSED), m_keyEvent(key_event) {};
 
-	const sf::Event::KeyEvent& GetKeyboardEvent() const { return m_keyEvent; }
-	const char* GetName() const override { return "Key Pressed Event"; }
+	const sf::Event::KeyEvent& getKeyboardEvent() const { return m_keyEvent; }
+	const char* getName() const override { return "Key Pressed Event"; }
 
 private:
 	sf::Event::KeyEvent m_keyEvent;
@@ -84,7 +95,7 @@ class GameOverEvent : public Event {
 public:
 	GameOverEvent() : Event(EventType::GAME_OVER) {};
 
-	const char* GetName() const override { return "Key Pressed Event"; }
+	const char* getName() const override { return "Key Pressed Event"; }
 };
 
 class DestroyEntityEvent : public Event {
@@ -93,8 +104,8 @@ public:
 		: Event(EventType::DESTROY_ENTITY), m_entity(entity) {
 	}
 
-	const char* GetName() const override { return "Destroy Entity Event"; }
-	Entity* GetEntity() const { return m_entity; }
+	const char* getName() const override { return "Destroy Entity Event"; }
+	Entity* getEntity() const { return m_entity; }
 
 private:
 	Entity* m_entity;
@@ -104,7 +115,7 @@ private:
 class CollisionEvent : public Event {
 public:
 	CollisionEvent(const Entity& entityA,const Entity& entityB) : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
-	const char* GetName() const override { return "Collision Event"; }
+	const char* getName() const override { return "Collision Event"; }
 
 	const Entity& getEntityA() const { return m_entityA; }
 	const Entity& getEntityB() const { return m_entityB; }
@@ -117,7 +128,7 @@ private:
 class MoveEvent : public Event {
 public:
 	MoveEvent(sf::Sprite& sprite, float x, float y) : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_x(x), m_y(y) {};
-	const char* GetName() const override { return "Move Event"; }
+	const char* getName() const override { return "Move Event"; }
 
 	sf::Sprite& getSprite() const { return m_sprite; }
 	const std::pair<float, float> getDestination() { return { m_x, m_y }; }
@@ -133,16 +144,21 @@ public:
 	using EventFn = std::function<void(T&)>;
 
 	template <typename T>
-	void subscribe(void* entity, const EventFn<T>& subscriber) {
+	void subscribe(void* entity, const EventFn<T>& subscriber, RenderLayer layer = RenderLayer::MAP) {
 		std::vector<Subscription>& subscribers = m_subscriptions[std::type_index(typeid(T))];
 		subscribers.push_back({
 			entity,
+			static_cast<int>(layer), 
 			[subscriber](Event& event) {
-				subscriber(static_cast<T&>(event)); 
+				subscriber(static_cast<T&>(event));
 			}
-		});
+			});
+
+		std::sort(subscribers.begin(), subscribers.end(),
+			[](const Subscription& a, const Subscription& b) {
+				return a.layer < b.layer;
+			});
 	}
-	
 
 	void unsubscribe(void* ref) {
 		for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
@@ -179,9 +195,12 @@ public:
 
 private:
 	struct Subscription {
-		void* subscriber; 
+		void* subscriber;
+		int layer;
 		std::function<void(Event&)> callback;
 	};
 
 	std::unordered_map<std::type_index, std::vector<Subscription>> m_subscriptions;
 };
+
+

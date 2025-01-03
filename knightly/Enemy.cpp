@@ -24,10 +24,10 @@
 
         dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
             onDraw(event);
-            });
+            }, RenderLayer::ENTITIES);
 
         dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
-            onUpdate(event.GetDeltaTime());
+            onUpdate(event.getDeltaTime());
             });
 
         dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
@@ -65,7 +65,7 @@
     }
 
     void Enemy::onDraw(DrawEvent& event) {
-        sf::RenderWindow& window = event.GetWindow();
+        sf::RenderWindow& window = event.getWindow();
         window.draw(m_sprite);
 
         window.draw(m_healthBarBackground);
@@ -108,17 +108,16 @@
     }
 
     void Enemy::move(float deltaX, float deltaY) {
+        if (deltaX != 0.f || deltaY != 0.f) {
+            if (m_state != EnemyAnimationState::Walking) {
+                setAnimation(EnemyAnimationState::Walking);
+            }
+        }
+      /*  else if (m_state == EnemyAnimationState::Walking) {
+            setAnimation(EnemyAnimationState::Idle);
+        }*/
         m_sprite.move(deltaX, deltaY);
-
-        // flip sprite when walking in other direction
-        if (deltaX < 0) {
-            m_sprite.setScale(-1.f, 1.f);
-            m_sprite.setOrigin((float)m_frameWidth, 0.f);
-        }
-        else if (deltaX > 0) {
-            m_sprite.setScale(1.f, 1.f);
-            m_sprite.setOrigin(0, 0);
-        }
+        MoveEvent moveEvent(m_sprite, deltaX, deltaY);
     }
 
     void Enemy::onUpdate(const float deltaTime) {
@@ -127,17 +126,14 @@
         updateAnimation(deltaTime);
 
         if (isHitting()) return;
-        float deltaX = 0.f;
+        float deltaX = 1.f;
         float deltaY = 0.f;
 
-        // if no movement keys are pressed, return to idle (only if not hitting)
-        // the check in the animation loop isnt sufficient cause it only changes animation after finished
         if (deltaX == 0.f && deltaY == 0.f && m_state == EnemyAnimationState::Walking) {
             setAnimation(EnemyAnimationState::Idle);
         }
 
         move(deltaX, deltaY);
-
     }
 
     void Enemy::updateHealthBar() {
@@ -170,7 +166,7 @@
 
 
     bool Enemy::isHitting() const {
-        return (m_state != EnemyAnimationState::Idle && m_state != EnemyAnimationState::Walking);
+        return m_state == EnemyAnimationState::Hitting;
     }
 
     void Enemy::onCollision() {

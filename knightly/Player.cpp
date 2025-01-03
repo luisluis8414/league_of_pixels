@@ -26,10 +26,10 @@ Player::Player(EventDispatcher& dispatcher, float x, float y)
 
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         onDraw(event);
-    });
+    }, RenderLayer::PLAYER);
 
     m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
-        onUpdate(event.GetDeltaTime());
+        onUpdate(event.getDeltaTime());
     });
 
     //m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
@@ -62,7 +62,7 @@ void Player::updateAnimation(float deltaTime) {
 }
 
 void Player::onDraw(DrawEvent& event) {
-    sf::RenderWindow& window = event.GetWindow();
+    sf::RenderWindow& window = event.getWindow();
     window.draw(m_sprite);
 
     window.draw(m_healthBarBackground);
@@ -105,20 +105,8 @@ void Player::setAnimation(PlayerAnimationState animationState) {
 }
 
 void Player::move(float deltaX, float deltaY) {
-    /*if (!m_collisionSystem.isTerrainCollision(deltaX, deltaY)) {
-    }
-    */
     MoveEvent moveEvent(m_sprite, deltaX, deltaY);
     m_dispatcher.emit(moveEvent);
-    // flip sprite when walking in other direction
-    if (deltaX < 0) {
-        m_sprite.setScale(-1.f, 1.f);
-        m_sprite.setOrigin((float)m_frameWidth, 0.f); 
-    }
-    else if (deltaX > 0) {
-        m_sprite.setScale(1.f, 1.f); 
-        m_sprite.setOrigin(0, 0); 
-    }
 }
 
 void Player::onUpdate(const float deltaTime) {

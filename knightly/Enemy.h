@@ -8,6 +8,7 @@
 enum class EnemyAnimationState {
     Idle,
     Walking,
+    Hitting
 };
 
 
@@ -39,6 +40,7 @@ private:
     const std::unordered_map<EnemyAnimationState, AnimationConfig> m_animationConfigs = {
         {EnemyAnimationState::Idle, {0, 5, 0.1f}},
         {EnemyAnimationState::Walking, {6, 11, 0.1f}},
+        {EnemyAnimationState::Hitting, {6, 11, 0.1f}},
     };
     
     //std::unordered_map<EnemyAnimationState, HitboxConfig> m_attackHitboxConfigs = {

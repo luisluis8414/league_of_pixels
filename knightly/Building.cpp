@@ -18,5 +18,5 @@ Building::Building(EventDispatcher& dispatcher, const std::string& texturePath, 
 
 
 void Building::onDraw(DrawEvent& event) {
-    event.GetWindow().draw(m_sprite);
+    event.getWindow().draw(m_sprite);
 }
