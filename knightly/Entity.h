@@ -8,6 +8,7 @@
 enum class EntityType {
     Player,
     Enemy,
+    Minion
 };
 
 struct AnimationConfig {

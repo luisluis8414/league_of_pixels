@@ -5,6 +5,7 @@
 #include "Enemy.h"
 #include "CollisionSystem.h"
 #include "Config.h"
+#include "Minion.h"
 
 Game::Game()
 	: m_window(sf::VideoMode(Config::Window::WIDTH, Config::Window::HEIGHT), Config::Window::TITLE), m_eventDispatcher(), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
@@ -41,6 +42,7 @@ void Game::run() {
 	Building CastleRed(m_eventDispatcher, Config::Textures::Buildings::CASTLE_RED, 1400, 400, 1.f);
 	spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
 	spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
+	Minion minion(m_eventDispatcher, {400.f, 400.f});
 
 	sf::Event e;
 	while (m_window.isOpen()) {

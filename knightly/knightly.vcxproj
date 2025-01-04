@@ -151,6 +151,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Minion.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="TextRenderer.h" />
   </ItemGroup>

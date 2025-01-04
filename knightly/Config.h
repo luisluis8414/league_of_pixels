@@ -1,4 +1,3 @@
-// Config.h
 #pragma once
 #include <string>
 
@@ -16,6 +15,8 @@ namespace Config {
         namespace Troops {
             inline const std::string TORCH_RED = "resources/tiny_swords/Factions/Goblins/Troops/Torch/Red/Torch_Red.png";
             inline const std::string TNT_RED = "resources/tiny_swords/Factions/Goblins/Troops/TNT/Red/TNT_Red.png";
+
+            inline const std::string MINIONS_RED = "resources/minions/minions.png";
         }
     }
 
