@@ -24,6 +24,7 @@ enum class EventType {
 	GAME_OVER,
 	DESTROY_ENTITY,
 	KEYPRESSED,
+	MOUSE_CLICKED,
 	WINDOW_RESIZE,
 	COLLISION_EVENT,
 	MOVE_EVENT
@@ -82,13 +83,23 @@ private:
 
 class KeyPressedEvent : public Event {
 public:
-	KeyPressedEvent(sf::Event::KeyEvent key_event) : Event(EventType::KEYPRESSED), m_keyEvent(key_event) {};
+	KeyPressedEvent(const sf::Event::KeyEvent key_event) : Event(EventType::KEYPRESSED), m_keyEvent(key_event) {};
 
 	const sf::Event::KeyEvent& getKeyboardEvent() const { return m_keyEvent; }
 	const char* getName() const override { return "Key Pressed Event"; }
 
 private:
-	sf::Event::KeyEvent m_keyEvent;
+	const sf::Event::KeyEvent m_keyEvent;
+};
+
+class MouseRightClickEvent : public Event {
+public:
+	MouseRightClickEvent(const sf::Vector2f& position): Event(EventType::MOUSE_CLICKED), m_position(position) {};
+
+	const sf::Vector2f& getPosition() const { return m_position; }
+	const char* getName() const override { return "Left Mouse Click Event"; }
+private: 
+	const sf::Vector2f& m_position;
 };
 
 class GameOverEvent : public Event {
@@ -127,15 +138,16 @@ private:
 
 class MoveEvent : public Event {
 public:
-	MoveEvent(sf::Sprite& sprite, float x, float y) : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_x(x), m_y(y) {};
+	MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination) : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_destination(destination) {};
 	const char* getName() const override { return "Move Event"; }
 
 	sf::Sprite& getSprite() const { return m_sprite; }
-	const std::pair<float, float> getDestination() { return { m_x, m_y }; }
+	const sf::Vector2f& getDestination() const { return m_destination; }
+	const sf::FloatRect& getHitbox() const { return m_hitbox; }
 private:
 	sf::Sprite& m_sprite;
-	float m_x;
-	float m_y;
+	const sf::Vector2f m_destination;
+	const sf::FloatRect m_hitbox;
 };
 
 class EventDispatcher {

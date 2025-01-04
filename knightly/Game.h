@@ -30,6 +30,6 @@ private:
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<Entity*> m_entitiesToDestroy;
 
-    void spawnEnemy(const std::string& texturePath, float x, float y);
+    void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
     void cleanUp();
 };

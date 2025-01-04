@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "Event.h"
-#include <random>
+#include <iostream>
 
 enum class EntityType {
     Player,
@@ -36,12 +36,12 @@ public:
         EventDispatcher& dispatcher,
         int frameWidth,
         int frameHeight,
-        float x_posi,
-        float y_posi,
+        sf::Vector2f position,
         float frameTime,
         float speed,
         float maxHealth,
-        EntityType type
+        EntityType type,
+        std::string texturePath
     )
         : m_dispatcher(dispatcher),
         m_frameWidth(frameWidth),
@@ -54,9 +54,30 @@ public:
         m_speed(speed),
         m_maxHealth(maxHealth),
         m_currentHealth(maxHealth),
-        m_type(type)
+        m_type(type),
+        m_destination(position)
     {
-        m_sprite.setPosition(x_posi, y_posi);
+        if (!m_texture.loadFromFile(texturePath)) {
+            std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
+        }
+
+        m_texture.setSmooth(false);
+        m_sprite.setTexture(m_texture);
+
+        m_frameRect = sf::IntRect(0, 0, m_frameWidth, m_frameHeight);
+        m_sprite.setTextureRect(m_frameRect);
+
+        m_sprite.setPosition(position.x, position.y);
+
+        m_sprite.setOrigin(m_sprite.getGlobalBounds().width / 2.f, m_sprite.getGlobalBounds().height / 2.f);
+
+        m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
+        m_healthBarBackground.setFillColor(sf::Color::Red);
+        m_healthBarBackground.setPosition(10.f, 10.f);
+
+        m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
+        m_healthBarForeground.setFillColor(sf::Color::Green);
+        m_healthBarForeground.setPosition(10.f, 10.f);
     }
 
 
@@ -84,6 +105,7 @@ protected:
     int m_frameWidth;          // width of one frame
     int m_frameHeight;         // height of one frame
 
+    sf::Vector2f m_destination;
     float m_speed;             // movement speed
 
     float m_maxHealth;         // maximum health
@@ -96,14 +118,44 @@ protected:
     virtual void updateHealthBar() = 0;
     virtual void updateHitbox() = 0;
 
-    virtual void move(float deltaX, float deltaY) = 0; 
+    virtual void move(float deltaTime) = 0; 
     virtual void updateAnimation(float deltaTime) = 0; 
-    virtual void setPosition(float x, float y) = 0; 
+
+    virtual void setPosition(sf::Vector2f position) {
+        m_sprite.setPosition(position.x, position.y);
+    };
 
     virtual void onUpdate(float deltaTime) = 0; 
     virtual void onDraw(DrawEvent& event) = 0; 
 
     virtual void onCollision() = 0;
+
+    void setDestination(sf::Vector2f position) {
+        sf::Vector2f direction = position - m_sprite.getPosition();
+
+        constexpr float flipThreshold = 1.f;
+
+        if (direction.x < -flipThreshold && m_sprite.getScale().x != -1.f) {
+            m_sprite.setScale(-1.f, 1.f); 
+        }
+        else if (direction.x > flipThreshold && m_sprite.getScale().x != 1.f) {
+            m_sprite.setScale(1.f, 1.f); 
+        }
+
+        m_destination = position;
+    }
+
+
+    sf::Vector2f getSpriteCenter() {
+        sf::Vector2f currentPosition = m_sprite.getPosition();
+
+        sf::FloatRect bounds = m_sprite.getGlobalBounds();
+
+        return sf::Vector2f(
+            currentPosition.x + bounds.width / 2.f,
+            currentPosition.y + bounds.height / 2.f
+        );
+    }
 
     EntityType m_type;
 };

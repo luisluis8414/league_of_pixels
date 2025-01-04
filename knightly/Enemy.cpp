@@ -1,41 +1,22 @@
     #include "Enemy.h"
     #include <iostream>
 
-    Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, float x,float y)
-        : Entity(dispatcher, 192, 192, x, y, 0.1f, 200.f, 100.f, EntityType::Enemy), m_state(EnemyAnimationState::Idle) {
-
-        if (!m_texture.loadFromFile(texturePath)) {
-            std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
-        }
-
-        m_texture.setSmooth(false);
-        m_sprite.setTexture(m_texture);
-
-        m_frameRect = sf::IntRect(0, 0, m_frameWidth, m_frameHeight);
-        m_sprite.setTextureRect(m_frameRect);
-
-        m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
-        m_healthBarBackground.setFillColor(sf::Color::Red);
-        m_healthBarBackground.setPosition(10.f, 10.f);
-
-        m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
-        m_healthBarForeground.setFillColor(sf::Color::Green);
-        m_healthBarForeground.setPosition(10.f, 10.f);
-
-        dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
+    Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position)
+        : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Enemy, texturePath), m_state(EnemyAnimationState::Idle) {
+        m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
             onDraw(event);
             }, RenderLayer::ENTITIES);
 
-        dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
+        m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
             onUpdate(event.getDeltaTime());
             });
 
-        dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
+        m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
             const Entity& entityA = event.getEntityA();
             const Entity& entityB = event.getEntityB();
 
             if (&entityA == this || &entityB == this) {
-            onCollision();
+                onCollision();
             }
         });
     }
@@ -91,11 +72,6 @@
         }
     }
 
-
-    void Enemy::setPosition(float x, float y) {
-        m_sprite.setPosition(x, y);
-    }
-
     void Enemy::setAnimation(EnemyAnimationState animationState) {
         if (m_animationConfigs.count(animationState) > 0) {
             const auto& config = m_animationConfigs.at(animationState);
@@ -107,17 +83,21 @@
         m_state = animationState;
     }
 
-    void Enemy::move(float deltaX, float deltaY) {
+    void Enemy::move(float deltaTime) {
+        float deltaX = 10.f;
+        float deltaY = 0.f;
+
+        if (deltaX == 0.f && deltaY == 0.f && m_state == EnemyAnimationState::Walking) {
+            setAnimation(EnemyAnimationState::Idle);
+        }
+
         if (deltaX != 0.f || deltaY != 0.f) {
             if (m_state != EnemyAnimationState::Walking) {
                 setAnimation(EnemyAnimationState::Walking);
             }
         }
-      /*  else if (m_state == EnemyAnimationState::Walking) {
-            setAnimation(EnemyAnimationState::Idle);
-        }*/
-        m_sprite.move(deltaX, deltaY);
-        MoveEvent moveEvent(m_sprite, deltaX, deltaY);
+        MoveEvent moveEvent(m_sprite, m_hitbox, { deltaX, deltaY });
+        m_dispatcher.emit(moveEvent);
     }
 
     void Enemy::onUpdate(const float deltaTime) {
@@ -126,14 +106,8 @@
         updateAnimation(deltaTime);
 
         if (isHitting()) return;
-        float deltaX = 1.f;
-        float deltaY = 0.f;
 
-        if (deltaX == 0.f && deltaY == 0.f && m_state == EnemyAnimationState::Walking) {
-            setAnimation(EnemyAnimationState::Idle);
-        }
-
-        move(deltaX, deltaY);
+        move(deltaTime);
     }
 
     void Enemy::updateHealthBar() {

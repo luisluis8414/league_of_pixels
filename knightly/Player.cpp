@@ -1,29 +1,10 @@
 #include "Player.h"
-#include <iostream>
 #include "CollisionSystem.h"
+#include "Map.h"
 
-Player::Player(EventDispatcher& dispatcher, float x, float y)
-    : Entity(dispatcher, 192, 192, x, y, 0.1f, 200.f, 100.f, EntityType::Player), m_state(PlayerAnimationState::Idle) {
-    const char* spriteSheetPath = "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png";
-
-    if (!m_texture.loadFromFile(spriteSheetPath)) {
-        std::cerr << "Failed to load sprite sheet: " << spriteSheetPath << std::endl;
-    }
-
-    m_texture.setSmooth(false);
-    m_sprite.setTexture(m_texture);
-
-    m_frameRect = sf::IntRect(0, 0, m_frameWidth, m_frameHeight);
-    m_sprite.setTextureRect(m_frameRect);
-
-    m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
-    m_healthBarBackground.setFillColor(sf::Color::Red);
-    m_healthBarBackground.setPosition(10.f, 10.f);
-
-    m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
-    m_healthBarForeground.setFillColor(sf::Color::Green);
-    m_healthBarForeground.setPosition(10.f, 10.f);
-
+Player::Player(EventDispatcher& dispatcher, sf::Vector2f position)
+    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Player, "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png"), m_state(PlayerAnimationState::Idle) {
+       
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         onDraw(event);
     }, RenderLayer::PLAYER);
@@ -32,9 +13,9 @@ Player::Player(EventDispatcher& dispatcher, float x, float y)
         onUpdate(event.getDeltaTime());
     });
 
-    //m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
-    //    onCollision();
-    //});
+    dispatcher.subscribe<MouseRightClickEvent>(this, [this](MouseRightClickEvent event) {
+        setDestination(event.getPosition());
+        });
 }
 
 
@@ -86,12 +67,20 @@ void Player::onDraw(DrawEvent& event) {
         attackHitboxShape.setOutlineThickness(1.f);
         window.draw(attackHitboxShape);
     }
+
+    //sprite border
+    sf::FloatRect bounds = m_sprite.getGlobalBounds();
+
+    sf::RectangleShape border;
+    border.setPosition(bounds.left, bounds.top); // Top-left corner of the sprite
+    border.setSize({ bounds.width, bounds.height }); // Size of the sprite
+    border.setFillColor(sf::Color::Transparent); // Make the inside transparent
+    border.setOutlineColor(sf::Color::Red); // Set the border color
+    border.setOutlineThickness(1.f); // Set the border thickness
+
+    window.draw(border);
 }
 
-
-void Player::setPosition(float x, float y) {
-    m_sprite.setPosition(x, y);
-}
 
 void Player::setAnimation(PlayerAnimationState animationState) {
     if (m_animationConfigs.count(animationState) > 0) {
@@ -104,9 +93,54 @@ void Player::setAnimation(PlayerAnimationState animationState) {
     m_state = animationState;
 }
 
-void Player::move(float deltaX, float deltaY) {
-    MoveEvent moveEvent(m_sprite, deltaX, deltaY);
-    m_dispatcher.emit(moveEvent);
+void Player::move(float deltaTime) {
+    sf::Vector2f direction = m_destination - m_sprite.getPosition();
+
+    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+    constexpr float epsilon = 2.f;
+
+    if (distance > epsilon) {
+        direction /= distance;
+
+        constexpr float minDirectionThreshold = 0.01f; 
+        if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
+        if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
+
+        float deltaX = direction.x * m_speed * deltaTime;
+        float deltaY = direction.y * m_speed * deltaTime;
+
+        sf::FloatRect newXHitbox = m_hitbox;
+        newXHitbox.left += deltaX;
+
+
+        sf::FloatRect newYHitbox = m_hitbox;
+        newYHitbox.top += deltaY;
+
+        bool canMoveX = Map::isTilePassable(newXHitbox.left, newXHitbox.top) && Map::isTilePassable((newXHitbox.left + newXHitbox.width), newXHitbox.top);
+        bool canMoveY = Map::isTilePassable(newYHitbox.left, newYHitbox.top) && Map::isTilePassable(newYHitbox.left, (newYHitbox.top + newYHitbox.height));
+
+        if (canMoveX) {
+            m_sprite.move(deltaX, 0.f);
+        }
+
+        if (canMoveY) {
+            m_sprite.move(0.f, deltaY);
+        }
+
+        if (m_state != PlayerAnimationState::Walking) {
+            setAnimation(PlayerAnimationState::Walking);
+        }
+
+        if ((!canMoveX && deltaY == 0) || (!canMoveY && deltaX== 0)) {
+            m_destination = m_sprite.getPosition();
+        }
+    }
+    else {
+        if (m_state != PlayerAnimationState::Idle) {
+            setAnimation(PlayerAnimationState::Idle);
+        }
+    }
 }
 
 void Player::onUpdate(const float deltaTime) {
@@ -115,58 +149,24 @@ void Player::onUpdate(const float deltaTime) {
     updateAnimation(deltaTime);
 
     if (isHitting()) return;
-    float deltaX = 0.f;
-    float deltaY = 0.f;
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            deltaY -= m_speed * deltaTime;
-            if (m_state != PlayerAnimationState::Walking) {
-                setAnimation(PlayerAnimationState::Walking);
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            deltaY += m_speed * deltaTime;
-            if (m_state != PlayerAnimationState::Walking) {
-                setAnimation(PlayerAnimationState::Walking);
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-            deltaX -= m_speed * deltaTime;
-            if (m_state != PlayerAnimationState::Walking) {
-                setAnimation(PlayerAnimationState::Walking);
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-            deltaX += m_speed * deltaTime;
-            if (m_state != PlayerAnimationState::Walking) {
-                setAnimation(PlayerAnimationState::Walking);
-            }
-        }
+    move(deltaTime);
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            setAnimation(PlayerAnimationState::SlashDown);
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-            setAnimation(PlayerAnimationState::SlashUp);
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
-            setAnimation(PlayerAnimationState::SlashForwardRight);
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-            setAnimation(PlayerAnimationState::SlashBehindLeft);
-        }
-
-        // if no movement keys are pressed, return to idle (only if not hitting)
-        // the check in the animation loop isnt sufficient cause it only changes animation after finished
-        if (deltaX == 0.f && deltaY == 0.f && m_state == PlayerAnimationState::Walking) {
-            setAnimation(PlayerAnimationState::Idle);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+        setAnimation(PlayerAnimationState::SlashDown);
     }
 
-    move(deltaX, deltaY);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+        setAnimation(PlayerAnimationState::SlashUp);
+    }
 
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+        setAnimation(PlayerAnimationState::SlashForwardRight);
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+        setAnimation(PlayerAnimationState::SlashBehindLeft);
+    }
 }
 
 void Player::updateHealthBar() {
@@ -233,7 +233,5 @@ void Player::onCollision() {
 bool Player::isHitting() const  {
     return (m_state != PlayerAnimationState::Idle && m_state != PlayerAnimationState::Walking);
 }
-
-
 
 

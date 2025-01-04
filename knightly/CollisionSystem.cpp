@@ -2,13 +2,16 @@
 #include <iostream>
 #include <vector>
 #include "Event.h"
-#include "Map.h"
 
 CollisionSystem::CollisionSystem(EventDispatcher& dispatcher, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies)
 	: m_eventDispatcher(dispatcher), m_player(player), m_enemies(enemies) {
 
-	m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
-		handleEntityMove(moveEvent.getSprite(), moveEvent.getDestination());
+	//m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
+	//	handleEntityMove(moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getDestination());
+	//	});
+
+	m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
+		update();
 		});
 }
 
@@ -50,38 +53,8 @@ bool CollisionSystem::aabbCollision(const sf::FloatRect& a, const sf::FloatRect&
 		a.top < b.top + b.height);
 }
 
-void CollisionSystem::handleEntityMove(sf::Sprite& sprite, std::pair<float, float> destination) {
-	float newX = destination.first + sprite.getPosition().x;
-	float newY = destination.second + sprite.getPosition().y;
+//void CollisionSystem::handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination) {
+//    
+//
+//}
 
-	sf::FloatRect bounds = sprite.getGlobalBounds();
-	float spriteWidth = bounds.width;
-	float spriteHeight = bounds.height;
-
-	int gridXLeft = std::max(0, static_cast<int>(newX / Map::tileSize));
-	int gridYTop = std::max(0, static_cast<int>(newY / Map::tileSize));
-
-	int gridXRight = static_cast<int>((newX + spriteWidth) / Map::tileSize);
-	int gridYBottom = static_cast<int>((newY + spriteHeight) / Map::tileSize);
-
-	// Ensure safe indexing for +1 and -1 operations
-	int safeGridYTopPlusOne = std::min(gridYTop + 1, static_cast<int>(Map::IslandMap.size() - 1));
-	int safeGridXLeftPlusOne = std::min(gridXLeft + 1, static_cast<int>(Map::IslandMap[0].size() - 1));
-	int safeGridYBottomMinusOne = std::max(gridYBottom - 1, 0);
-	int safeGridXRightMinusOne = std::max(gridXRight - 1, 0);
-
-	if (!((gridXLeft < 0 || gridXRight >= Map::IslandMap[0].size() ||
-		gridYTop + 1 < 0 || gridYBottom >= Map::IslandMap.size()) ||
-		(Map::IslandMap[safeGridYTopPlusOne][safeGridXLeftPlusOne] == 0 ||
-			Map::IslandMap[safeGridYBottomMinusOne][safeGridXRightMinusOne] == 0))) {
-		if (destination.first < 0) {
-			sprite.setScale(-1.f, 1.f);
-			sprite.setOrigin((float)sprite.getTextureRect().width, 0.f);
-		}
-		else if (destination.first > 0) {
-			sprite.setScale(1.f, 1.f);
-			sprite.setOrigin(0, 0);
-		}
-		sprite.move(destination.first, destination.second);
-	}
-}

@@ -14,7 +14,7 @@ enum class EnemyAnimationState {
 
 class Enemy : public Entity {
 public:
-    explicit Enemy(EventDispatcher& dispatcher, const std::string& texturePath, float x, float y);
+    Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position);
 
     ~Enemy() = default;
 private:
@@ -26,9 +26,8 @@ private:
     void updateHealthBar() override;
     void updateHitbox() override;
 
-    void move(float deltaX, float deltaY) override;
+    void move(float deltaTime) override;
     void updateAnimation(float deltaTime) override;
-    void setPosition(float x, float y) override;
 
     void onUpdate(float deltaTime) override;
     void onDraw(DrawEvent& event) override;
@@ -42,7 +41,7 @@ private:
         {EnemyAnimationState::Walking, {6, 11, 0.1f}},
         {EnemyAnimationState::Hitting, {6, 11, 0.1f}},
     };
-    
+
     //std::unordered_map<EnemyAnimationState, HitboxConfig> m_attackHitboxConfigs = {
     //    //{float widthFactor; heightFactor; offsetXFactor; offsetYFactor; }
     //    {PlayerAnimationState::SlashDown, {0.35f, 0.5f, 0.6f, 0.2f}},

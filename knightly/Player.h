@@ -19,7 +19,7 @@ enum class PlayerAnimationState {
 
 class Player : public Entity {
 public:
-    Player(EventDispatcher& dispatcher, float x, float y);
+    Player(EventDispatcher& dispatcher, sf::Vector2f position);
 
     ~Player() = default;
 
@@ -38,9 +38,8 @@ private:
 
     void onCollision() override;
 
-    void move(float deltaX, float deltaY) override;
+    void move(float deltaTime) override;
     void updateAnimation(float deltaTime) override;
-    void setPosition(float x, float y) override;
 
     void onUpdate(float deltaTime) override;
     void onDraw(DrawEvent& event) override;

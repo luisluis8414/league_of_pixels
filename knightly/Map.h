@@ -47,6 +47,18 @@ namespace Map {
 		}
 	};
 
+	inline bool isTilePassable(float x, float y) {
+		int tileX = static_cast<int>(x / tileSize);
+		int tileY = static_cast<int>(y / tileSize);
+
+		if (tileX < 0 || tileY < 0 ||
+			tileY >= static_cast<int>(IslandMap.size()) ||
+			tileX >= static_cast<int>(IslandMap[0].size()))
+			return false; 
+
+		return IslandMap[tileY][tileX] != 0; 
+	}
+
 	class Rift {
 	public:
 		Rift(EventDispatcher& eventDispatcher);

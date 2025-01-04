@@ -7,7 +7,7 @@
 #include "Config.h"
 
 Game::Game()
-	: m_window(sf::VideoMode(Config::Window::WIDTH, Config::Window::HEIGHT), Config::Window::TITLE), m_eventDispatcher(), m_player(m_eventDispatcher, 600.f, 600.f), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies){
+	: m_window(sf::VideoMode(Config::Window::WIDTH, Config::Window::HEIGHT), Config::Window::TITLE), m_eventDispatcher(), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
 
 	m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
 		m_entitiesToDestroy.push_back(event.getEntity());
@@ -36,10 +36,11 @@ void Game::run() {
 	sf::Clock clock;
 	sf::Clock fpsClock;
 
+
 	Building caslteBlue(m_eventDispatcher, Config::Textures::Buildings::CASTLE_BLUE, 200, 400, 1.f);
 	Building CastleRed(m_eventDispatcher, Config::Textures::Buildings::CASTLE_RED, 1400, 400, 1.f);
-	spawnEnemy(Config::Textures::Troops::TORCH_RED, 100.f, 100.f);
-	spawnEnemy(Config::Textures::Troops::TNT_RED, 200.f, 200.f);
+	//spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
+	//spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
 
 	sf::Event e;
 	while (m_window.isOpen()) {
@@ -49,6 +50,19 @@ void Game::run() {
 		while (m_window.pollEvent(e)) {
 			if (e.type == sf::Event::Closed) {
 				m_window.close();
+			}
+
+			if (e.type == sf::Event::MouseButtonPressed) {
+				if (e.mouseButton.button == sf::Mouse::Right) {
+					sf::Vector2 worldPosition = m_window.mapPixelToCoords({ e.mouseButton.x, e.mouseButton.y });
+					MouseRightClickEvent event(worldPosition);
+					m_eventDispatcher.emit(event);
+				}
+				else if (e.mouseButton.button == sf::Mouse::Left) {
+					std::cout << "Right mouse button clicked at ("
+						<< e.mouseButton.x << ", "
+						<< e.mouseButton.y << ")\n";
+				}
 			}
 
 			if (e.type == sf::Event::KeyPressed) {
@@ -62,7 +76,8 @@ void Game::run() {
 			}
 		}
 
-		TickEvent tickEvent(deltaTime.asSeconds());
+		// pass deltaTime , hard coded value for debugging
+		TickEvent tickEvent(0.016f);
 		m_eventDispatcher.emit(tickEvent);
 
 		m_collisionSystem.update();
@@ -92,8 +107,8 @@ void Game::run() {
 	}
 }
 
-void Game::spawnEnemy(const std::string& texturePath, float x, float y) {
-	m_enemies.push_back(std::make_unique<Enemy>(m_eventDispatcher, texturePath, x, y));
+void Game::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
+	m_enemies.push_back(std::make_unique<Enemy>(m_eventDispatcher, texturePath, position));
 }
 
 void Game::cleanUp() {
