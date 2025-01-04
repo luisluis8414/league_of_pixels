@@ -145,6 +145,9 @@ protected:
         m_destination = position;
     }
 
+    void clearDestination() {
+        m_destination = m_sprite.getPosition();
+    }
 
     sf::Vector2f getSpriteCenter() {
         sf::Vector2f currentPosition = m_sprite.getPosition();

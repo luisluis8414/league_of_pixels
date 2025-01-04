@@ -2,13 +2,15 @@
 #include <iostream>
 #include <vector>
 #include "Event.h"
+#include "Map.h"
+
 
 CollisionSystem::CollisionSystem(EventDispatcher& dispatcher, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies)
 	: m_eventDispatcher(dispatcher), m_player(player), m_enemies(enemies) {
 
-	//m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
-	//	handleEntityMove(moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getDestination());
-	//	});
+	m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
+		handleEntityMove(moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getDestination(), [&moveEvent]() { moveEvent.clearDestination(); });
+		});
 
 	m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) {
 		update();
@@ -53,8 +55,26 @@ bool CollisionSystem::aabbCollision(const sf::FloatRect& a, const sf::FloatRect&
 		a.top < b.top + b.height);
 }
 
-//void CollisionSystem::handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination) {
-//    
-//
-//}
+void CollisionSystem::handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination, std::function<void()> clearDestination) {
+	sf::FloatRect newXHitbox = hitbox;
+	newXHitbox.left += destination.x;
+
+	sf::FloatRect newYHitbox = hitbox;
+	newYHitbox.top += destination.y;
+
+	bool canMoveX = Map::isTilePassable(newXHitbox.left, newXHitbox.top) && Map::isTilePassable((newXHitbox.left + newXHitbox.width), newXHitbox.top);
+	bool canMoveY = Map::isTilePassable(newYHitbox.left, newYHitbox.top) && Map::isTilePassable(newYHitbox.left, (newYHitbox.top + newYHitbox.height));
+
+	if (canMoveX) {
+		sprite.move(destination.x, 0.f);
+	}
+
+	if (canMoveY) {
+		sprite.move(0.f, destination.y);
+	}
+
+	if ((!canMoveX && destination.y == 0) || (!canMoveY && destination.x == 0)) {
+		clearDestination();
+	}
+}
 

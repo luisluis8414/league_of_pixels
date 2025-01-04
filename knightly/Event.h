@@ -4,6 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <typeindex>
+
 class Entity;
 
 enum class RenderLayer {
@@ -136,18 +137,32 @@ private:
 	const Entity& m_entityB;
 };
 
+
 class MoveEvent : public Event {
 public:
-	MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination) : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_destination(destination) {};
+	using Callback = std::function<void()>;
+
+	MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination, Callback clearDestinationCallback = nullptr)
+		: Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_destination(destination), m_clearDestination(clearDestinationCallback) {
+	};
+
 	const char* getName() const override { return "Move Event"; }
 
 	sf::Sprite& getSprite() const { return m_sprite; }
 	const sf::Vector2f& getDestination() const { return m_destination; }
 	const sf::FloatRect& getHitbox() const { return m_hitbox; }
+
+	void clearDestination() const {
+		if (m_clearDestination) {
+			m_clearDestination(); 
+		}
+	}
+
 private:
 	sf::Sprite& m_sprite;
 	const sf::Vector2f m_destination;
 	const sf::FloatRect m_hitbox;
+	Callback m_clearDestination;
 };
 
 class EventDispatcher {

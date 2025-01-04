@@ -2,7 +2,7 @@
     #include <iostream>
 
     Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position)
-        : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Enemy, texturePath), m_state(EnemyAnimationState::Idle) {
+        : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 1000.f, EntityType::Enemy, texturePath), m_state(EnemyAnimationState::Idle) {
         m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
             onDraw(event);
             }, RenderLayer::ENTITIES);
@@ -19,6 +19,8 @@
                 onCollision();
             }
         });
+        //let them walk
+        m_destination = { 1800.f, 200.f };
     }
 
 
@@ -84,20 +86,40 @@
     }
 
     void Enemy::move(float deltaTime) {
-        float deltaX = 10.f;
-        float deltaY = 0.f;
+        sf::Vector2f direction = m_destination - m_sprite.getPosition();
 
-        if (deltaX == 0.f && deltaY == 0.f && m_state == EnemyAnimationState::Walking) {
-            setAnimation(EnemyAnimationState::Idle);
-        }
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
-        if (deltaX != 0.f || deltaY != 0.f) {
+        constexpr float epsilon = 2.f;
+
+        if (distance > epsilon) {
+            direction /= distance;
+
+            constexpr float minDirectionThreshold = 0.01f;
+            if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
+            if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
+
+            float deltaX = direction.x * m_speed * deltaTime;
+            float deltaY = direction.y * m_speed * deltaTime;
+
+            MoveEvent moveEvent(
+                m_sprite,
+                m_hitbox,
+                { deltaX, deltaY },
+                [this]() { this->clearDestination(); }
+            );
+
+            m_dispatcher.emit(moveEvent);
+
             if (m_state != EnemyAnimationState::Walking) {
                 setAnimation(EnemyAnimationState::Walking);
             }
         }
-        MoveEvent moveEvent(m_sprite, m_hitbox, { deltaX, deltaY });
-        m_dispatcher.emit(moveEvent);
+        else {
+            if (m_state != EnemyAnimationState::Idle) {
+                setAnimation(EnemyAnimationState::Idle);
+            }
+        }
     }
 
     void Enemy::onUpdate(const float deltaTime) {

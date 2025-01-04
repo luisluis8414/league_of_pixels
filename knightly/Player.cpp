@@ -1,6 +1,5 @@
 #include "Player.h"
 #include "CollisionSystem.h"
-#include "Map.h"
 
 Player::Player(EventDispatcher& dispatcher, sf::Vector2f position)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Player, "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png"), m_state(PlayerAnimationState::Idle) {
@@ -110,30 +109,17 @@ void Player::move(float deltaTime) {
         float deltaX = direction.x * m_speed * deltaTime;
         float deltaY = direction.y * m_speed * deltaTime;
 
-        sf::FloatRect newXHitbox = m_hitbox;
-        newXHitbox.left += deltaX;
+        MoveEvent moveEvent(
+            m_sprite,
+            m_hitbox,
+            { deltaX, deltaY },
+            [this]() { this->clearDestination(); }
+        );
 
-
-        sf::FloatRect newYHitbox = m_hitbox;
-        newYHitbox.top += deltaY;
-
-        bool canMoveX = Map::isTilePassable(newXHitbox.left, newXHitbox.top) && Map::isTilePassable((newXHitbox.left + newXHitbox.width), newXHitbox.top);
-        bool canMoveY = Map::isTilePassable(newYHitbox.left, newYHitbox.top) && Map::isTilePassable(newYHitbox.left, (newYHitbox.top + newYHitbox.height));
-
-        if (canMoveX) {
-            m_sprite.move(deltaX, 0.f);
-        }
-
-        if (canMoveY) {
-            m_sprite.move(0.f, deltaY);
-        }
+        m_dispatcher.emit(moveEvent);
 
         if (m_state != PlayerAnimationState::Walking) {
             setAnimation(PlayerAnimationState::Walking);
-        }
-
-        if ((!canMoveX && deltaY == 0) || (!canMoveY && deltaX== 0)) {
-            m_destination = m_sprite.getPosition();
         }
     }
     else {

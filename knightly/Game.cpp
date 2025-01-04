@@ -39,8 +39,8 @@ void Game::run() {
 
 	Building caslteBlue(m_eventDispatcher, Config::Textures::Buildings::CASTLE_BLUE, 200, 400, 1.f);
 	Building CastleRed(m_eventDispatcher, Config::Textures::Buildings::CASTLE_RED, 1400, 400, 1.f);
-	//spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
-	//spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
+	spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
+	spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
 
 	sf::Event e;
 	while (m_window.isOpen()) {
