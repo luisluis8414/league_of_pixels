@@ -106,7 +106,7 @@
                 m_sprite,
                 m_hitbox,
                 { deltaX, deltaY },
-                [this]() { this->clearDestination(); }
+                m_destination
             );
 
             m_dispatcher.emit(moveEvent);

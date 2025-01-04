@@ -25,5 +25,5 @@ private:
     // Checks for axis-aligned bounding box (AABB) collision
     bool aabbCollision(const sf::FloatRect& hitboxA, const sf::FloatRect& hitboxB) const;
 
-    void handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination, std::function<void()> clearDestination);
+    void handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination);
 };

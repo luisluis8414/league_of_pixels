@@ -140,29 +140,22 @@ private:
 
 class MoveEvent : public Event {
 public:
-	using Callback = std::function<void()>;
-
-	MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& destination, Callback clearDestinationCallback = nullptr)
-		: Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_destination(destination), m_clearDestination(clearDestinationCallback) {
+	MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination)
+		: Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_step(step), m_destination(destination){
 	};
 
 	const char* getName() const override { return "Move Event"; }
 
 	sf::Sprite& getSprite() const { return m_sprite; }
-	const sf::Vector2f& getDestination() const { return m_destination; }
+	const sf::Vector2f& getStep() const { return m_step; }
 	const sf::FloatRect& getHitbox() const { return m_hitbox; }
-
-	void clearDestination() const {
-		if (m_clearDestination) {
-			m_clearDestination(); 
-		}
-	}
+	sf::Vector2f& getDestination() { return m_destination; }
 
 private:
 	sf::Sprite& m_sprite;
-	const sf::Vector2f m_destination;
-	const sf::FloatRect m_hitbox;
-	Callback m_clearDestination;
+	const sf::Vector2f& m_step;
+	const sf::FloatRect& m_hitbox;
+	sf::Vector2f& m_destination;
 };
 
 class EventDispatcher {
