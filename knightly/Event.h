@@ -29,8 +29,10 @@ enum class EventType {
 	WINDOW_RESIZE,
 	COLLISION_EVENT,
 	MOVE_EVENT,
-	SCROLL_EVENT
+	SCROLL_EVENT,
+	CURSOR_ON_EDGE_EVENT
 };
+
 
 class Event {
 	friend class EventDispatcher;
@@ -161,18 +163,38 @@ private:
 
 class ScrollEvent : public Event {
 public:
-	ScrollEvent(int x, int y, int delta): Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
+	ScrollEvent(int x, int y, float delta): Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
 
 	const char* getName() const override { return "Scroll Event"; }
 
 	int getX() const { return m_x; }
 	int getY() const { return m_y; }
-	int getDelta() const { return m_delta; }
+	float getDelta() const { return m_delta; }
 private:
 	int m_x;		// X position of the mouse pointer, relative to the left of the owner window.
 	int m_y;		// Y position of the mouse pointer, relative to the top of the owner window.
-	int m_delta;	// Number of ticks the wheel has moved (positive is up, negative is down)
+	float m_delta;	// Number of ticks the wheel has moved (positive is up, negative is down)
 };
+
+enum MouseEdge {
+	None = 0,
+	Left = 1 << 0,  // 0001
+	Right = 1 << 1,  // 0010
+	Top = 1 << 2,  // 0100
+	Bottom = 1 << 3   // 1000
+};
+
+class MouseOnEdgeEvent : public Event {
+public:
+	MouseOnEdgeEvent(int edges) : Event(EventType::CURSOR_ON_EDGE_EVENT), m_edges(edges) {}
+
+	const char* getName() const override { return "Cursor on Edge Event"; }
+	int getEdges() const { return m_edges; }
+
+private:
+	int m_edges;
+};
+
 
 class EventDispatcher {
 public:

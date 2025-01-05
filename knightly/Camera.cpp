@@ -1,13 +1,18 @@
 #include "Camera.h"
 #include "Config.h"
+#include <iostream>
 
 Camera::Camera(EventDispatcher& dispatcher, sf::RenderWindow& window) : m_window(window) {
 	dispatcher.subscribe<ScrollEvent>(this, [this](ScrollEvent& event) {
 		handleScroll(event.getX(), event.getY(), event.getDelta());
 		});
+
+    dispatcher.subscribe<MouseOnEdgeEvent>(this, [this](MouseOnEdgeEvent& event) {
+        handleCursorOnEdge(event.getEdges());
+       });
 }
 
-void Camera::handleScroll(int x, int y, int delta) {
+void Camera::handleScroll(int x, int y, float delta) {
     if (delta == 0) return;
 
     sf::View currentView = m_window.getView();
@@ -30,6 +35,30 @@ void Camera::handleScroll(int x, int y, int delta) {
     }
 
     currentView.setSize(newSize);
+
+    m_window.setView(currentView);
+}
+
+void Camera::handleCursorOnEdge(int edgeMask) {
+    sf::View currentView= m_window.getView();
+
+    float scrollSpeed = 15.0f;
+
+    if (edgeMask & MouseEdge::Left) {
+        currentView.move(-scrollSpeed, 0);
+    }
+
+    if (edgeMask & MouseEdge::Right) {
+        currentView.move(scrollSpeed, 0);
+    }
+
+    if (edgeMask & MouseEdge::Top) {
+        currentView.move(0, -scrollSpeed);
+    }
+
+    if (edgeMask & MouseEdge::Bottom) {
+        currentView.move(0, scrollSpeed);
+    }
 
     m_window.setView(currentView);
 }

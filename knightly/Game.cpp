@@ -9,7 +9,7 @@
 #include <windows.h>
 
 Game::Game()
-	: m_window(sf::VideoMode(Config::Window::WIDTH, Config::Window::HEIGHT), Config::Window::TITLE), m_eventDispatcher(), m_camera(m_eventDispatcher, m_window), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
+	: m_window(sf::VideoMode::getDesktopMode(), Config::Window::TITLE, sf::Style::Fullscreen), m_eventDispatcher(), m_camera(m_eventDispatcher, m_window), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
 
 	sf::Image icon;
 	if (!icon.loadFromFile(Config::Window::ICON_PATH)) {
@@ -96,6 +96,8 @@ void Game::run() {
 			}
 		}
 
+		handleCursorOnEdge();
+
 		// pass deltaTime , hard coded value for debugging
 		TickEvent tickEvent(0.016f);
 		m_eventDispatcher.emit(tickEvent);
@@ -149,7 +151,13 @@ void Game::confineCursorToWindow() {
 	sf::Vector2i windowPos = m_window.getPosition();
 	sf::Vector2u windowSize = m_window.getSize();
 
-	RECT rect = { windowPos.x , windowPos.y , (windowPos.x + windowSize.x), (windowPos.y + windowSize.y)};
+	RECT rect = {
+		static_cast<long>(windowPos.x),
+		static_cast<long>(windowPos.y),
+		static_cast<long>(windowPos.x + windowSize.x),
+		static_cast<long>(windowPos.y + windowSize.y)
+	};
+
 
 	ClipCursor(&rect); 
 }
@@ -157,3 +165,23 @@ void Game::confineCursorToWindow() {
 void Game::releaseCursor() {
 	ClipCursor(nullptr); 
 }
+
+void Game::handleCursorOnEdge() {
+	int threshold = 10;
+
+	sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
+	sf::Vector2u windowSize = m_window.getSize();
+
+	int edges = MouseEdge::None;
+
+	if (mousePos.x <= threshold) edges |= MouseEdge::Left;
+	if (mousePos.x >= static_cast<int>(windowSize.x) - threshold) edges |= MouseEdge::Right;
+	if (mousePos.y <= threshold) edges |= MouseEdge::Top;
+	if (mousePos.y >= static_cast<int>(windowSize.y) - threshold) edges |= MouseEdge::Bottom;
+
+	if (edges != MouseEdge::None) {
+		MouseOnEdgeEvent edgeEvent(edges);
+		m_eventDispatcher.emit(edgeEvent);
+	}
+}
+

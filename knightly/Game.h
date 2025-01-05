@@ -37,4 +37,6 @@ private:
 
     void releaseCursor();
     void confineCursorToWindow();
+
+    void handleCursorOnEdge();
 };
