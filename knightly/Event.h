@@ -28,7 +28,8 @@ enum class EventType {
 	MOUSE_CLICKED,
 	WINDOW_RESIZE,
 	COLLISION_EVENT,
-	MOVE_EVENT
+	MOVE_EVENT,
+	SCROLL_EVENT
 };
 
 class Event {
@@ -156,6 +157,21 @@ private:
 	const sf::Vector2f& m_step;
 	const sf::FloatRect& m_hitbox;
 	sf::Vector2f& m_destination;
+};
+
+class ScrollEvent : public Event {
+public:
+	ScrollEvent(int x, int y, int delta): Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
+
+	const char* getName() const override { return "Scroll Event"; }
+
+	int getX() const { return m_x; }
+	int getY() const { return m_y; }
+	int getDelta() const { return m_delta; }
+private:
+	int m_x;		// X position of the mouse pointer, relative to the left of the owner window.
+	int m_y;		// Y position of the mouse pointer, relative to the top of the owner window.
+	int m_delta;	// Number of ticks the wheel has moved (positive is up, negative is down)
 };
 
 class EventDispatcher {

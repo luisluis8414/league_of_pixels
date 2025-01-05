@@ -6,10 +6,19 @@
 #include "CollisionSystem.h"
 #include "Config.h"
 #include "Minion.h"
+#include <windows.h>
 
 Game::Game()
-	: m_window(sf::VideoMode(Config::Window::WIDTH, Config::Window::HEIGHT), Config::Window::TITLE), m_eventDispatcher(), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
+	: m_window(sf::VideoMode(Config::Window::WIDTH, Config::Window::HEIGHT), Config::Window::TITLE), m_eventDispatcher(), m_camera(m_eventDispatcher, m_window), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
 
+	sf::Image icon;
+	if (!icon.loadFromFile(Config::Window::ICON_PATH)) {
+		std::cerr << "failed to load icon!" << std::endl;
+		return;
+	}
+
+	m_window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+	
 	m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
 		m_entitiesToDestroy.push_back(event.getEntity());
 	});
@@ -30,6 +39,8 @@ void Game::endGame() {
 }
 
 void Game::run() {
+	confineCursorToWindow();
+
 	const float fpsTarget = 60.0f;
 	const float targetFrameTime = 1.0f / fpsTarget;  // 60fps and ticks
 	int fps = 0;
@@ -73,8 +84,15 @@ void Game::run() {
 			}
 
 			if (e.type == sf::Event::Resized) {
+				confineCursorToWindow();
 				sf::View newView(sf::FloatRect(0.f, 0.f, (float)e.size.width, (float)e.size.height));
 				m_window.setView(newView);
+			}
+
+			if (e.type == sf::Event::MouseWheelScrolled)
+			{
+				ScrollEvent scrollEvent(e.mouseWheelScroll.x, e.mouseWheelScroll.y,e.mouseWheelScroll.delta);
+				m_eventDispatcher.emit(scrollEvent);
 			}
 		}
 
@@ -107,6 +125,8 @@ void Game::run() {
 		sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
 		if (frameEnd > sf::Time::Zero) sf::sleep(frameEnd);
 	}
+
+	releaseCursor();
 }
 
 void Game::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
@@ -125,6 +145,15 @@ void Game::cleanUp() {
 	m_entitiesToDestroy.clear();
 }
 
+void Game::confineCursorToWindow() {
+	sf::Vector2i windowPos = m_window.getPosition();
+	sf::Vector2u windowSize = m_window.getSize();
 
+	RECT rect = { windowPos.x , windowPos.y , (windowPos.x + windowSize.x), (windowPos.y + windowSize.y)};
 
+	ClipCursor(&rect); 
+}
 
+void Game::releaseCursor() {
+	ClipCursor(nullptr); 
+}

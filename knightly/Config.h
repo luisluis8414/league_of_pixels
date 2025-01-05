@@ -24,5 +24,12 @@ namespace Config {
         constexpr int WIDTH = 1920;
         constexpr int HEIGHT = 1080;
         inline const std::string TITLE = "League of Pixels";
+
+        inline const std::string ICON_PATH = "resources/leagueOfPixelsLogo.png";
+    }
+
+    namespace Camera {
+        inline const float MAX_ZOOM = 2.0f;
+        inline const float MIN_ZOOM = 0.1f;
     }
 }

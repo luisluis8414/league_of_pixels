@@ -7,6 +7,7 @@
 #include "Map.h"
 #include "TextRenderer.h"
 #include "CollisionSystem.h"
+#include "Camera.h"
 
 class Game {
 public:
@@ -18,8 +19,9 @@ public:
     void endGame();
 
 private:
-    sf::RenderWindow m_window;
     EventDispatcher m_eventDispatcher;
+    sf::RenderWindow m_window;
+    Camera m_camera;
 
     Player m_player;
     TextRenderer m_textRenderer;
@@ -32,4 +34,7 @@ private:
 
     void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
     void cleanUp();
+
+    void releaseCursor();
+    void confineCursorToWindow();
 };

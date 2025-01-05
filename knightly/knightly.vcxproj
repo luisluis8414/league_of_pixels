@@ -145,6 +145,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CollisionSystem.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Minion.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="TextRenderer.h" />
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\tiny_swords\Factions\Knights\Troops\Warrior\Blue\Warrior_Blue.png" />
