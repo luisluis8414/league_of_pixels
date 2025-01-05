@@ -8,13 +8,15 @@
 #include "TextRenderer.h"
 #include "CollisionSystem.h"
 #include "Camera.h"
+#include "Minion.h"
+#include "Building.h"
 
 class Game {
 public:
     Game();
     ~Game();
 
-    void run(); 
+    void run();
 
     void endGame();
 
@@ -39,4 +41,14 @@ private:
     void confineCursorToWindow();
 
     void handleCursorOnEdge();
+
+    sf::Clock m_spawnClock;
+    int m_minionsSpawned = 0;
+    bool m_spawnCycleActive = false;
+
+    std::vector<std::unique_ptr<Minion>> m_minions;
+    std::vector<Minion*> m_minionsToDestroy;
+
+    void startMinionSpawnCycle(Building& spawn, Building& targetBuilding);
+    void spawnMinion(sf::Vector2f spawn, sf::Vector2f destination, std::string texturePath);
 };

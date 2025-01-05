@@ -2,8 +2,8 @@
 #include "CollisionSystem.h"
 #include "Config.h"
 
-Minion::Minion(EventDispatcher& dispatcher, sf::Vector2f position)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Minion, Config::Textures::Troops::MINIONS_RED), m_state(MinionAnimationState::Walking) {
+Minion::Minion(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, sf::Vector2f destination)
+    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Minion, texturePath), m_state(MinionAnimationState::Walking) {
 
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         onDraw(event);
@@ -13,7 +13,7 @@ Minion::Minion(EventDispatcher& dispatcher, sf::Vector2f position)
         onUpdate(event.getDeltaTime());
         });
 
-    m_destination = { 1000.f, 1000.f };
+    setDestination(destination);
 }
 
 

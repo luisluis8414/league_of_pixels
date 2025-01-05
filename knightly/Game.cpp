@@ -47,13 +47,13 @@ void Game::run() {
 
 	sf::Clock clock;
 	sf::Clock fpsClock;
+	sf::Clock minionSpawnClock;
 
 
-	Building caslteBlue(m_eventDispatcher, Config::Textures::Buildings::CASTLE_BLUE, 200, 400, 1.f);
-	Building CastleRed(m_eventDispatcher, Config::Textures::Buildings::CASTLE_RED, 1400, 400, 1.f);
+	Building castleBlue(m_eventDispatcher, Config::Textures::Buildings::CASTLE_BLUE, { 300.f, 400.f }, 1.f);
+	Building castleRed(m_eventDispatcher, Config::Textures::Buildings::CASTLE_RED, { 3500.f, 400.f }, 1.f);
 	spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
 	spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
-	Minion minion(m_eventDispatcher, {400.f, 400.f});
 
 	sf::Event e;
 	while (m_window.isOpen()) {
@@ -94,6 +94,11 @@ void Game::run() {
 				ScrollEvent scrollEvent(e.mouseWheelScroll.x, e.mouseWheelScroll.y,e.mouseWheelScroll.delta);
 				m_eventDispatcher.emit(scrollEvent);
 			}
+		}
+	
+		if (minionSpawnClock.getElapsedTime().asSeconds() >= Config::Minions::SPAWN_TIMER || m_spawnCycleActive) {
+			startMinionSpawnCycle(castleBlue, castleRed);
+			minionSpawnClock.restart();
 		}
 
 		handleCursorOnEdge();
@@ -183,5 +188,34 @@ void Game::handleCursorOnEdge() {
 		MouseOnEdgeEvent edgeEvent(edges);
 		m_eventDispatcher.emit(edgeEvent);
 	}
+}
+
+void Game::startMinionSpawnCycle(Building& spawn, Building& targetBuilding) {
+	// Ensure a spawn cycle starts only once when triggered
+	if (!m_spawnCycleActive) {
+		m_spawnCycleActive = true;
+		m_spawnClock.restart();
+		m_minionsSpawned = 0;
+	}
+
+	if (m_spawnCycleActive) {
+		float elapsed = m_spawnClock.getElapsedTime().asSeconds();
+
+		if (elapsed >= 1.f && m_minionsSpawned < 3) {
+			spawnMinion(spawn.getCenterPosition(), targetBuilding.getCenterPosition(), Config::Textures::Troops::MINIONS_BLUE);
+			spawnMinion(targetBuilding.getCenterPosition(), spawn.getCenterPosition(), Config::Textures::Troops::MINIONS_RED);
+			m_spawnClock.restart();
+			m_minionsSpawned++;
+		}
+
+		if (m_minionsSpawned >= 3) {
+			m_spawnCycleActive = false;
+		}
+	}
+}
+
+
+void Game::spawnMinion(sf::Vector2f spawn, sf::Vector2f destination, std::string texturePath) {
+	m_minions.push_back(std::make_unique<Minion>(m_eventDispatcher, texturePath, spawn, destination));
 }
 

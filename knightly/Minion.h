@@ -14,7 +14,7 @@ enum class MinionAnimationState {
 
 class Minion : public Entity {
 public:
-    Minion(EventDispatcher& dispatcher, sf::Vector2f position);
+    Minion(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, sf::Vector2f destination);
 
     ~Minion() = default;
 

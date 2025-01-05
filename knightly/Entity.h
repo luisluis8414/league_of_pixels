@@ -123,7 +123,7 @@ protected:
     virtual void updateAnimation(float deltaTime) = 0; 
 
     virtual void setPosition(sf::Vector2f position) {
-        m_sprite.setPosition(position.x, position.y);
+        m_sprite.setPosition(position.x, position.y);       
     };
 
     virtual void onUpdate(float deltaTime) = 0; 
