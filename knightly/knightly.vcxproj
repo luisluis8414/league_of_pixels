@@ -166,6 +166,7 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="Minion.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Ability.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Utils.h" />

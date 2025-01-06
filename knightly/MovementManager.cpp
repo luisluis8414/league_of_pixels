@@ -5,7 +5,6 @@
 #include "Map.h"
 #include "Utils.h"
 
-
 MovementManager::MovementManager(EventDispatcher& dispatcher, const Player& player, const std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<std::shared_ptr<Minion>>& blueSideMinions, const std::vector<std::shared_ptr<Minion>>& redSideMinions)
 	: m_eventDispatcher(dispatcher), m_player(player), m_enemies(enemies), m_blueSideMinions(blueSideMinions), m_redSideMinions(redSideMinions) {
 
@@ -41,14 +40,14 @@ void MovementManager::checkForTarget(sf::Vector2f position) {
 }
 
 void MovementManager::checkCollisions() {
-	for (const auto& enemy : m_enemies) {
+	for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
 		if (m_player.isHitting() && Utils::aabbCollision(m_player.getAttackHitbox(), enemy->getHitbox())) {
 			CollisionEvent collisionEvent(m_player, *enemy);
 			m_eventDispatcher.emit(collisionEvent);
 		}
 	}
 
-	for (const auto& redSideMinion : m_redSideMinions) {
+	for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
 		if (m_player.isHitting() && Utils::aabbCollision(m_player.getAttackHitbox(), redSideMinion->getHitbox())) {
 			CollisionEvent collisionEvent(m_player, *redSideMinion);
 			m_eventDispatcher.emit(collisionEvent);

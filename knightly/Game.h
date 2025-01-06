@@ -29,6 +29,8 @@ private:
     TextRenderer m_textRenderer;
     MovementManager m_movementManager;
 
+    sf::Clock m_clock;
+
     Map::Rift m_map;
 
     std::vector<std::shared_ptr<Enemy>> m_enemies;

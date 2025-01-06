@@ -9,8 +9,19 @@ Camera::Camera(EventDispatcher& dispatcher, sf::RenderWindow& window) : m_window
 
     dispatcher.subscribe<MouseOnEdgeEvent>(this, [this](MouseOnEdgeEvent& event) {
         handleCursorOnEdge(event.getEdges());
-       });
+        });
+
+    dispatcher.subscribe<CenterCameraEvent>(this, [this](CenterCameraEvent& event) {
+        centerCamera(event.getPlayerPosition());
+        });
 }
+
+void Camera::centerCamera(sf::Vector2f playerPosition) {
+    sf::View currentView = m_window.getView();
+    currentView.setCenter(playerPosition);
+    m_window.setView(currentView);
+}
+
 
 void Camera::handleScroll(int x, int y, float delta) {
     if (delta == 0) return;

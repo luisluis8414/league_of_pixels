@@ -23,6 +23,13 @@ namespace Config {
             inline const std::string MINIONS_RED = "resources/minions/minionRed.png";
             inline const std::string MINIONS_BLUE = "resources/minions/minionBlue.png";
         }
+
+        namespace Spells {
+            namespace Garen {
+                inline const std::string Q = "resources/spells/Lightning.png";
+                inline const std::string W = "resources/spells/Fire-bomb.png";
+            }
+        }
     }
 
     namespace Window {

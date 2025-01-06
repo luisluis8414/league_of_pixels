@@ -3,9 +3,17 @@
 #include "Utils.h"
 #include "Config.h"
 
-Player::Player(EventDispatcher& dispatcher, sf::Vector2f position)
+Player::Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string qTexturePath, std::string wTexturePath)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 10.f , EntityType::Player, Config::Textures::Troops::PLAYER), m_state(PlayerAnimationState::Idle) {
        
+    if (!m_qTexture.loadFromFile(qTexturePath)) {
+        std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
+    }
+
+    if (!m_wTexture.loadFromFile(wTexturePath)) {
+        std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
+    }
+
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         onDraw(event);
     }, RenderLayer::PLAYER);
@@ -34,6 +42,15 @@ Player::Player(EventDispatcher& dispatcher, sf::Vector2f position)
             if (m_target.has_value()) m_target.reset();
         }
     });
+
+    m_dispatcher.subscribe<KeyPressedEvent>(this, [this](KeyPressedEvent& event) {
+        if (event.getKeyboardEvent().code == sf::Keyboard::Q) {
+            castAbility(PlayerAbilities::Q, event.getMousePosition());
+        }
+        if (event.getKeyboardEvent().code == sf::Keyboard::W) {
+            castAbility(PlayerAbilities::W, event.getMousePosition());
+        }
+      });
 }
 
 
@@ -72,6 +89,8 @@ void Player::onDraw(DrawEvent& event) {
     sf::RenderWindow& window = event.getWindow();
     window.draw(m_sprite);
 
+    drawAbilities(window);
+
     window.draw(m_healthBarBackground);
     window.draw(m_healthBarForeground);
 
@@ -107,6 +126,44 @@ void Player::onDraw(DrawEvent& event) {
     window.draw(border);
 }
 
+void Player::castAbility(PlayerAbilities ability, sf::Vector2f position) {
+    switch (ability) {
+    case PlayerAbilities::Q:
+        m_activeSpells.emplace_back(m_qTexture, position, 64, 128, 10, 0.1f, 2.f);
+        break;
+    case PlayerAbilities::W:
+        m_activeSpells.emplace_back(m_wTexture, position, 64, 64, 14, 0.1f, 4.f);
+        break;
+    case PlayerAbilities::E:
+        // Add logic for E spell
+        break;
+    case PlayerAbilities::R:
+        // Add logic for R spell
+        break;
+    default:
+        break;
+    }
+}
+
+
+    
+void Player::updateAbilities(float deltaTime) {
+    for (std::vector<Ability>::iterator it = m_activeSpells.begin(); it != m_activeSpells.end();) {
+        it->update(deltaTime);
+        if (!it->isActive()) {
+            it = m_activeSpells.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+void Player::drawAbilities(sf::RenderWindow& window) {
+    for (Ability& spell : m_activeSpells) {
+        spell.draw(window);
+    }
+}
 
 void Player::setAnimation(PlayerAnimationState animationState) {
     if (m_animationConfigs.count(animationState) > 0) {
@@ -161,6 +218,7 @@ void Player::onUpdate(const float deltaTime) {
     updateHealthBar();
     updateHitbox();
     updateAnimation(deltaTime);
+    updateAbilities(deltaTime);
 
     if (isHitting()) return;
 
@@ -180,9 +238,6 @@ void Player::onUpdate(const float deltaTime) {
         setAnimation(PlayerAnimationState::SlashUp);
     }*/
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
-        setAnimation(PlayerAnimationState::SlashForwardRight);
-    }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
         setAnimation(PlayerAnimationState::SlashBehindLeft);

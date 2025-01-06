@@ -31,6 +31,7 @@ enum class EventType {
 	TARGET_EVENT,
 	MOVE_EVENT,
 	SCROLL_EVENT,
+	CENTER_CAMERA_EVENT,
 	CURSOR_ON_EDGE_EVENT
 };
 
@@ -88,13 +89,15 @@ private:
 
 class KeyPressedEvent : public Event {
 public:
-	KeyPressedEvent(const sf::Event::KeyEvent key_event) : Event(EventType::KEYPRESSED), m_keyEvent(key_event) {};
+	KeyPressedEvent(const sf::Event::KeyEvent key_event, sf::Vector2f mousePosition) : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
 
-	const sf::Event::KeyEvent& getKeyboardEvent() const { return m_keyEvent; }
 	const char* getName() const override { return "Key Pressed Event"; }
 
+	const sf::Event::KeyEvent& getKeyboardEvent() const { return m_keyEvent; }
+	const sf::Vector2f getMousePosition() const { return m_mousePosition; }
 private:
 	const sf::Event::KeyEvent m_keyEvent;
+	const sf::Vector2f m_mousePosition;
 };
 
 class MouseRightClickEvent : public Event {
@@ -205,6 +208,18 @@ private:
 	int m_x;		// X position of the mouse pointer, relative to the left of the owner window.
 	int m_y;		// Y position of the mouse pointer, relative to the top of the owner window.
 	float m_delta;	// Number of ticks the wheel has moved (positive is up, negative is down)
+};
+
+class CenterCameraEvent : public Event {
+public: 
+	CenterCameraEvent(sf::Vector2f playerPosition) : Event(EventType::CENTER_CAMERA_EVENT), m_playerPosition(playerPosition) {};
+
+	const char* getName() const override { return "Center Camera Event"; }
+
+	sf::Vector2f getPlayerPosition() { return m_playerPosition; }
+
+private:
+	sf::Vector2f m_playerPosition;
 };
 
 enum MouseEdge {

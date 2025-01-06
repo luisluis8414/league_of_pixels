@@ -4,6 +4,7 @@
 #include "Event.h"
 #include "Entity.h"
 #include <unordered_map>
+#include "Ability.h"
 
 enum class PlayerAnimationState {
     Idle,
@@ -16,10 +17,26 @@ enum class PlayerAnimationState {
     SlashBehindRight
 };
 
+enum class PlayerAbilities {
+    Q,
+    W,
+    E,
+    R
+};
+
+struct AbilityAnimationState {
+    bool isAbilityActive = false;
+    sf::Vector2f abilityPosition;
+    int abilityCurrentFrame = 0;
+    float abilityElapsedTime = 0.f;
+    float abilityFrameDuration = 0.1f; 
+    int abilityTotalFrames = 10;
+};
+
 
 class Player : public Entity {
 public:
-    Player(EventDispatcher& dispatcher, sf::Vector2f position);
+    Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string qTexturePath, std::string wTexturePath);
 
     ~Player() = default;
 
@@ -33,6 +50,12 @@ private:
     sf::FloatRect m_attackHitbox;
     //CollisionSystem& m_collisionSystem;
 
+    sf::Texture m_qTexture;
+    sf::Texture m_wTexture;
+    std::vector<Ability> m_activeSpells;
+
+    AbilityAnimationState m_qAnimationState;
+
     void updateHealthBar() override;
     void updateHitbox() override;
 
@@ -45,6 +68,10 @@ private:
     void onDraw(DrawEvent& event) override;
 
     void setAnimation(PlayerAnimationState state);
+    void castAbility(PlayerAbilities ability, sf::Vector2f position);
+
+    void updateAbilities(float deltaTime);
+    void drawAbilities(sf::RenderWindow& window);
 
     void checkTargetInRange(); 
     void autoAttack();
@@ -57,7 +84,7 @@ private:
         {PlayerAnimationState::SlashForwardLeft, {24, 29, 0.1f}},
         {PlayerAnimationState::SlashForwardRight, {30, 35, 0.1f}},
         {PlayerAnimationState::SlashBehindLeft, {36, 41, 0.1f}},
-        {PlayerAnimationState::SlashBehindRight, {42, 47, 0.1f}}
+        {PlayerAnimationState::SlashBehindRight, {42, 47, 0.1f}},
     };
 
     std::unordered_map<PlayerAnimationState, HitboxConfig> m_attackHitboxConfigs = {

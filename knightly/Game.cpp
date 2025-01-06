@@ -13,7 +13,8 @@ Game::Game()
 		Config::Window::TITLE, sf::Style::Fullscreen), 
 		m_eventDispatcher(), 
 		m_camera(m_eventDispatcher, m_window), 
-		m_player(m_eventDispatcher, { 600.f, 600.f }), 
+		m_player(m_eventDispatcher, { 600.f, 600.f }, Config::Textures::Spells::Garen::Q, Config::Textures::Spells::Garen::W),
+		m_clock(),
 		m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), 
 		m_movementManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions) {
 
@@ -84,19 +85,16 @@ void Game::run() {
 
 			if (e.type == sf::Event::MouseButtonPressed) {
 				if (e.mouseButton.button == sf::Mouse::Right) {
-					sf::Vector2 worldPosition = m_window.mapPixelToCoords({ e.mouseButton.x, e.mouseButton.y });
+					sf::Vector2f worldPosition = m_window.mapPixelToCoords({ e.mouseButton.x, e.mouseButton.y });
 					MouseRightClickEvent event(worldPosition);
 					m_eventDispatcher.emit(event);
-				}
-				else if (e.mouseButton.button == sf::Mouse::Left) {
-					std::cout << "Right mouse button clicked at ("
-						<< e.mouseButton.x << ", "
-						<< e.mouseButton.y << ")\n";
 				}
 			}
 
 			if (e.type == sf::Event::KeyPressed) {
-				KeyPressedEvent keyEvent(e.key);
+				sf::Vector2i mousePosition =  sf::Mouse::getPosition();
+				sf::Vector2f mouseWorldPosition = m_window.mapPixelToCoords(mousePosition);
+				KeyPressedEvent keyEvent(e.key, mouseWorldPosition);
 				m_eventDispatcher.emit(keyEvent);
 			}
 
@@ -113,6 +111,11 @@ void Game::run() {
 			}
 		}
 
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+			CenterCameraEvent centerCameraEvent(m_player.getPosition());
+			m_eventDispatcher.emit(centerCameraEvent);
+		};
 
 		/*if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
