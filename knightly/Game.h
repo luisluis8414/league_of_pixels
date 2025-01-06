@@ -6,7 +6,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "TextRenderer.h"
-#include "CollisionSystem.h"
+#include "MovementManager.h"
 #include "Camera.h"
 #include "Minion.h"
 #include "Building.h"
@@ -27,11 +27,11 @@ private:
 
     Player m_player;
     TextRenderer m_textRenderer;
-    CollisionSystem m_collisionSystem;
+    MovementManager m_movementManager;
 
     Map::Rift m_map;
 
-    std::vector<std::unique_ptr<Enemy>> m_enemies;
+    std::vector<std::shared_ptr<Enemy>> m_enemies;
     std::vector<Entity*> m_entitiesToDestroy;
 
     void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
@@ -46,9 +46,10 @@ private:
     int m_minionsSpawned = 0;
     bool m_spawnCycleActive = false;
 
-    std::vector<std::unique_ptr<Minion>> m_minions;
+    std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
+    std::vector<std::shared_ptr<Minion>> m_redSideMinions;
+
     std::vector<Minion*> m_minionsToDestroy;
 
-    void startMinionSpawnCycle(Building& spawn, Building& targetBuilding);
-    void spawnMinion(sf::Vector2f spawn, sf::Vector2f destination, std::string texturePath);
+    void spawnMinions(Building& spawn, Building& targetBuilding);
 };

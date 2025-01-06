@@ -146,7 +146,7 @@
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CollisionSystem.cpp" />
+    <ClCompile Include="MovementManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
@@ -157,7 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Building.h" />
-    <ClInclude Include="CollisionSystem.h" />
+    <ClInclude Include="MovementManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Event.h" />
@@ -168,6 +168,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\tiny_swords\Factions\Knights\Troops\Warrior\Blue\Warrior_Blue.png" />

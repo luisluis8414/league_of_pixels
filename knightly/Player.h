@@ -8,8 +8,8 @@
 enum class PlayerAnimationState {
     Idle,
     Walking,
-    SlashDown,
-    SlashUp,
+    AA1,
+    AA2,
     SlashForwardLeft,
     SlashForwardRight,
     SlashBehindLeft,
@@ -46,11 +46,14 @@ private:
 
     void setAnimation(PlayerAnimationState state);
 
+    void checkTargetInRange(); 
+    void autoAttack();
+
     const std::unordered_map<PlayerAnimationState, AnimationConfig> m_animationConfigs = {
         {PlayerAnimationState::Idle, {0, 5, 0.1f}},
         {PlayerAnimationState::Walking, {6, 11, 0.1f}},
-        {PlayerAnimationState::SlashDown, {12, 17, 0.1f}},
-        {PlayerAnimationState::SlashUp, {18, 23, 0.1f}},
+        {PlayerAnimationState::AA1, {12, 17, 0.1f, 15}},
+        {PlayerAnimationState::AA2, {18, 23, 0.1f, 21}},
         {PlayerAnimationState::SlashForwardLeft, {24, 29, 0.1f}},
         {PlayerAnimationState::SlashForwardRight, {30, 35, 0.1f}},
         {PlayerAnimationState::SlashBehindLeft, {36, 41, 0.1f}},
@@ -58,9 +61,7 @@ private:
     };
 
     std::unordered_map<PlayerAnimationState, HitboxConfig> m_attackHitboxConfigs = {
-    //{float widthFactor; heightFactor; offsetXFactor; offsetYFactor; }
-    {PlayerAnimationState::SlashDown, {0.35f, 0.5f, 0.6f, 0.2f}},
-    {PlayerAnimationState::SlashUp, {0.6f, 0.25f, 0.4f, 0.4f}},
+    // { float widthFactor; heightFactor; offsetXFactor; offsetYFactor; }
     {PlayerAnimationState::SlashForwardRight, {0.6f, 0.3f, 0.3f, 0.55f}},
     {PlayerAnimationState::SlashBehindLeft, {0.6f, 0.25f, 0.2f, 0.2f}},
     };

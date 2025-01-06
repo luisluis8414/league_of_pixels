@@ -1,8 +1,10 @@
 #include "Player.h"
-#include "CollisionSystem.h"
+#include "MovementManager.h"
+#include "Utils.h"
+#include "Config.h"
 
 Player::Player(EventDispatcher& dispatcher, sf::Vector2f position)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Player, "resources/tiny_swords/Factions/Knights/Troops/Warrior/Blue/Warrior_Blue.png"), m_state(PlayerAnimationState::Idle) {
+    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 10.f , EntityType::Player, Config::Textures::Troops::PLAYER), m_state(PlayerAnimationState::Idle) {
        
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         onDraw(event);
@@ -12,9 +14,26 @@ Player::Player(EventDispatcher& dispatcher, sf::Vector2f position)
         onUpdate(event.getDeltaTime());
     });
 
-    dispatcher.subscribe<MouseRightClickEvent>(this, [this](MouseRightClickEvent event) {
-        setDestination(event.getPosition());
-        });
+    m_dispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
+        if (m_target.has_value() && m_target.value() == event.getEntity()) {
+            m_target.reset(); 
+            setDestination(m_sprite.getPosition());
+        }
+       });
+
+    m_dispatcher.subscribe<ActionEvent>(this, [this](ActionEvent& event) {
+        if (event.getActionType() == ActionEventType::TargetAction && event.getTarget()) {
+
+            if (m_target != event.getTarget()) {
+                setAnimation(PlayerAnimationState::Walking);
+             }
+             m_target = event.getTarget();
+        }
+        else {
+            setDestination(event.getPosition());
+            if (m_target.has_value()) m_target.reset();
+        }
+    });
 }
 
 
@@ -31,6 +50,14 @@ void Player::updateAnimation(float deltaTime) {
             }
             else {
                 m_currentFrame = m_startFrame;
+            }
+        }
+
+        if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
+            if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
+                if (m_target.has_value()) {
+                    m_target.value()->takeDmg(m_physicalDmg);
+               }
             }
         }
 
@@ -83,7 +110,7 @@ void Player::onDraw(DrawEvent& event) {
 
 void Player::setAnimation(PlayerAnimationState animationState) {
     if (m_animationConfigs.count(animationState) > 0) {
-        const auto& config = m_animationConfigs.at(animationState);
+        const AnimationConfig& config = m_animationConfigs.at(animationState);
         m_startFrame = config.startFrame;
         m_endFrame = config.endFrame;
         m_frameTime = config.frameTime;
@@ -93,6 +120,7 @@ void Player::setAnimation(PlayerAnimationState animationState) {
 }
 
 void Player::move(float deltaTime) {
+    if (isHitting()) return;
     sf::Vector2f direction = m_destination - m_sprite.getPosition();
 
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
@@ -136,15 +164,21 @@ void Player::onUpdate(const float deltaTime) {
 
     if (isHitting()) return;
 
+
+    if (m_target.has_value()) {
+        setDestination(m_target.value()->getPosition());
+        checkTargetInRange();
+    }
+
     move(deltaTime);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        setAnimation(PlayerAnimationState::SlashDown);
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+ /*   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
         setAnimation(PlayerAnimationState::SlashUp);
     }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        setAnimation(PlayerAnimationState::SlashUp);
+    }*/
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
         setAnimation(PlayerAnimationState::SlashForwardRight);
@@ -183,32 +217,55 @@ void Player::updateHitbox() {
     m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
 
     // attack hitbox based on animation state
-    if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
-        const auto& config = m_attackHitboxConfigs.at(m_state);
+    //if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
+    //    const auto& config = m_attackHitboxConfigs.at(m_state);
 
-        // check if current frame is within the last two frames of the animation
-        if (m_currentFrame >= (m_endFrame - 2)) {
-            float attackHitboxWidth = spriteBounds.width * config.widthFactor;
-            float attackHitboxHeight = spriteBounds.height * config.heightFactor;
+    //    // check if current frame is within the last two frames of the animation
+    //    if (m_currentFrame >= (m_endFrame - 2)) {
+    //        float attackHitboxWidth = spriteBounds.width * config.widthFactor;
+    //        float attackHitboxHeight = spriteBounds.height * config.heightFactor;
 
-            float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
-            float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
+    //        float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
+    //        float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
 
-            // flip the attack hitbox if facing left
-            float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
-            if (direction < 0.f) {
-                float centerX = spriteBounds.left + spriteBounds.width * 0.5f;
-                float offsetFromCenter = attackHitboxLeft - centerX;
-                attackHitboxLeft = centerX - offsetFromCenter - attackHitboxWidth;
-            }
+    //        // flip the attack hitbox if facing left
+    //        float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
+    //        if (direction < 0.f) {
+    //            float centerX = spriteBounds.left + spriteBounds.width * 0.5f;
+    //            float offsetFromCenter = attackHitboxLeft - centerX;
+    //            attackHitboxLeft = centerX - offsetFromCenter - attackHitboxWidth;
+    //        }
 
-            m_attackHitbox = sf::FloatRect(attackHitboxLeft, attackHitboxTop, attackHitboxWidth, attackHitboxHeight);
-        }
+    //        m_attackHitbox = sf::FloatRect(attackHitboxLeft, attackHitboxTop, attackHitboxWidth, attackHitboxHeight);
+    //    }
 
+    //}
+    //else {
+    //    // reset when not attacking
+    //    m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f);
+    //}
+}
+
+void Player::checkTargetInRange() {
+    if (!m_target.has_value()) return;
+
+    Entity* target = m_target.value();
+
+    const sf::Rect targetHitbox = target->getHitbox();
+    const sf::Rect playerHitbox = getHitbox();
+
+    if (Utils::aabbCollision(playerHitbox, targetHitbox)) {
+        autoAttack();
+    }
+}
+
+
+void Player::autoAttack() {
+    if (Utils::getRandomInt(0, 1) == 1) {
+        setAnimation(PlayerAnimationState::AA1);
     }
     else {
-        // reset when not attacking
-        m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f);
+        setAnimation(PlayerAnimationState::AA2);
     }
 }
 

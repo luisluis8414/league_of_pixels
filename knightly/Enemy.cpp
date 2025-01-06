@@ -2,7 +2,7 @@
     #include <iostream>
 
     Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position)
-        : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 1000.f, EntityType::Enemy, texturePath), m_state(EnemyAnimationState::Idle) {
+        : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 1000.f, 10.f, EntityType::Enemy, texturePath), m_state(EnemyAnimationState::Idle) {
         m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
             onDraw(event);
             }, RenderLayer::ENTITIES);

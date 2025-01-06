@@ -3,13 +3,19 @@
 #include "Player.h"
 #include <iostream>
 #include "Enemy.h"
-#include "CollisionSystem.h"
+#include "MovementManager.h"
 #include "Config.h"
 #include "Minion.h"
 #include <windows.h>
 
 Game::Game()
-	: m_window(sf::VideoMode::getDesktopMode(), Config::Window::TITLE, sf::Style::Fullscreen), m_eventDispatcher(), m_camera(m_eventDispatcher, m_window), m_player(m_eventDispatcher, { 600.f, 600.f }), m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), m_collisionSystem(m_eventDispatcher, m_player, m_enemies) {
+	:	m_window(sf::VideoMode::getDesktopMode(), 
+		Config::Window::TITLE, sf::Style::Fullscreen), 
+		m_eventDispatcher(), 
+		m_camera(m_eventDispatcher, m_window), 
+		m_player(m_eventDispatcher, { 600.f, 600.f }), 
+		m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), 
+		m_movementManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions) {
 
 	sf::Image icon;
 	if (!icon.loadFromFile(Config::Window::ICON_PATH)) {
@@ -50,10 +56,21 @@ void Game::run() {
 	sf::Clock minionSpawnClock;
 
 
-	Building castleBlue(m_eventDispatcher, Config::Textures::Buildings::CASTLE_BLUE, { 300.f, 400.f }, 1.f);
-	Building castleRed(m_eventDispatcher, Config::Textures::Buildings::CASTLE_RED, { 3500.f, 400.f }, 1.f);
-	spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
-	spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
+	Building castleBlue(m_eventDispatcher, Config::Textures::Buildings::BLUE_SIDE_NEXUS, { 300.f, 400.f }, 1.f);
+	Building castleRed(m_eventDispatcher, Config::Textures::Buildings::RED_SIDE_NEXUS, { 3500.f, 400.f }, 1.f);
+
+	Building blueSideT3Tower1(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, { 700.f, 300.f }, 1.f);
+	Building blueSideT3Tower2(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, { 700.f, 500.f }, 1.f);
+	Building blueSideT2Tower(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, { 1100.f, 400.f }, 1.f);
+	Building blueSideT1Tower(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, { 1600.f, 400.f }, 1.f);
+
+	Building redSideT3Tower1(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, { 3300.f, 300.f }, 1.f);
+	Building redSideT3Tower2(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, { 3300.f, 500.f }, 1.f);
+	Building redSideT2Tower(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, { 2900.f, 400.f }, 1.f);
+	Building redSideT1Tower(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, { 2400.f, 400.f }, 1.f);
+
+	//spawnEnemy(Config::Textures::Troops::TORCH_RED, { 200.f , 200.f });
+	//spawnEnemy(Config::Textures::Troops::TNT_RED, { 200.f , 300.f });
 
 	sf::Event e;
 	while (m_window.isOpen()) {
@@ -95,9 +112,18 @@ void Game::run() {
 				m_eventDispatcher.emit(scrollEvent);
 			}
 		}
-	
+
+
+		/*if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+			sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
+			sf::Vector2f worldPos = m_window.mapPixelToCoords(pixelPos);
+
+			MouseRightClickEvent event(worldPos);
+			m_eventDispatcher.emit(event);
+		}
+	*/
 		if (minionSpawnClock.getElapsedTime().asSeconds() >= Config::Minions::SPAWN_TIMER || m_spawnCycleActive) {
-			startMinionSpawnCycle(castleBlue, castleRed);
+			spawnMinions(castleBlue, castleRed);
 			minionSpawnClock.restart();
 		}
 
@@ -106,8 +132,6 @@ void Game::run() {
 		// pass deltaTime , hard coded value for debugging
 		TickEvent tickEvent(0.016f);
 		m_eventDispatcher.emit(tickEvent);
-
-		m_collisionSystem.update();
 
 		// render frame
 		m_window.clear();
@@ -148,6 +172,18 @@ void Game::cleanUp() {
 				break;
 			}
 		}
+		for (int j = 0; j < m_redSideMinions.size(); ++j) {
+			if (m_redSideMinions[j].get() == m_entitiesToDestroy[i]) {
+				m_redSideMinions.erase(m_redSideMinions.begin() + j);
+				break;
+			}
+		}
+		for (int j = 0; j < m_blueSideMinions.size(); ++j) {
+			if (m_blueSideMinions[j].get() == m_entitiesToDestroy[i]) {
+				m_blueSideMinions.erase(m_blueSideMinions.begin() + j);
+				break;
+			}
+		}
 	}
 	m_entitiesToDestroy.clear();
 }
@@ -162,7 +198,6 @@ void Game::confineCursorToWindow() {
 		static_cast<long>(windowPos.x + windowSize.x),
 		static_cast<long>(windowPos.y + windowSize.y)
 	};
-
 
 	ClipCursor(&rect); 
 }
@@ -190,8 +225,7 @@ void Game::handleCursorOnEdge() {
 	}
 }
 
-void Game::startMinionSpawnCycle(Building& spawn, Building& targetBuilding) {
-	// Ensure a spawn cycle starts only once when triggered
+void Game::spawnMinions(Building& blueSideNexus, Building& redSideNexus) {
 	if (!m_spawnCycleActive) {
 		m_spawnCycleActive = true;
 		m_spawnClock.restart();
@@ -201,9 +235,10 @@ void Game::startMinionSpawnCycle(Building& spawn, Building& targetBuilding) {
 	if (m_spawnCycleActive) {
 		float elapsed = m_spawnClock.getElapsedTime().asSeconds();
 
-		if (elapsed >= 1.f && m_minionsSpawned < 3) {
-			spawnMinion(spawn.getCenterPosition(), targetBuilding.getCenterPosition(), Config::Textures::Troops::MINIONS_BLUE);
-			spawnMinion(targetBuilding.getCenterPosition(), spawn.getCenterPosition(), Config::Textures::Troops::MINIONS_RED);
+		if (elapsed >= 3.f && m_minionsSpawned < 3) {
+			m_blueSideMinions.push_back(std::make_unique<Minion>(m_eventDispatcher, Config::Textures::Troops::MINIONS_BLUE, blueSideNexus.getCenterPosition(), redSideNexus.getCenterPosition()));
+			m_redSideMinions.push_back(std::make_unique<Minion>(m_eventDispatcher, Config::Textures::Troops::MINIONS_RED, redSideNexus.getCenterPosition(), blueSideNexus.getCenterPosition()));
+			
 			m_spawnClock.restart();
 			m_minionsSpawned++;
 		}
@@ -215,7 +250,4 @@ void Game::startMinionSpawnCycle(Building& spawn, Building& targetBuilding) {
 }
 
 
-void Game::spawnMinion(sf::Vector2f spawn, sf::Vector2f destination, std::string texturePath) {
-	m_minions.push_back(std::make_unique<Minion>(m_eventDispatcher, texturePath, spawn, destination));
-}
 

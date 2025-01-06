@@ -28,6 +28,7 @@ enum class EventType {
 	MOUSE_CLICKED,
 	WINDOW_RESIZE,
 	COLLISION_EVENT,
+	TARGET_EVENT,
 	MOVE_EVENT,
 	SCROLL_EVENT,
 	CURSOR_ON_EDGE_EVENT
@@ -139,6 +140,36 @@ private:
 	const Entity& m_entityA;
 	const Entity& m_entityB;
 };
+
+enum class ActionEventType {
+	TargetAction,
+	MoveAction
+};
+
+class ActionEvent : public Event {
+public:
+	ActionEvent(const ActionEventType actionType, const Entity& targeter, Entity* target, const sf::Vector2f& position)
+		: Event(EventType::TARGET_EVENT),
+		m_actor(targeter),
+		m_target(target),
+		m_destination(position),
+		m_actionType(actionType) {
+	}
+
+	const char* getName() const override { return "Action Event"; }
+
+	const Entity& getTargeter() const { return m_actor; }
+	Entity* getTarget() const { return m_target; }
+	const sf::Vector2f& getPosition() const { return m_destination; }
+	ActionEventType getActionType() const { return m_actionType; }
+
+private:
+	const Entity& m_actor;             
+	Entity* m_target;                  
+	const sf::Vector2f& m_destination;
+	ActionEventType m_actionType;      
+};
+
 
 
 class MoveEvent : public Event {

@@ -4,6 +4,7 @@
 #include <vector>
 #include "Event.h"
 #include <iostream>
+#include <optional>
 
 enum class EntityType {
     Player,
@@ -15,6 +16,7 @@ struct AnimationConfig {
     int startFrame;
     int endFrame;
     float frameTime;
+    int dmgFrame;
 };
 
 struct HitboxConfig {
@@ -41,6 +43,7 @@ public:
         float frameTime,
         float speed,
         float maxHealth,
+        float physicalDmg,
         EntityType type,
         std::string texturePath
     )
@@ -55,8 +58,10 @@ public:
         m_speed(speed),
         m_maxHealth(maxHealth),
         m_currentHealth(maxHealth),
+        m_physicalDmg(physicalDmg),
         m_type(type),
-        m_destination(position)
+        m_destination(position),
+        m_target(std::nullopt)
     {
         if (!m_texture.loadFromFile(texturePath)) {
             std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
@@ -88,33 +93,54 @@ public:
 
     EntityType getType() const { return m_type; }
     const sf::FloatRect& getHitbox() const { return m_hitbox; }
+
+    const sf::Vector2f getSpriteCenter() {
+        sf::Vector2f currentPosition = m_sprite.getPosition();
+
+        sf::FloatRect bounds = m_sprite.getGlobalBounds();
+
+        return sf::Vector2f(
+            currentPosition.x + bounds.width / 2.f,
+            currentPosition.y + bounds.height / 2.f
+        );
+    }
+
+    sf::Vector2f getPosition() {
+        return m_sprite.getPosition();
+    }
+
+    void takeDmg(float dmg) {
+        m_currentHealth -= dmg;
+    }
 protected:
     EventDispatcher& m_dispatcher;
 
     sf::FloatRect m_hitbox;
 
-    sf::Texture m_texture;     // the sprite sheet
-    sf::Sprite m_sprite;       // the player's sprite
-    sf::IntRect m_frameRect;   // rectangle defining the current frame
+    sf::Texture m_texture;     
+    sf::Sprite m_sprite;       
+    sf::IntRect m_frameRect;   
 
-    int m_startFrame;          // start of the animation
-    int m_endFrame;            // end of the animation
-    int m_currentFrame;        // current frame index
-    float m_frameTime;         // time per frame
-    float m_elapsedTime;       // time elapsed since last frame change
+    int m_startFrame;          
+    int m_endFrame;            
+    int m_currentFrame;        
+    float m_frameTime;        
+    float m_elapsedTime;     
 
-    int m_frameWidth;          // width of one frame
-    int m_frameHeight;         // height of one frame
+    int m_frameWidth;         
+    int m_frameHeight;         
 
+    std::optional<Entity*> m_target;
     sf::Vector2f m_destination;
-    float m_speed;             // movement speed
+    float m_speed;             
 
-    float m_maxHealth;         // maximum health
-    float m_currentHealth;     // current health
+    float m_maxHealth;     
+    float m_currentHealth;    
 
+    float m_physicalDmg;
 
-    sf::RectangleShape m_healthBarBackground; // health bar background
-    sf::RectangleShape m_healthBarForeground; // health bar foreground
+    sf::RectangleShape m_healthBarBackground; 
+    sf::RectangleShape m_healthBarForeground; 
 
     virtual void updateHealthBar() = 0;
     virtual void updateHitbox() = 0;
@@ -144,17 +170,6 @@ protected:
         }
 
         m_destination = position;
-    }
-
-    sf::Vector2f getSpriteCenter() {
-        sf::Vector2f currentPosition = m_sprite.getPosition();
-
-        sf::FloatRect bounds = m_sprite.getGlobalBounds();
-
-        return sf::Vector2f(
-            currentPosition.x + bounds.width / 2.f,
-            currentPosition.y + bounds.height / 2.f
-        );
     }
 
     EntityType m_type;

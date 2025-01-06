@@ -1,9 +1,9 @@
 #include "Minion.h"
-#include "CollisionSystem.h"
+#include "MovementManager.h"
 #include "Config.h"
 
 Minion::Minion(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, sf::Vector2f destination)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, EntityType::Minion, texturePath), m_state(MinionAnimationState::Walking) {
+    : Entity(dispatcher, 192, 192, position, 0.1f, 50.f, 100.f, 5.f, EntityType::Minion, texturePath), m_state(MinionAnimationState::Walking) {
 
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
         onDraw(event);
@@ -14,6 +14,15 @@ Minion::Minion(EventDispatcher& dispatcher, const std::string& texturePath, sf::
         });
 
     setDestination(destination);
+
+    m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
+        const Entity& entityA = event.getEntityA();
+        const Entity& entityB = event.getEntityB();
+
+        if (&entityA == this || &entityB == this) {
+            onCollision();
+        }
+        });
 }
 
 
@@ -66,15 +75,14 @@ void Minion::onDraw(DrawEvent& event) {
         window.draw(attackHitboxShape);
     }
 
-    //sprite border
     sf::FloatRect bounds = m_sprite.getGlobalBounds();
 
     sf::RectangleShape border;
-    border.setPosition(bounds.left, bounds.top); // Top-left corner of the sprite
-    border.setSize({ bounds.width, bounds.height }); // Size of the sprite
-    border.setFillColor(sf::Color::Transparent); // Make the inside transparent
-    border.setOutlineColor(sf::Color::Red); // Set the border color
-    border.setOutlineThickness(1.f); // Set the border thickness
+    border.setPosition(bounds.left, bounds.top); 
+    border.setSize({ bounds.width, bounds.height }); 
+    border.setFillColor(sf::Color::Transparent); 
+    border.setOutlineColor(sf::Color::Red);
+    border.setOutlineThickness(1.f); 
 
     window.draw(border);
 }
@@ -152,19 +160,17 @@ void Minion::updateHealthBar() {
 void Minion::updateHitbox() {
     sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
 
-    float hitboxWidth = spriteBounds.width * 0.3f;
-    float hitboxHeight = spriteBounds.height * 0.4f;
+    float hitboxWidth = spriteBounds.width * 0.2f;
+    float hitboxHeight = spriteBounds.height * 0.3f;
 
     float hitboxLeft = spriteBounds.left + (spriteBounds.width - hitboxWidth) / 2.f;
     float hitboxTop = spriteBounds.top + (spriteBounds.height - hitboxHeight) / 2.f;
 
     m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
 
-    // attack hitbox based on animation state
     if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
         const auto& config = m_attackHitboxConfigs.at(m_state);
 
-        // check if current frame is within the last two frames of the animation
         if (m_currentFrame >= (m_endFrame - 2)) {
             float attackHitboxWidth = spriteBounds.width * config.widthFactor;
             float attackHitboxHeight = spriteBounds.height * config.heightFactor;
@@ -172,7 +178,6 @@ void Minion::updateHitbox() {
             float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
             float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
 
-            // flip the attack hitbox if facing left
             float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
             if (direction < 0.f) {
                 float centerX = spriteBounds.left + spriteBounds.width * 0.5f;
