@@ -27,7 +27,7 @@ private:
 
     Player m_player;
     TextRenderer m_textRenderer;
-    MovementManager m_movementManager;
+    EntityManager m_movementManager;
 
     sf::Clock m_clock;
 

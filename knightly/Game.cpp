@@ -13,7 +13,7 @@ Game::Game()
 		Config::Window::TITLE, sf::Style::Fullscreen), 
 		m_eventDispatcher(), 
 		m_camera(m_eventDispatcher, m_window), 
-		m_player(m_eventDispatcher, { 600.f, 600.f }, Config::Textures::Spells::Garen::Q, Config::Textures::Spells::Garen::W),
+		m_player(m_eventDispatcher, { 600.f, 600.f }, Config::Textures::Spells::Garen::Q, Config::Textures::Spells::Garen::W, Config::Textures::Spells::Garen::E, Config::Textures::Spells::Garen::R),
 		m_clock(),
 		m_map(m_eventDispatcher), m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL), 
 		m_movementManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions) {

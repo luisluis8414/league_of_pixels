@@ -56,35 +56,37 @@ void Minion::onDraw(DrawEvent& event) {
     window.draw(m_healthBarBackground);
     window.draw(m_healthBarForeground);
 
-    sf::RectangleShape hitboxShape;
-    hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
-    hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
-    hitboxShape.setFillColor(sf::Color::Transparent);
-    hitboxShape.setOutlineColor(sf::Color::Red);
-    hitboxShape.setOutlineThickness(1.f);
+    if (Config::Settings::showHitboxes) {
+        sf::RectangleShape hitboxShape;
+        hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
+        hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
+        hitboxShape.setFillColor(sf::Color::Transparent);
+        hitboxShape.setOutlineColor(sf::Color::Red);
+        hitboxShape.setOutlineThickness(1.f);
 
-    window.draw(hitboxShape);
+        window.draw(hitboxShape);
 
-    if (isHitting()) {
-        sf::RectangleShape attackHitboxShape;
-        attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
-        attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
-        attackHitboxShape.setFillColor(sf::Color::Transparent);
-        attackHitboxShape.setOutlineColor(sf::Color::Green);
-        attackHitboxShape.setOutlineThickness(1.f);
-        window.draw(attackHitboxShape);
+        if (isHitting()) {
+            sf::RectangleShape attackHitboxShape;
+            attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
+            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
+            attackHitboxShape.setFillColor(sf::Color::Transparent);
+            attackHitboxShape.setOutlineColor(sf::Color::Green);
+            attackHitboxShape.setOutlineThickness(1.f);
+            window.draw(attackHitboxShape);
+        }
+
+        sf::FloatRect bounds = m_sprite.getGlobalBounds();
+
+        sf::RectangleShape border;
+        border.setPosition(bounds.left, bounds.top);
+        border.setSize({ bounds.width, bounds.height });
+        border.setFillColor(sf::Color::Transparent);
+        border.setOutlineColor(sf::Color::Red);
+        border.setOutlineThickness(1.f);
+
+        window.draw(border);
     }
-
-    sf::FloatRect bounds = m_sprite.getGlobalBounds();
-
-    sf::RectangleShape border;
-    border.setPosition(bounds.left, bounds.top); 
-    border.setSize({ bounds.width, bounds.height }); 
-    border.setFillColor(sf::Color::Transparent); 
-    border.setOutlineColor(sf::Color::Red);
-    border.setOutlineThickness(1.f); 
-
-    window.draw(border);
 }
 
 

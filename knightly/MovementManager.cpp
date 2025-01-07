@@ -5,7 +5,7 @@
 #include "Map.h"
 #include "Utils.h"
 
-MovementManager::MovementManager(EventDispatcher& dispatcher, const Player& player, const std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<std::shared_ptr<Minion>>& blueSideMinions, const std::vector<std::shared_ptr<Minion>>& redSideMinions)
+EntityManager::EntityManager(EventDispatcher& dispatcher, const Player& player, const std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<std::shared_ptr<Minion>>& blueSideMinions, const std::vector<std::shared_ptr<Minion>>& redSideMinions)
 	: m_eventDispatcher(dispatcher), m_player(player), m_enemies(enemies), m_blueSideMinions(blueSideMinions), m_redSideMinions(redSideMinions) {
 
 	m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
@@ -16,12 +16,25 @@ MovementManager::MovementManager(EventDispatcher& dispatcher, const Player& play
 		checkCollisions();
 		});
 
-	dispatcher.subscribe<MouseRightClickEvent>(this, [this](MouseRightClickEvent event) {
+	m_eventDispatcher.subscribe<MouseRightClickEvent>(this, [this](MouseRightClickEvent event) {
 		checkForTarget(event.getPosition());
-	});
+		});
+
+	m_eventDispatcher.subscribe<AbilityDmgEvent>(this, [this](AbilityDmgEvent event) {
+		checkAbilityDmg(event.getHitbox(), event.getSpellDmg());
+		});
 }
 
-void MovementManager::checkForTarget(sf::Vector2f position) {
+void EntityManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
+	for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
+		if (Utils::aabbCollision(redSideMinion->getHitbox(), hitbox)) {
+			redSideMinion->takeDmg(spellDmg);
+			break;
+		}
+	}
+}
+
+void EntityManager::checkForTarget(sf::Vector2f position) {
 	Entity* target = nullptr;
 
 	for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
@@ -39,7 +52,7 @@ void MovementManager::checkForTarget(sf::Vector2f position) {
 	m_eventDispatcher.emit(actionEvent);
 }
 
-void MovementManager::checkCollisions() {
+void EntityManager::checkCollisions() {
 	for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
 		if (m_player.isHitting() && Utils::aabbCollision(m_player.getAttackHitbox(), enemy->getHitbox())) {
 			CollisionEvent collisionEvent(m_player, *enemy);
@@ -58,15 +71,15 @@ void MovementManager::checkCollisions() {
 
 
 // handles a move for an entity and does terrain collision check
-void MovementManager::handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination) {
+void EntityManager::handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination) {
 	sf::FloatRect newXHitbox = hitbox;
 	newXHitbox.left += step.x;
 
 	sf::FloatRect newYHitbox = hitbox;
 	newYHitbox.top += step.y;
 
-	bool canMoveX = Map::isTilePassable(newXHitbox.left, newXHitbox.top) && Map::isTilePassable((newXHitbox.left + newXHitbox.width), newXHitbox.top);
-	bool canMoveY = Map::isTilePassable(newYHitbox.left, newYHitbox.top) && Map::isTilePassable(newYHitbox.left, (newYHitbox.top + newYHitbox.height));
+	bool canMoveX = Map::isTileWalkable(newXHitbox);
+	bool canMoveY = Map::isTileWalkable(newYHitbox);
 
 	if (canMoveX) {
 		sprite.move(step.x, 0.f);

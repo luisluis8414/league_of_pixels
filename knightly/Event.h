@@ -32,7 +32,8 @@ enum class EventType {
 	MOVE_EVENT,
 	SCROLL_EVENT,
 	CENTER_CAMERA_EVENT,
-	CURSOR_ON_EDGE_EVENT
+	CURSOR_ON_EDGE_EVENT,
+	ABILITY_DMG_EVENT
 };
 
 
@@ -173,7 +174,18 @@ private:
 	ActionEventType m_actionType;      
 };
 
+class AbilityDmgEvent : public Event {
+public: 
+	AbilityDmgEvent(sf::FloatRect hitbox, float spellDmg): Event(EventType::ABILITY_DMG_EVENT), m_Spelldmg(spellDmg), m_hitbox(hitbox) {}
 
+	const char* getName() const override { return "Ability Dmg Event"; }
+
+	const sf::FloatRect getHitbox() const { return m_hitbox; }
+	const float getSpellDmg() const { return m_Spelldmg; }
+private: 
+	sf::FloatRect m_hitbox;
+	float m_Spelldmg;
+};
 
 class MoveEvent : public Event {
 public:

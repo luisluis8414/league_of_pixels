@@ -46,16 +46,30 @@ namespace Map {
 		}
 	};
 
-	inline bool isTilePassable(float x, float y) {
-		int tileX = static_cast<int>(x / tileSize);
-		int tileY = static_cast<int>(y / tileSize);
+	inline bool isTileWalkable(const sf::FloatRect& rect) {
+		std::vector<sf::Vector2f> corners = {
+			{rect.left, rect.top},                         
+			{rect.left + rect.width, rect.top},                
+			{rect.left, rect.top + rect.height},               
+			{rect.left + rect.width, rect.top + rect.height}   
+		};
 
-		if (tileX < 0 || tileY < 0 ||
-			tileY >= static_cast<int>(IslandMap.size()) ||
-			tileX >= static_cast<int>(IslandMap[0].size()))
-			return false; 
+		for (const sf::Vector2f& corner : corners) {
+			int tileX = static_cast<int>(corner.x / tileSize);
+			int tileY = static_cast<int>(corner.y / tileSize);
 
-		return IslandMap[tileY][tileX] != 0; 
+			if (tileX < 0 || tileY < 0 ||
+				tileY >= static_cast<int>(IslandMap.size()) ||
+				tileX >= static_cast<int>(IslandMap[0].size())) {
+				return false; 
+			}
+
+			if (IslandMap[tileY][tileX] == 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	class Rift {

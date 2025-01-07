@@ -8,12 +8,12 @@
 #include <memory>
 #include "Minion.h"
 
-class MovementManager {
+class EntityManager {
 public:
-    MovementManager(EventDispatcher& dispatcher, const Player& player,
+    EntityManager(EventDispatcher& dispatcher, const Player& player,
         const std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<std::shared_ptr<Minion>>& blueSideMinions, const std::vector<std::shared_ptr<Minion>>& redSideMinions);
 
-    ~MovementManager() = default;
+    ~EntityManager() = default;
 
     void checkCollisions();
 
@@ -27,4 +27,5 @@ private:
 
     void handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination);
     void checkForTarget(sf::Vector2f position);
+    void checkAbilityDmg(sf::FloatRect hitbox, float spellDmg);
 };

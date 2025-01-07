@@ -36,7 +36,7 @@ struct AbilityAnimationState {
 
 class Player : public Entity {
 public:
-    Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string qTexturePath, std::string wTexturePath);
+    Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string qTexturePath, std::string wTexturePath, std::string eTexturePath, std::string rTexturePath);
 
     ~Player() = default;
 
@@ -48,11 +48,13 @@ public:
 private:
     PlayerAnimationState m_state;
     sf::FloatRect m_attackHitbox;
-    //CollisionSystem& m_collisionSystem;
 
     sf::Texture m_qTexture;
     sf::Texture m_wTexture;
-    std::vector<Ability> m_activeSpells;
+    sf::Texture m_eTexture;
+    sf::Texture m_rTexture;
+
+    std::vector<Ability> m_activeAbilities;
 
     AbilityAnimationState m_qAnimationState;
 

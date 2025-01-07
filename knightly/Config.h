@@ -2,6 +2,10 @@
 #include <string>
 
 namespace Config {
+    namespace Settings {
+        inline const bool showHitboxes = false; 
+    }
+
     namespace Fonts {
         inline const std::string ARIAL = "resources/fonts/arial.ttf";
     }
@@ -28,6 +32,8 @@ namespace Config {
             namespace Garen {
                 inline const std::string Q = "resources/spells/Lightning.png";
                 inline const std::string W = "resources/spells/Fire-bomb.png";
+                inline const std::string E = "resources/spells/spark.png";
+                inline const std::string R = "resources/spells/Dark-bolt.png";
             }
         }
     }
@@ -44,7 +50,7 @@ namespace Config {
         inline const float MAX_ZOOM = 2.0f;
         inline const float MIN_ZOOM = 0.1f;
 
-        inline const float SCOLLSPEED = 15.f;
+        inline const float SCOLLSPEED = 20.f;
     }
 
     namespace Minions {

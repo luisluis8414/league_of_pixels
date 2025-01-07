@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include "Config.h"
 
-Player::Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string qTexturePath, std::string wTexturePath)
+Player::Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string qTexturePath, std::string wTexturePath, std::string eTexturePath, std::string rTexturePath)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 10.f , EntityType::Player, Config::Textures::Troops::PLAYER), m_state(PlayerAnimationState::Idle) {
        
     if (!m_qTexture.loadFromFile(qTexturePath)) {
@@ -11,7 +11,15 @@ Player::Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string q
     }
 
     if (!m_wTexture.loadFromFile(wTexturePath)) {
-        std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
+        std::cerr << "Failed to load sprite sheet: " << wTexturePath << std::endl;
+    }
+
+    if (!m_eTexture.loadFromFile(eTexturePath)) {
+        std::cerr << "Failed to load sprite sheet: " << eTexturePath << std::endl;
+    }
+
+    if (!m_rTexture.loadFromFile(rTexturePath)) {
+        std::cerr << "Failed to load sprite sheet: " << rTexturePath << std::endl;
     }
 
     m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) {
@@ -49,6 +57,12 @@ Player::Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string q
         }
         if (event.getKeyboardEvent().code == sf::Keyboard::W) {
             castAbility(PlayerAbilities::W, event.getMousePosition());
+        }
+        if (event.getKeyboardEvent().code == sf::Keyboard::E) {
+            castAbility(PlayerAbilities::E, event.getMousePosition());
+        }
+        if (event.getKeyboardEvent().code == sf::Keyboard::R) {
+            castAbility(PlayerAbilities::R, event.getMousePosition());
         }
       });
 }
@@ -94,51 +108,52 @@ void Player::onDraw(DrawEvent& event) {
     window.draw(m_healthBarBackground);
     window.draw(m_healthBarForeground);
 
-    sf::RectangleShape hitboxShape;
-    hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
-    hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
-    hitboxShape.setFillColor(sf::Color::Transparent); 
-    hitboxShape.setOutlineColor(sf::Color::Red);
-    hitboxShape.setOutlineThickness(1.f);
+    if (Config::Settings::showHitboxes) {
+        sf::RectangleShape hitboxShape;
+        hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
+        hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
+        hitboxShape.setFillColor(sf::Color::Transparent);
+        hitboxShape.setOutlineColor(sf::Color::Red);
+        hitboxShape.setOutlineThickness(1.f);
 
-    window.draw(hitboxShape);
+        window.draw(hitboxShape);
 
-    if (isHitting()) {
-        sf::RectangleShape attackHitboxShape;
-        attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
-        attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
-        attackHitboxShape.setFillColor(sf::Color::Transparent);
-        attackHitboxShape.setOutlineColor(sf::Color::Green);
-        attackHitboxShape.setOutlineThickness(1.f);
-        window.draw(attackHitboxShape);
-    }
+        if (isHitting()) {
+            sf::RectangleShape attackHitboxShape;
+            attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
+            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
+            attackHitboxShape.setFillColor(sf::Color::Transparent);
+            attackHitboxShape.setOutlineColor(sf::Color::Green);
+            attackHitboxShape.setOutlineThickness(1.f);
+            window.draw(attackHitboxShape);
+        }
 
-    //sprite border
-    sf::FloatRect bounds = m_sprite.getGlobalBounds();
+        sf::FloatRect bounds = m_sprite.getGlobalBounds();
 
-    sf::RectangleShape border;
-    border.setPosition(bounds.left, bounds.top); // Top-left corner of the sprite
-    border.setSize({ bounds.width, bounds.height }); // Size of the sprite
-    border.setFillColor(sf::Color::Transparent); // Make the inside transparent
-    border.setOutlineColor(sf::Color::Red); // Set the border color
-    border.setOutlineThickness(1.f); // Set the border thickness
+        sf::RectangleShape border;
+        border.setPosition(bounds.left, bounds.top);
+        border.setSize({ bounds.width, bounds.height });
+        border.setFillColor(sf::Color::Transparent);
+        border.setOutlineColor(sf::Color::Red);
+        border.setOutlineThickness(1.f);
 
-    window.draw(border);
+        window.draw(border);
+  }
 }
 
-void Player::castAbility(PlayerAbilities ability, sf::Vector2f position) {
+void Player::castAbility(PlayerAbilities ability, sf::Vector2f mousePosition) {
     switch (ability) {
     case PlayerAbilities::Q:
-        m_activeSpells.emplace_back(m_qTexture, position, 64, 128, 10, 0.1f, 2.f);
+        m_activeAbilities.emplace_back(m_qTexture, 64, 128, 10, 0.1f, 6, AbilityLocationData{ {16.f, 16.f}, mousePosition, {0.f, 0.f}, { 0.f, 120.f} });
         break;
     case PlayerAbilities::W:
-        m_activeSpells.emplace_back(m_wTexture, position, 64, 64, 14, 0.1f, 4.f);
+        m_activeAbilities.emplace_back(m_wTexture, 64, 64, 14, 0.1f, 12, AbilityLocationData{ {48.f, 48.f}, mousePosition, {0.f, 40.f}, { 0.f, 40.f} }, 4.f);
         break;
     case PlayerAbilities::E:
-        // Add logic for E spell
+        m_activeAbilities.emplace_back(m_eTexture, 32, 32, 7, 0.1f, 6, AbilityLocationData{ {64.f, 32.f}, mousePosition});
         break;
     case PlayerAbilities::R:
-        // Add logic for R spell
+        m_activeAbilities.emplace_back(m_rTexture,64, 88, 11, 0.1f, 7, AbilityLocationData{ {48.f, 32.f}, mousePosition, {0.f, 0.f}, { 0.f, 120.f} }, 4.f);
         break;
     default:
         break;
@@ -148,10 +163,15 @@ void Player::castAbility(PlayerAbilities ability, sf::Vector2f position) {
 
     
 void Player::updateAbilities(float deltaTime) {
-    for (std::vector<Ability>::iterator it = m_activeSpells.begin(); it != m_activeSpells.end();) {
+    for (std::vector<Ability>::iterator it = m_activeAbilities.begin(); it != m_activeAbilities.end();) {
         it->update(deltaTime);
+        if (it->isInDmgFrame() && !it->hasEmitted()) {
+            AbilityDmgEvent event(it->getHitbox(), it->getDmg());
+            m_dispatcher.emit(event);
+            it->emit();
+        }
         if (!it->isActive()) {
-            it = m_activeSpells.erase(it);
+            it = m_activeAbilities.erase(it);
         }
         else {
             ++it;
@@ -160,8 +180,31 @@ void Player::updateAbilities(float deltaTime) {
 }
 
 void Player::drawAbilities(sf::RenderWindow& window) {
-    for (Ability& spell : m_activeSpells) {
+    for (Ability& spell : m_activeAbilities) {
         spell.draw(window);
+
+        if (spell.isInDmgFrame() && Config::Settings::showHitboxes) {
+            sf::CircleShape attackHitboxShape;
+
+            // Set the radius based on the hitbox dimensions (assume a circular hitbox fits within the rectangle dimensions)
+            float radius = std::min(spell.getHitbox().width, spell.getHitbox().height) / 2.f;
+            attackHitboxShape.setRadius(radius);
+
+            // Position the circle, adjusting for the radius to center it
+            attackHitboxShape.setPosition(
+                spell.getHitbox().left + spell.getHitbox().width / 2.f - radius,
+                spell.getHitbox().top + spell.getHitbox().height / 2.f - radius
+            );
+
+            // Style the circle
+            attackHitboxShape.setFillColor(sf::Color::Transparent);
+            attackHitboxShape.setOutlineColor(sf::Color::Red);
+            attackHitboxShape.setOutlineThickness(2.f);
+
+            // Draw the circle
+            window.draw(attackHitboxShape);
+       }
+
     }
 }
 
