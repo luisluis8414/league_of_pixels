@@ -1,6 +1,2 @@
-# Knightly
+# League of Pixels
 
-## todo 
-
-- [ ] implement event system
-- [ ] implement layer system
