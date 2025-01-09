@@ -56,19 +56,19 @@ void Camera::handleCursorOnEdge(int edgeMask) {
     float scrollSpeed = Config::Camera::SCOLLSPEED;
 
     if (edgeMask & MouseEdge::Left) {
-        currentView.move(-scrollSpeed, 0);
+        currentView.move({ -scrollSpeed, 0.f });
     }
 
     if (edgeMask & MouseEdge::Right) {
-        currentView.move(scrollSpeed, 0);
+        currentView.move({ scrollSpeed, 0.f });
     }
 
     if (edgeMask & MouseEdge::Top) {
-        currentView.move(0, -scrollSpeed);
+        currentView.move({ 0.f, -scrollSpeed });
     }
 
     if (edgeMask & MouseEdge::Bottom) {
-        currentView.move(0, scrollSpeed);
+        currentView.move({ 0.f, scrollSpeed });
     }
 
     m_window.setView(currentView);

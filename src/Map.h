@@ -33,25 +33,25 @@ namespace Map {
 
 	inline const std::map<int, sf::IntRect> tileRects = {
 		{
-			{0, sf::IntRect(10 * tileSize, 0, tileSize, tileSize)},				// Water
-			{1, sf::IntRect(0, 0, tileSize, tileSize)},							// Grass top left
-			{2, sf::IntRect(tileSize, 0, tileSize, tileSize)},					// Grass top mid
-			{3, sf::IntRect(2 * tileSize, 0, tileSize, tileSize)},				// Grass top right
-			{4, sf::IntRect(0, tileSize, tileSize, tileSize)},					// Grass mid left
-			{5, sf::IntRect(tileSize, tileSize, tileSize, tileSize)},			// Grass mid mid
-			{6, sf::IntRect(2 * tileSize, tileSize, tileSize, tileSize)},		// Grass mid right
-			{7, sf::IntRect(0, 2 * tileSize, tileSize, tileSize)},				// Grass down left
-			{8, sf::IntRect(tileSize, 2 * tileSize, tileSize, tileSize)},		// Grass down mid
-			{9, sf::IntRect(2 * tileSize, 2 * tileSize, tileSize, tileSize)},	// Grass down right
+			{0, sf::IntRect({10 * tileSize, 0}, {tileSize, tileSize})},				// Water
+			{1, sf::IntRect({0, 0,},{ tileSize, tileSize})},							// Grass top left
+			{2, sf::IntRect({tileSize, 0}, {tileSize, tileSize})},					// Grass top mid
+			{3, sf::IntRect({2 * tileSize, 0} ,{tileSize, tileSize})},				// Grass top right
+			{4, sf::IntRect({0, tileSize}, {tileSize, tileSize})},					// Grass mid left
+			{5, sf::IntRect({tileSize, tileSize}, {tileSize, tileSize})},			// Grass mid mid
+			{6, sf::IntRect({2 * tileSize, tileSize}, {tileSize, tileSize})},		// Grass mid right
+			{7, sf::IntRect({0, 2 * tileSize}, {tileSize, tileSize})},				// Grass down left
+			{8, sf::IntRect({tileSize, 2 * tileSize}, {tileSize, tileSize})},		// Grass down mid
+			{9, sf::IntRect({2 * tileSize, 2 * tileSize}, {tileSize, tileSize})},	// Grass down right
 		}
 	};
 
 	inline bool isTileWalkable(const sf::FloatRect& rect) {
 		std::vector<sf::Vector2f> corners = {
-			{rect.left, rect.top},                         
-			{rect.left + rect.width, rect.top},                
-			{rect.left, rect.top + rect.height},               
-			{rect.left + rect.width, rect.top + rect.height}   
+			{rect.position.x, rect.position.y},                         
+			{rect.position.x + rect.size.x, rect.position.y},
+			{rect.position.x, rect.position.y + rect.size.y},
+			{rect.position.x + rect.size.x, rect.position.y + rect.size.y}
 		};
 
 		for (const sf::Vector2f& corner : corners) {

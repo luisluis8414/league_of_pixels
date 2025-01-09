@@ -73,23 +73,23 @@ void EntityManager::checkCollisions() {
 // handles a move for an entity and does terrain collision check
 void EntityManager::handleEntityMove(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination) {
 	sf::FloatRect newXHitbox = hitbox;
-	newXHitbox.left += step.x;
+	newXHitbox.position.x += step.x;
 
 	sf::FloatRect newYHitbox = hitbox;
-	newYHitbox.top += step.y;
+	newYHitbox.position.y += step.y;
 
 	bool canMoveX = Map::isTileWalkable(newXHitbox);
 	bool canMoveY = Map::isTileWalkable(newYHitbox);
 
 	if (canMoveX) {
-		sprite.move(step.x, 0.f);
+		sprite.move({ step.x, 0.f });
 	}
 	else {
 		destination.x = sprite.getPosition().x;
 	}
 
 	if (canMoveY) {
-		sprite.move(0.f, step.y);
+		sprite.move({ 0.f, step.y });
 	}
 	else {
 		destination.y = sprite.getPosition().y;

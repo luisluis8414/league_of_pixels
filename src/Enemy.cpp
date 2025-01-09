@@ -42,7 +42,7 @@
 
             int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
             int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-            m_frameRect = sf::IntRect(column * m_frameWidth, row * m_frameHeight, m_frameWidth, m_frameHeight);
+            m_frameRect = sf::IntRect({ column * m_frameWidth, row * m_frameHeight }, { m_frameWidth, m_frameHeight });
             m_sprite.setTextureRect(m_frameRect);
         }
     }
@@ -55,8 +55,8 @@
         window.draw(m_healthBarForeground);
 
         sf::RectangleShape hitboxShape;
-        hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
-        hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
+        hitboxShape.setPosition({ m_hitbox.position.x, m_hitbox.position.y });
+        hitboxShape.setSize(sf::Vector2f(m_hitbox.size.x, m_hitbox.size.y));
         hitboxShape.setFillColor(sf::Color::Transparent);
         hitboxShape.setOutlineColor(sf::Color::Red);
         hitboxShape.setOutlineThickness(1.f);
@@ -65,8 +65,8 @@
 
         if (isHitting()) {
             sf::RectangleShape attackHitboxShape;
-            attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
-            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
+            attackHitboxShape.setPosition({ m_attackHitbox.position.x, m_attackHitbox.position.y });
+            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
             attackHitboxShape.setFillColor(sf::Color::Transparent);
             attackHitboxShape.setOutlineColor(sf::Color::Green);
             attackHitboxShape.setOutlineThickness(1.f);
@@ -142,22 +142,22 @@
         m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
         sf::FloatRect bounds = m_sprite.getGlobalBounds();
-        float healthBarX = bounds.left + (bounds.width / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
-        float healthBarY = bounds.top - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
-        m_healthBarBackground.setPosition(healthBarX, healthBarY);
-        m_healthBarForeground.setPosition(healthBarX, healthBarY);
+        float healthBarX = bounds.position.x + (bounds.size.x / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
+        float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
+        m_healthBarBackground.setPosition({ healthBarX, healthBarY });
+        m_healthBarForeground.setPosition({ healthBarX, healthBarY });
     }
 
     void Enemy::updateHitbox() {
         sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
 
-        float hitboxWidth = spriteBounds.width * 0.3f;
-        float hitboxHeight = spriteBounds.height * 0.4f;
+        float hitboxWidth = spriteBounds.size.x * 0.3f;
+        float hitboxHeight = spriteBounds.size.y * 0.4f;
 
-        float hitboxLeft = spriteBounds.left + (spriteBounds.width - hitboxWidth) / 2.f;
-        float hitboxTop = spriteBounds.top + (spriteBounds.height - hitboxHeight) / 2.f;
+        float hitboxLeft = spriteBounds.position.x + (spriteBounds.size.x - hitboxWidth) / 2.f;
+        float hitboxTop = spriteBounds.position.y + (spriteBounds.size.y - hitboxHeight) / 2.f;
 
-        m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
+        m_hitbox = sf::FloatRect({ hitboxLeft, hitboxTop }, { hitboxWidth, hitboxHeight });
     }
 
 

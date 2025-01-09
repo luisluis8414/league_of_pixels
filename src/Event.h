@@ -90,14 +90,14 @@ private:
 
 class KeyPressedEvent : public Event {
 public:
-	KeyPressedEvent(const sf::Event::KeyEvent key_event, sf::Vector2f mousePosition) : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
+	KeyPressedEvent(const sf::Keyboard::Key key_event, sf::Vector2f mousePosition) : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
 
 	const char* getName() const override { return "Key Pressed Event"; }
 
-	const sf::Event::KeyEvent& getKeyboardEvent() const { return m_keyEvent; }
+	const sf::Keyboard::Key& getKeyboardEvent() const { return m_keyEvent; }
 	const sf::Vector2f getMousePosition() const { return m_mousePosition; }
 private:
-	const sf::Event::KeyEvent m_keyEvent;
+	const sf::Keyboard::Key m_keyEvent;
 	const sf::Vector2f m_mousePosition;
 };
 

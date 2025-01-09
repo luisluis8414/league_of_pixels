@@ -52,16 +52,16 @@ Player::Player(EventDispatcher& dispatcher, sf::Vector2f position, std::string q
     });
 
     m_dispatcher.subscribe<KeyPressedEvent>(this, [this](KeyPressedEvent& event) {
-        if (event.getKeyboardEvent().code == sf::Keyboard::Q) {
+        if (event.getKeyboardEvent() == sf::Keyboard::Key::Q) {
             castAbility(PlayerAbilities::Q, event.getMousePosition());
         }
-        if (event.getKeyboardEvent().code == sf::Keyboard::W) {
+        if (event.getKeyboardEvent() == sf::Keyboard::Key::W) {
             castAbility(PlayerAbilities::W, event.getMousePosition());
         }
-        if (event.getKeyboardEvent().code == sf::Keyboard::E) {
+        if (event.getKeyboardEvent() == sf::Keyboard::Key::E) {
             castAbility(PlayerAbilities::E, event.getMousePosition());
         }
-        if (event.getKeyboardEvent().code == sf::Keyboard::R) {
+        if (event.getKeyboardEvent() == sf::Keyboard::Key::R) {
             castAbility(PlayerAbilities::R, event.getMousePosition());
         }
       });
@@ -94,7 +94,7 @@ void Player::updateAnimation(float deltaTime) {
 
         int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
         int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-        m_frameRect = sf::IntRect(column * m_frameWidth, row * m_frameHeight, m_frameWidth, m_frameHeight);
+        m_frameRect = sf::IntRect({ column * m_frameWidth, row * m_frameHeight }, { m_frameWidth, m_frameHeight });
         m_sprite.setTextureRect(m_frameRect);
     }
 }
@@ -110,8 +110,8 @@ void Player::onDraw(DrawEvent& event) {
 
     if (Config::Settings::showHitboxes) {
         sf::RectangleShape hitboxShape;
-        hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
-        hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
+        hitboxShape.setPosition({ m_hitbox.position.x, m_hitbox.position.y});
+        hitboxShape.setSize(sf::Vector2f(m_hitbox.size.x, m_hitbox.size.y));
         hitboxShape.setFillColor(sf::Color::Transparent);
         hitboxShape.setOutlineColor(sf::Color::Red);
         hitboxShape.setOutlineThickness(1.f);
@@ -120,8 +120,8 @@ void Player::onDraw(DrawEvent& event) {
 
         if (isHitting()) {
             sf::RectangleShape attackHitboxShape;
-            attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
-            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
+            attackHitboxShape.setPosition({ m_attackHitbox.position.x, m_attackHitbox.position.y });
+            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
             attackHitboxShape.setFillColor(sf::Color::Transparent);
             attackHitboxShape.setOutlineColor(sf::Color::Green);
             attackHitboxShape.setOutlineThickness(1.f);
@@ -131,8 +131,8 @@ void Player::onDraw(DrawEvent& event) {
         sf::FloatRect bounds = m_sprite.getGlobalBounds();
 
         sf::RectangleShape border;
-        border.setPosition(bounds.left, bounds.top);
-        border.setSize({ bounds.width, bounds.height });
+        border.setPosition({ bounds.position.x, bounds.position.y });
+        border.setSize({ bounds.size.x, bounds.size.y });
         border.setFillColor(sf::Color::Transparent);
         border.setOutlineColor(sf::Color::Red);
         border.setOutlineThickness(1.f);
@@ -187,13 +187,13 @@ void Player::drawAbilities(sf::RenderWindow& window) {
             sf::CircleShape attackHitboxShape;
 
             // Set the radius based on the hitbox dimensions (assume a circular hitbox fits within the rectangle dimensions)
-            float radius = std::min(spell.getHitbox().width, spell.getHitbox().height) / 2.f;
+            float radius = std::min(spell.getHitbox().size.x, spell.getHitbox().size.y) / 2.f;
             attackHitboxShape.setRadius(radius);
 
             // Position the circle, adjusting for the radius to center it
             attackHitboxShape.setPosition(
-                spell.getHitbox().left + spell.getHitbox().width / 2.f - radius,
-                spell.getHitbox().top + spell.getHitbox().height / 2.f - radius
+                { spell.getHitbox().position.x + spell.getHitbox().size.x / 2.f - radius,
+                spell.getHitbox().position.y + spell.getHitbox().size.y / 2.f - radius }
             );
 
             // Style the circle
@@ -282,9 +282,9 @@ void Player::onUpdate(const float deltaTime) {
     }*/
 
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+   /* if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
         setAnimation(PlayerAnimationState::SlashBehindLeft);
-    }
+    }*/
 }
 
 void Player::updateHealthBar() {
@@ -297,22 +297,22 @@ void Player::updateHealthBar() {
     m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
     sf::FloatRect bounds = m_sprite.getGlobalBounds();
-    float healthBarX = bounds.left + (bounds.width / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
-    float healthBarY = bounds.top - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
-    m_healthBarBackground.setPosition(healthBarX, healthBarY);
-    m_healthBarForeground.setPosition(healthBarX, healthBarY);
+    float healthBarX = bounds.position.x + (bounds.size.x / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
+    float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
+    m_healthBarBackground.setPosition({ healthBarX, healthBarY });
+    m_healthBarForeground.setPosition({ healthBarX, healthBarY });
 }
 
 void Player::updateHitbox() {
     sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
 
-    float hitboxWidth = spriteBounds.width * 0.3f;
-    float hitboxHeight = spriteBounds.height * 0.4f;
+    float hitboxWidth = spriteBounds.size.x * 0.3f;
+    float hitboxHeight = spriteBounds.size.y * 0.4f;
 
-    float hitboxLeft = spriteBounds.left + (spriteBounds.width - hitboxWidth) / 2.f;
-    float hitboxTop = spriteBounds.top + (spriteBounds.height - hitboxHeight) / 2.f;
+    float hitboxLeft = spriteBounds.position.x + (spriteBounds.size.x - hitboxWidth) / 2.f;
+    float hitboxTop = spriteBounds.position.y + (spriteBounds.size.y - hitboxHeight) / 2.f;
 
-    m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
+    m_hitbox = sf::FloatRect({ hitboxLeft, hitboxTop }, { hitboxWidth, hitboxHeight });
 
     // attack hitbox based on animation state
     //if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {

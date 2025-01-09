@@ -44,7 +44,7 @@ void Minion::updateAnimation(float deltaTime) {
 
         int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
         int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-        m_frameRect = sf::IntRect(column * m_frameWidth, row * m_frameHeight, m_frameWidth, m_frameHeight);
+        m_frameRect = sf::IntRect({ column * m_frameWidth, row * m_frameHeight }, { m_frameWidth, m_frameHeight });
         m_sprite.setTextureRect(m_frameRect);
     }
 }
@@ -58,8 +58,8 @@ void Minion::onDraw(DrawEvent& event) {
 
     if (Config::Settings::showHitboxes) {
         sf::RectangleShape hitboxShape;
-        hitboxShape.setPosition(m_hitbox.left, m_hitbox.top);
-        hitboxShape.setSize(sf::Vector2f(m_hitbox.width, m_hitbox.height));
+        hitboxShape.setPosition({ m_hitbox.position.x, m_hitbox.position.y });
+        hitboxShape.setSize(sf::Vector2f(m_hitbox.size.x, m_hitbox.size.y));
         hitboxShape.setFillColor(sf::Color::Transparent);
         hitboxShape.setOutlineColor(sf::Color::Red);
         hitboxShape.setOutlineThickness(1.f);
@@ -68,8 +68,8 @@ void Minion::onDraw(DrawEvent& event) {
 
         if (isHitting()) {
             sf::RectangleShape attackHitboxShape;
-            attackHitboxShape.setPosition(m_attackHitbox.left, m_attackHitbox.top);
-            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.width, m_attackHitbox.height));
+            attackHitboxShape.setPosition({ m_attackHitbox.position.x, m_attackHitbox.position.y });
+            attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
             attackHitboxShape.setFillColor(sf::Color::Transparent);
             attackHitboxShape.setOutlineColor(sf::Color::Green);
             attackHitboxShape.setOutlineThickness(1.f);
@@ -79,8 +79,8 @@ void Minion::onDraw(DrawEvent& event) {
         sf::FloatRect bounds = m_sprite.getGlobalBounds();
 
         sf::RectangleShape border;
-        border.setPosition(bounds.left, bounds.top);
-        border.setSize({ bounds.width, bounds.height });
+        border.setPosition({ bounds.position.x, bounds.position.y });
+        border.setSize({ bounds.size.x, bounds.size.y});
         border.setFillColor(sf::Color::Transparent);
         border.setOutlineColor(sf::Color::Red);
         border.setOutlineThickness(1.f);
@@ -153,47 +153,47 @@ void Minion::updateHealthBar() {
     m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
     sf::FloatRect bounds = m_sprite.getGlobalBounds();
-    float healthBarX = bounds.left + (bounds.width / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
-    float healthBarY = bounds.top - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
-    m_healthBarBackground.setPosition(healthBarX, healthBarY);
-    m_healthBarForeground.setPosition(healthBarX, healthBarY);
+    float healthBarX = bounds.position.x + (bounds.size.x / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
+    float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 25.f; // offset for spacing from top
+    m_healthBarBackground.setPosition({ healthBarX, healthBarY });
+    m_healthBarForeground.setPosition({ healthBarX, healthBarY });
 }
 
 void Minion::updateHitbox() {
     sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
 
-    float hitboxWidth = spriteBounds.width * 0.2f;
-    float hitboxHeight = spriteBounds.height * 0.3f;
+    float hitboxWidth = spriteBounds.size.x * 0.2f;
+    float hitboxHeight = spriteBounds.size.y * 0.3f;
 
-    float hitboxLeft = spriteBounds.left + (spriteBounds.width - hitboxWidth) / 2.f;
-    float hitboxTop = spriteBounds.top + (spriteBounds.height - hitboxHeight) / 2.f;
+    float hitboxLeft = spriteBounds.position.x + (spriteBounds.size.x - hitboxWidth) / 2.f;
+    float hitboxTop = spriteBounds.position.y + (spriteBounds.size.y - hitboxHeight) / 2.f;
 
-    m_hitbox = sf::FloatRect(hitboxLeft, hitboxTop, hitboxWidth, hitboxHeight);
+    m_hitbox = sf::FloatRect({ hitboxLeft, hitboxTop }, { hitboxWidth, hitboxHeight });
 
     if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
         const auto& config = m_attackHitboxConfigs.at(m_state);
 
         if (m_currentFrame >= (m_endFrame - 2)) {
-            float attackHitboxWidth = spriteBounds.width * config.widthFactor;
-            float attackHitboxHeight = spriteBounds.height * config.heightFactor;
+            float attackHitboxWidth = spriteBounds.size.x * config.widthFactor;
+            float attackHitboxHeight = spriteBounds.size.y * config.heightFactor;
 
-            float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
-            float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
+            float attackHitboxLeft = spriteBounds.position.x + spriteBounds.size.x * config.offsetXFactor;
+            float attackHitboxTop = spriteBounds.position.y + spriteBounds.size.y * config.offsetYFactor;
 
             float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
             if (direction < 0.f) {
-                float centerX = spriteBounds.left + spriteBounds.width * 0.5f;
+                float centerX = spriteBounds.position.x + spriteBounds.size.x * 0.5f;
                 float offsetFromCenter = attackHitboxLeft - centerX;
                 attackHitboxLeft = centerX - offsetFromCenter - attackHitboxWidth;
             }
 
-            m_attackHitbox = sf::FloatRect(attackHitboxLeft, attackHitboxTop, attackHitboxWidth, attackHitboxHeight);
+            m_attackHitbox = sf::FloatRect({ attackHitboxLeft, attackHitboxTop }, { attackHitboxWidth, attackHitboxHeight });
         }
 
     }
     else {
         // reset when not attacking
-        m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f);
+        m_attackHitbox = sf::FloatRect({ 0.f, 0.f }, { 0.f, 0.f });
     }
 }
 

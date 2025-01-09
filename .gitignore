@@ -33,7 +33,7 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-!vendor/SFML-2.6.2/bin/
+!vendor/*/bin/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

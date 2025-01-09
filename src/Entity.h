@@ -61,7 +61,8 @@ public:
         m_physicalDmg(physicalDmg),
         m_type(type),
         m_destination(position),
-        m_target(std::nullopt)
+        m_target(std::nullopt),
+        m_sprite(m_texture)
     {
         if (!m_texture.loadFromFile(texturePath)) {
             std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
@@ -70,20 +71,20 @@ public:
         m_texture.setSmooth(false);
         m_sprite.setTexture(m_texture);
 
-        m_frameRect = sf::IntRect(0, 0, m_frameWidth, m_frameHeight);
+        m_frameRect = sf::IntRect({ 0, 0 }, { m_frameWidth, m_frameHeight });
         m_sprite.setTextureRect(m_frameRect);
 
-        m_sprite.setPosition(position.x, position.y);
+        m_sprite.setPosition({ position.x, position.y });
 
-        m_sprite.setOrigin(m_sprite.getGlobalBounds().width / 2.f, m_sprite.getGlobalBounds().height / 2.f);
+        m_sprite.setOrigin({ m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f });
 
         m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
         m_healthBarBackground.setFillColor(sf::Color::Red);
-        m_healthBarBackground.setPosition(10.f, 10.f);
+        m_healthBarBackground.setPosition({ 10.f, 10.f });
 
         m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
         m_healthBarForeground.setFillColor(sf::Color::Green);
-        m_healthBarForeground.setPosition(10.f, 10.f);
+        m_healthBarForeground.setPosition({ 10.f, 10.f });
     }
 
 
@@ -100,8 +101,8 @@ public:
         sf::FloatRect bounds = m_sprite.getGlobalBounds();
 
         return sf::Vector2f(
-            currentPosition.x + bounds.width / 2.f,
-            currentPosition.y + bounds.height / 2.f
+            currentPosition.x + bounds.size.x / 2.f,
+            currentPosition.y + bounds.size.y / 2.f
         );
     }
 
@@ -149,7 +150,7 @@ protected:
     virtual void updateAnimation(float deltaTime) = 0; 
 
     virtual void setPosition(sf::Vector2f position) {
-        m_sprite.setPosition(position.x, position.y);       
+        m_sprite.setPosition({ position.x, position.y });
     };
 
     virtual void onUpdate(float deltaTime) = 0; 
@@ -163,10 +164,10 @@ protected:
         constexpr float flipThreshold = 1.f;
 
         if (direction.x < -flipThreshold && m_sprite.getScale().x != -1.f) {
-            m_sprite.setScale(-1.f, 1.f); 
+            m_sprite.setScale({ -1.f, 1.f });
         }
         else if (direction.x > flipThreshold && m_sprite.getScale().x != 1.f) {
-            m_sprite.setScale(1.f, 1.f); 
+            m_sprite.setScale({ 1.f, 1.f });
         }
 
         m_destination = position;

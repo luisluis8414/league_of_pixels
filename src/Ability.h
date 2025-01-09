@@ -17,17 +17,17 @@ public:
         m_isActive(true), m_dmgFrame(dmgFrame), m_dmg(10.f), m_hasEmitted(false)
     {
         // Set the sprite scale and position
-        m_sprite.setScale(scale, scale);
-        m_sprite.setPosition(locationData.mousePosition.x - (frameWidth / 2.f) * scale - locationData.abilityOffset.x,
-            locationData.mousePosition.y - (frameHeight / 2.f) * scale - locationData.abilityOffset.y);
+        m_sprite.setScale({ scale, scale });
+        m_sprite.setPosition({ locationData.mousePosition.x - (frameWidth / 2.f) * scale - locationData.abilityOffset.x,
+            locationData.mousePosition.y - (frameHeight / 2.f) * scale - locationData.abilityOffset.y });
 
         float scaledWidth = locationData.hitboxSize.x * scale;
         float scaledHeight = locationData.hitboxSize.y * scale;
         m_hitbox = sf::FloatRect(
-            locationData.mousePosition.x - (scaledWidth / 2.f) - locationData.hitboxOffset.x,
-            locationData.mousePosition.y - (scaledHeight / 2.f) - locationData.hitboxOffset.y,
-            scaledWidth,
-            scaledHeight
+            { locationData.mousePosition.x - (scaledWidth / 2.f) - locationData.hitboxOffset.x,
+            locationData.mousePosition.y - (scaledHeight / 2.f) - locationData.hitboxOffset.y}
+         ,{ scaledWidth,
+            scaledHeight }
         );
     }
 
@@ -46,8 +46,8 @@ public:
         }
 
         m_sprite.setTextureRect(sf::IntRect(
-            m_currentFrame * m_frameWidth, 0,
-            m_frameWidth, m_frameHeight));
+            { m_currentFrame * m_frameWidth, 0 },
+            { m_frameWidth, m_frameHeight }));
     }
 
     void draw(sf::RenderWindow& window) {

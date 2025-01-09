@@ -20,9 +20,9 @@ namespace Utils {
 
     // Checks for axis-aligned bounding box (AABB) collision
     inline bool aabbCollision(const sf::FloatRect& a, const sf::FloatRect& b) {
-        return (a.left + a.width > b.left &&
-            a.left < b.left + b.width &&
-            a.top + a.height > b.top &&
-            a.top < b.top + b.height);
+        return (a.position.x + a.size.x > b.position.x &&
+            a.position.x < b.position.x + b.size.x &&
+            a.position.y + a.size.y > b.position.y &&
+            a.position.y < b.position.y + b.size.y);
     };
 }

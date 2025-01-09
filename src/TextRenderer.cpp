@@ -1,7 +1,7 @@
 #include "TextRenderer.h"
 
-TextRenderer::TextRenderer(EventDispatcher& dispatcher, const std::string& fontPath): m_eventDispatcher(dispatcher) {
-    if (!m_font.loadFromFile(fontPath)) {
+TextRenderer::TextRenderer(EventDispatcher& dispatcher, const std::string& fontPath): m_eventDispatcher(dispatcher), m_text(m_font) {
+    if (!m_font.openFromFile(fontPath)) {
         std::cerr << "Couldn't load font from: " << fontPath << std::endl;
         return;
     }
@@ -25,10 +25,10 @@ void TextRenderer::draw(sf::RenderWindow& window) {
     sf::Vector2u windowSize = window.getSize();
     sf::FloatRect textBounds = m_text.getLocalBounds();
 
-    float xPos = static_cast<float>(windowSize.x) - textBounds.width - 15.0f; 
+    float xPos = static_cast<float>(windowSize.x) - textBounds.size.x - 15.0f; 
     float yPos = 10.0f; 
 
-    m_text.setPosition(xPos, yPos);
+    m_text.setPosition({ xPos, yPos });
 
     window.draw(m_text);
 
