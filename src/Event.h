@@ -2,57 +2,55 @@
 
 #include <SFML/Graphics.hpp>
 #include <functional>
-#include <unordered_map>
 #include <typeindex>
+#include <unordered_map>
 
 class Entity;
 
-enum class RenderLayer {
-	BACKGROUND = -1,
-	MAP,
-	ENTITIES,
-	PLAYER,
-	TEXT,
-	UI
-};
+enum class RenderLayer { BACKGROUND = -1, MAP, ENTITIES, PLAYER, TEXT, UI };
 
 enum class EventType {
-	DRAW,
-	TEXT_DRAW,
-	MAP_DRAW,
-	TICK_UPDATE,
-	ANIMATION_UPDATE,
-	GAME_OVER,
-	DESTROY_ENTITY,
-	KEYPRESSED,
-	MOUSE_CLICKED,
-	WINDOW_RESIZE,
-	COLLISION_EVENT,
-	TARGET_EVENT,
-	MOVE_EVENT,
-	SCROLL_EVENT,
-	CENTER_CAMERA_EVENT,
-	CURSOR_ON_EDGE_EVENT,
-	ABILITY_DMG_EVENT
+  DRAW,
+  TEXT_DRAW,
+  MAP_DRAW,
+  TICK_UPDATE,
+  ANIMATION_UPDATE,
+  GAME_OVER,
+  DESTROY_ENTITY,
+  KEYPRESSED,
+  MOUSE_CLICKED,
+  WINDOW_RESIZE,
+  COLLISION_EVENT,
+  TARGET_EVENT,
+  MOVE_EVENT,
+  SCROLL_EVENT,
+  CENTER_CAMERA_EVENT,
+  CURSOR_ON_EDGE_EVENT,
+  ABILITY_DMG_EVENT
 };
 
-
 class Event {
-	friend class EventDispatcher;
-public:
-	virtual const char* getName() const = 0;
+  friend class EventDispatcher;
 
-	virtual EventType getEventType() const { return m_eventType; };
-	virtual std::string toString() const { return getName(); }
+ public:
+  virtual const char* getName() const = 0;
 
-protected:
-	Event(EventType type) : m_eventType(type) {}
-	EventType m_eventType;
-	bool m_handled = false;
-};	
+  virtual EventType getEventType() const {
+    return m_eventType;
+  };
+  virtual std::string toString() const {
+    return getName();
+  }
 
-//class PlayerMovedEvent : public Event {
-//public:
+ protected:
+  Event(EventType type) : m_eventType(type) {
+  }
+  EventType m_eventType;
+  bool m_handled = false;
+};
+
+// class PlayerMovedEvent : public Event {
+// public:
 //	PlayerMovedEvent(int x, int y) : m_x(x), m_y(y) {};
 //	int GetX() const { return m_x; }
 //	int GetY() const { return m_y; }
@@ -62,261 +60,324 @@ protected:
 //		ss << "PlayerMovedEvent: x: " << m_x << ", y: " << m_y;
 //		return ss.str();
 //	}
-//private:
+// private:
 //	int m_x, m_y;
-//};
+// };
 
 class DrawEvent : public Event {
-public:
-	DrawEvent(sf::RenderWindow& window) : Event(EventType::DRAW), m_window(window) {};
-	
-	sf::RenderWindow& getWindow() const { return m_window; }
-	const char* getName() const override { return "Draw Event"; }
-	
-private:
-	sf::RenderWindow& m_window;
+ public:
+  DrawEvent(sf::RenderWindow& window) : Event(EventType::DRAW), m_window(window) {};
+
+  sf::RenderWindow& getWindow() const {
+    return m_window;
+  }
+  const char* getName() const override {
+    return "Draw Event";
+  }
+
+ private:
+  sf::RenderWindow& m_window;
 };
 
 class TickEvent : public Event {
-public:
-	TickEvent(const float& deltaTime) : Event(EventType::TICK_UPDATE), m_detlaTime(deltaTime) {};
+ public:
+  TickEvent(const float& deltaTime) : Event(EventType::TICK_UPDATE), m_detlaTime(deltaTime) {};
 
-	const float getDeltaTime() const { return m_detlaTime; }
-	const char* getName() const override { return "Update Event"; }
+  const float getDeltaTime() const {
+    return m_detlaTime;
+  }
+  const char* getName() const override {
+    return "Update Event";
+  }
 
-private:
-	const float m_detlaTime;
+ private:
+  const float m_detlaTime;
 };
 
 class KeyPressedEvent : public Event {
-public:
-	KeyPressedEvent(const sf::Keyboard::Key key_event, sf::Vector2f mousePosition) : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
+ public:
+  KeyPressedEvent(const sf::Keyboard::Key key_event, sf::Vector2f mousePosition)
+      : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
 
-	const char* getName() const override { return "Key Pressed Event"; }
+  const char* getName() const override {
+    return "Key Pressed Event";
+  }
 
-	const sf::Keyboard::Key& getKeyboardEvent() const { return m_keyEvent; }
-	const sf::Vector2f getMousePosition() const { return m_mousePosition; }
-private:
-	const sf::Keyboard::Key m_keyEvent;
-	const sf::Vector2f m_mousePosition;
+  const sf::Keyboard::Key& getKeyboardEvent() const {
+    return m_keyEvent;
+  }
+  const sf::Vector2f getMousePosition() const {
+    return m_mousePosition;
+  }
+
+ private:
+  const sf::Keyboard::Key m_keyEvent;
+  const sf::Vector2f m_mousePosition;
 };
 
 class MouseRightClickEvent : public Event {
-public:
-	MouseRightClickEvent(const sf::Vector2f& position): Event(EventType::MOUSE_CLICKED), m_position(position) {};
+ public:
+  MouseRightClickEvent(const sf::Vector2f& position) : Event(EventType::MOUSE_CLICKED), m_position(position) {};
 
-	const sf::Vector2f& getPosition() const { return m_position; }
-	const char* getName() const override { return "Left Mouse Click Event"; }
-private: 
-	const sf::Vector2f& m_position;
+  const sf::Vector2f& getPosition() const {
+    return m_position;
+  }
+  const char* getName() const override {
+    return "Left Mouse Click Event";
+  }
+
+ private:
+  const sf::Vector2f& m_position;
 };
 
 class GameOverEvent : public Event {
-public:
-	GameOverEvent() : Event(EventType::GAME_OVER) {};
+ public:
+  GameOverEvent() : Event(EventType::GAME_OVER) {};
 
-	const char* getName() const override { return "Key Pressed Event"; }
+  const char* getName() const override {
+    return "Key Pressed Event";
+  }
 };
 
 class DestroyEntityEvent : public Event {
-public:
-	DestroyEntityEvent(Entity* entity)
-		: Event(EventType::DESTROY_ENTITY), m_entity(entity) {
-	}
+ public:
+  DestroyEntityEvent(Entity* entity) : Event(EventType::DESTROY_ENTITY), m_entity(entity) {
+  }
 
-	const char* getName() const override { return "Destroy Entity Event"; }
-	Entity* getEntity() const { return m_entity; }
+  const char* getName() const override {
+    return "Destroy Entity Event";
+  }
+  Entity* getEntity() const {
+    return m_entity;
+  }
 
-private:
-	Entity* m_entity;
+ private:
+  Entity* m_entity;
 };
-
 
 class CollisionEvent : public Event {
-public:
-	CollisionEvent(const Entity& entityA,const Entity& entityB) : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
-	const char* getName() const override { return "Collision Event"; }
+ public:
+  CollisionEvent(const Entity& entityA, const Entity& entityB)
+      : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
+  const char* getName() const override {
+    return "Collision Event";
+  }
 
-	const Entity& getEntityA() const { return m_entityA; }
-	const Entity& getEntityB() const { return m_entityB; }
+  const Entity& getEntityA() const {
+    return m_entityA;
+  }
+  const Entity& getEntityB() const {
+    return m_entityB;
+  }
 
-private:
-	const Entity& m_entityA;
-	const Entity& m_entityB;
+ private:
+  const Entity& m_entityA;
+  const Entity& m_entityB;
 };
 
-enum class ActionEventType {
-	TargetAction,
-	MoveAction
-};
+enum class ActionEventType { TargetAction, MoveAction };
 
 class ActionEvent : public Event {
-public:
-	ActionEvent(const ActionEventType actionType, const Entity& targeter, Entity* target, const sf::Vector2f& position)
-		: Event(EventType::TARGET_EVENT),
-		m_actor(targeter),
-		m_target(target),
-		m_destination(position),
-		m_actionType(actionType) {
-	}
+ public:
+  ActionEvent(const ActionEventType actionType, const Entity& targeter, Entity* target, const sf::Vector2f& position)
+      : Event(EventType::TARGET_EVENT),
+        m_actor(targeter),
+        m_target(target),
+        m_destination(position),
+        m_actionType(actionType) {
+  }
 
-	const char* getName() const override { return "Action Event"; }
+  const char* getName() const override {
+    return "Action Event";
+  }
 
-	const Entity& getTargeter() const { return m_actor; }
-	Entity* getTarget() const { return m_target; }
-	const sf::Vector2f& getPosition() const { return m_destination; }
-	ActionEventType getActionType() const { return m_actionType; }
+  const Entity& getTargeter() const {
+    return m_actor;
+  }
+  Entity* getTarget() const {
+    return m_target;
+  }
+  const sf::Vector2f& getPosition() const {
+    return m_destination;
+  }
+  ActionEventType getActionType() const {
+    return m_actionType;
+  }
 
-private:
-	const Entity& m_actor;             
-	Entity* m_target;                  
-	const sf::Vector2f& m_destination;
-	ActionEventType m_actionType;      
+ private:
+  const Entity& m_actor;
+  Entity* m_target;
+  const sf::Vector2f& m_destination;
+  ActionEventType m_actionType;
 };
 
 class AbilityDmgEvent : public Event {
-public: 
-	AbilityDmgEvent(sf::FloatRect hitbox, float spellDmg): Event(EventType::ABILITY_DMG_EVENT), m_Spelldmg(spellDmg), m_hitbox(hitbox) {}
+ public:
+  AbilityDmgEvent(sf::FloatRect hitbox, float spellDmg)
+      : Event(EventType::ABILITY_DMG_EVENT), m_Spelldmg(spellDmg), m_hitbox(hitbox) {
+  }
 
-	const char* getName() const override { return "Ability Dmg Event"; }
+  const char* getName() const override {
+    return "Ability Dmg Event";
+  }
 
-	const sf::FloatRect getHitbox() const { return m_hitbox; }
-	const float getSpellDmg() const { return m_Spelldmg; }
-private: 
-	sf::FloatRect m_hitbox;
-	float m_Spelldmg;
+  const sf::FloatRect getHitbox() const {
+    return m_hitbox;
+  }
+  const float getSpellDmg() const {
+    return m_Spelldmg;
+  }
+
+ private:
+  sf::FloatRect m_hitbox;
+  float m_Spelldmg;
 };
 
 class MoveEvent : public Event {
-public:
-	MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination)
-		: Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_step(step), m_destination(destination){
-	};
+ public:
+  MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination)
+      : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_step(step), m_destination(destination) {};
 
-	const char* getName() const override { return "Move Event"; }
+  const char* getName() const override {
+    return "Move Event";
+  }
 
-	sf::Sprite& getSprite() const { return m_sprite; }
-	const sf::Vector2f& getStep() const { return m_step; }
-	const sf::FloatRect& getHitbox() const { return m_hitbox; }
-	sf::Vector2f& getDestination() { return m_destination; }
+  sf::Sprite& getSprite() const {
+    return m_sprite;
+  }
+  const sf::Vector2f& getStep() const {
+    return m_step;
+  }
+  const sf::FloatRect& getHitbox() const {
+    return m_hitbox;
+  }
+  sf::Vector2f& getDestination() {
+    return m_destination;
+  }
 
-private:
-	sf::Sprite& m_sprite;
-	const sf::Vector2f& m_step;
-	const sf::FloatRect& m_hitbox;
-	sf::Vector2f& m_destination;
+ private:
+  sf::Sprite& m_sprite;
+  const sf::Vector2f& m_step;
+  const sf::FloatRect& m_hitbox;
+  sf::Vector2f& m_destination;
 };
 
 class ScrollEvent : public Event {
-public:
-	ScrollEvent(int x, int y, float delta): Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
+ public:
+  ScrollEvent(int x, int y, float delta) : Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
 
-	const char* getName() const override { return "Scroll Event"; }
+  const char* getName() const override {
+    return "Scroll Event";
+  }
 
-	int getX() const { return m_x; }
-	int getY() const { return m_y; }
-	float getDelta() const { return m_delta; }
-private:
-	int m_x;		// X position of the mouse pointer, relative to the left of the owner window.
-	int m_y;		// Y position of the mouse pointer, relative to the top of the owner window.
-	float m_delta;	// Number of ticks the wheel has moved (positive is up, negative is down)
+  int getX() const {
+    return m_x;
+  }
+  int getY() const {
+    return m_y;
+  }
+  float getDelta() const {
+    return m_delta;
+  }
+
+ private:
+  int m_x;        // X position of the mouse pointer, relative to the left of the
+                  // owner window.
+  int m_y;        // Y position of the mouse pointer, relative to the top of the
+                  // owner window.
+  float m_delta;  // Number of ticks the wheel has moved (positive is up,
+                  // negative is down)
 };
 
 class CenterCameraEvent : public Event {
-public: 
-	CenterCameraEvent(sf::Vector2f playerPosition) : Event(EventType::CENTER_CAMERA_EVENT), m_playerPosition(playerPosition) {};
+ public:
+  CenterCameraEvent(sf::Vector2f playerPosition)
+      : Event(EventType::CENTER_CAMERA_EVENT), m_playerPosition(playerPosition) {};
 
-	const char* getName() const override { return "Center Camera Event"; }
+  const char* getName() const override {
+    return "Center Camera Event";
+  }
 
-	sf::Vector2f getPlayerPosition() { return m_playerPosition; }
+  sf::Vector2f getPlayerPosition() {
+    return m_playerPosition;
+  }
 
-private:
-	sf::Vector2f m_playerPosition;
+ private:
+  sf::Vector2f m_playerPosition;
 };
 
 enum MouseEdge {
-	None = 0,
-	Left = 1 << 0,  // 0001
-	Right = 1 << 1,  // 0010
-	Top = 1 << 2,  // 0100
-	Bottom = 1 << 3   // 1000
+  None = 0,
+  Left = 1 << 0,   // 0001
+  Right = 1 << 1,  // 0010
+  Top = 1 << 2,    // 0100
+  Bottom = 1 << 3  // 1000
 };
 
 class MouseOnEdgeEvent : public Event {
-public:
-	MouseOnEdgeEvent(int edges) : Event(EventType::CURSOR_ON_EDGE_EVENT), m_edges(edges) {}
+ public:
+  MouseOnEdgeEvent(int edges) : Event(EventType::CURSOR_ON_EDGE_EVENT), m_edges(edges) {
+  }
 
-	const char* getName() const override { return "Cursor on Edge Event"; }
-	int getEdges() const { return m_edges; }
+  const char* getName() const override {
+    return "Cursor on Edge Event";
+  }
+  int getEdges() const {
+    return m_edges;
+  }
 
-private:
-	int m_edges;
+ private:
+  int m_edges;
 };
-
 
 class EventDispatcher {
-public:
-	template <typename T>
-	using EventFn = std::function<void(T&)>;
+ public:
+  template <typename T>
+  using EventFn = std::function<void(T&)>;
 
-	template <typename T>
-	void subscribe(void* entity, const EventFn<T>& subscriber, RenderLayer layer = RenderLayer::MAP) {
-		std::vector<Subscription>& subscribers = m_subscriptions[std::type_index(typeid(T))];
-		subscribers.push_back({
-			entity,
-			static_cast<int>(layer), 
-			[subscriber](Event& event) {
-				subscriber(static_cast<T&>(event));
-			}
-			});
+  template <typename T>
+  void subscribe(void* entity, const EventFn<T>& subscriber, RenderLayer layer = RenderLayer::MAP) {
+    std::vector<Subscription>& subscribers = m_subscriptions[std::type_index(typeid(T))];
+    subscribers.push_back(
+        {entity, static_cast<int>(layer), [subscriber](Event& event) { subscriber(static_cast<T&>(event)); }});
 
-		std::sort(subscribers.begin(), subscribers.end(),
-			[](const Subscription& a, const Subscription& b) {
-				return a.layer < b.layer;
-			});
-	}
+    std::sort(subscribers.begin(), subscribers.end(), [](const Subscription& a, const Subscription& b) {
+      return a.layer < b.layer;
+    });
+  }
 
-	void unsubscribe(void* ref) {
-		for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
-			std::vector<Subscription>& subscriptions = it->second;
-			subscriptions.erase(
-				std::remove_if(
-					subscriptions.begin(),
-					subscriptions.end(),
-					[ref](const Subscription& sub) {
-						return sub.subscriber == ref;
-					}
-				),
-				subscriptions.end()
-			);
+  void unsubscribe(void* ref) {
+    for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
+      std::vector<Subscription>& subscriptions = it->second;
+      subscriptions.erase(std::remove_if(subscriptions.begin(),
+                                         subscriptions.end(),
+                                         [ref](const Subscription& sub) { return sub.subscriber == ref; }),
+                          subscriptions.end());
 
-			if (subscriptions.empty()) {
-				it = m_subscriptions.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
+      if (subscriptions.empty()) {
+        it = m_subscriptions.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
 
-	void emit(Event& event) {
-		auto it = m_subscriptions.find(std::type_index(typeid(event)));
-		if (it != m_subscriptions.end()) {
-			for (Subscription& subscription : it->second) {
-				if (event.m_handled) break;
-				subscription.callback(event);
-			}
-		}
-	}
+  void emit(Event& event) {
+    auto it = m_subscriptions.find(std::type_index(typeid(event)));
+    if (it != m_subscriptions.end()) {
+      for (Subscription& subscription : it->second) {
+        if (event.m_handled) break;
+        subscription.callback(event);
+      }
+    }
+  }
 
-private:
-	struct Subscription {
-		void* subscriber;
-		int layer;
-		std::function<void(Event&)> callback;
-	};
+ private:
+  struct Subscription {
+    void* subscriber;
+    int layer;
+    std::function<void(Event&)> callback;
+  };
 
-	std::unordered_map<std::type_index, std::vector<Subscription>> m_subscriptions;
+  std::unordered_map<std::type_index, std::vector<Subscription>> m_subscriptions;
 };
-
-

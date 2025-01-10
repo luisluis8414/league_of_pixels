@@ -11,7 +11,7 @@ This project uses **Premake** for generating build files and **SFML** for render
 #### 1. Prerequisites
 
 - **Premake**: The project includes a local version of Premake located in `vendor/premake5`.
-- **SFML**: The project uses SFML 2.6.2, provided in the `vendor/SFML-2.6.2` directory. This version is pre-configured for Visual Studio compilers.
+- **SFML**: The project uses SFML 3.0.0, provided in the `vendor/SFML-3.0.0` directory. This version is pre-configured for Visual Studio compilers.
 
 #### 2. Generate Build Files
 
@@ -69,7 +69,7 @@ These DLLs are automatically copied during the build process via `postbuildcomma
 
 - **Manual SFML Configuration for MinGW**  
   If MinGW support is required, follow these steps:
-  1. Download a MinGW-compatible version of SFML 2.6.2 from the [SFML website](https://www.sfml-dev.org/download/sfml/2.6.2/).
+  1. Download a MinGW-compatible version of SFML 3.0.0 from the [SFML website](https://www.sfml-dev.org/download/sfml/3.0.0/).
   2. Place the downloaded SFML library files into the `lib` directory of the project.
   3. Place the downloaded SFML include files into the `include` directory of the project.
   5. Reconfigure the project by running the build script (`.\scripts\build.bat`) to regenerate the solution files or run:

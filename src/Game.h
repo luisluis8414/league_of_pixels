@@ -1,57 +1,58 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "Event.h"
-#include "Enemy.h"
-#include "Player.h"
-#include "Map.h"
-#include "TextRenderer.h"
-#include "MovementManager.h"
-#include "Camera.h"
-#include "Minion.h"
+
 #include "Building.h"
+#include "Camera.h"
+#include "Entitys/Enemy.h"
+#include "Entitys/Minion.h"
+#include "Entitys/Player.h"
+#include "Event.h"
+#include "Map.h"
+#include "MovementManager.h"
+#include "TextRenderer.h"
 
 class Game {
-public:
-    Game();
-    ~Game();
+ public:
+  Game();
+  ~Game();
 
-    void run();
+  void run();
 
-    void endGame();
+  void endGame();
 
-private:
-    EventDispatcher m_eventDispatcher;
-    sf::RenderWindow m_window;
-    Camera m_camera;
+ private:
+  EventDispatcher m_eventDispatcher;
+  sf::RenderWindow m_window;
+  Camera m_camera;
 
-    Player m_player;
-    TextRenderer m_textRenderer;
-    EntityManager m_movementManager;
+  Player m_player;
+  TextRenderer m_textRenderer;
+  EntityManager m_movementManager;
 
-    sf::Clock m_clock;
+  sf::Clock m_clock;
 
-    Map::Rift m_map;
+  Map::Rift m_map;
 
-    std::vector<std::shared_ptr<Enemy>> m_enemies;
-    std::vector<Entity*> m_entitiesToDestroy;
+  std::vector<std::shared_ptr<Enemy>> m_enemies;
+  std::vector<Entity*> m_entitiesToDestroy;
 
-    void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
-    void cleanUp();
+  void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
+  void cleanUp();
 
-    void releaseCursor();
-    void confineCursorToWindow();
+  void releaseCursor();
+  void confineCursorToWindow();
 
-    void handleCursorOnEdge();
+  void handleCursorOnEdge();
 
-    sf::Clock m_spawnClock;
-    int m_minionsSpawned = 0;
-    bool m_spawnCycleActive = false;
+  sf::Clock m_spawnClock;
+  int m_minionsSpawned = 0;
+  bool m_spawnCycleActive = false;
 
-    std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
-    std::vector<std::shared_ptr<Minion>> m_redSideMinions;
+  std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
+  std::vector<std::shared_ptr<Minion>> m_redSideMinions;
 
-    std::vector<Minion*> m_minionsToDestroy;
+  std::vector<Minion*> m_minionsToDestroy;
 
-    void spawnMinions(Building& spawn, Building& targetBuilding);
+  void spawnMinions(Building& spawn, Building& targetBuilding);
 };

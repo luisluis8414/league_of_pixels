@@ -1,0 +1,17 @@
+BasedOnStyle: Google
+IndentWidth: 2                # Mimics Prettier's default 2-space indentation.
+TabWidth: 2                   # Tab width consistent with Prettier.
+UseTab: Never                 # Prettier defaults to spaces, not tabs.
+ColumnLimit: 120               # Enforce a line width of 80 characters, similar to Prettier.
+AllowShortFunctionsOnASingleLine: None # Always break short functions into multiple lines.
+BreakBeforeBraces: Attach     # Keep braces on the same line (similar to JS style).
+AlwaysBreakBeforeMultilineStrings: true # Break before multi-line strings for clarity.
+BinPackArguments: false       # Keep each argument on a separate line when breaking.
+BinPackParameters: false      # Keep each parameter on a separate line when breaking.
+SpacesInContainerLiterals: false # No spaces inside container literals (like arrays).
+SpaceBeforeParens: ControlStatements # Add a space before parentheses in control statements.
+BraceWrapping:
+  AfterFunction: true         # Enforce a line break after the opening brace of functions.
+  AfterStruct: true           # Enforce a line break after structs/classes.
+  AfterControlStatement: false # Don't enforce breaks after control statements.
+  AfterEnum: true             # Line break after enums.

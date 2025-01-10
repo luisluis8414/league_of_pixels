@@ -1,23 +1,22 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <string>
 #include <iostream>
+#include <string>
+
 #include "Event.h"
 
 class TextRenderer {
-public:
-    TextRenderer(EventDispatcher& dispatcher, const std::string& fontPath);
+ public:
+  TextRenderer(EventDispatcher& dispatcher, const std::string& fontPath);
 
-    void setText(const std::string& text);
+  void setText(const std::string& text);
 
-    void draw(sf::RenderWindow& window);
+  void draw(sf::RenderWindow& window);
 
-private:
-    EventDispatcher& m_eventDispatcher;
+ private:
+  EventDispatcher& m_eventDispatcher;
 
-    sf::Font m_font;
-    sf::Text m_text;
+  sf::Font m_font;
+  sf::Text m_text;
 };
-
-
