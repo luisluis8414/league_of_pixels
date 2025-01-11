@@ -2,9 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../components/Building.h"
 #include "../components/Camera.h"
 #include "../components/Map.h"
+#include "../components/buildings/Building.h"
 #include "../entities/Enemy.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"

@@ -2,8 +2,9 @@
 
 #include <iostream>
 
-Building::Building(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, float scale)
-    : m_position(position), m_sprite(m_texture) {
+Building::Building(
+    EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, float health, float scale)
+    : m_position(position), m_sprite(m_texture), m_health(health) {
   if (!m_texture.loadFromFile(texturePath)) {
     std::cerr << "Failed to load texture: " << texturePath << std::endl;
   }

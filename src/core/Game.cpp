@@ -5,7 +5,8 @@
 
 #include <iostream>
 
-#include "../components/Building.h"
+#include "../components/buildings/Building.h"
+#include "../components/buildings/Tower.h"
 #include "../entities/Enemy.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
@@ -65,18 +66,58 @@ void Game::run() {
   sf::Clock fpsClock;
   sf::Clock minionSpawnClock;
 
-  Building castleBlue(m_eventDispatcher, Config::Textures::Buildings::BLUE_SIDE_NEXUS, {300.f, 400.f}, 1.f);
-  Building castleRed(m_eventDispatcher, Config::Textures::Buildings::RED_SIDE_NEXUS, {3500.f, 400.f}, 1.f);
+  Building castleBlue(m_eventDispatcher, Config::Textures::Buildings::BLUE_SIDE_NEXUS, {300.f, 400.f});
+  Building castleRed(m_eventDispatcher, Config::Textures::Buildings::RED_SIDE_NEXUS, {3500.f, 400.f});
 
-  Building blueSideT3Tower1(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, {700.f, 300.f}, 1.f);
-  Building blueSideT3Tower2(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, {700.f, 500.f}, 1.f);
-  Building blueSideT2Tower(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, {1100.f, 400.f}, 1.f);
-  Building blueSideT1Tower(m_eventDispatcher, Config::Textures::Buildings::T3_BLUE_SIDE_TOWER, {1600.f, 400.f}, 1.f);
+  Tower blueSideT1Tower(m_eventDispatcher,
+                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
+                        {1600.f, 400.f},
+                        1000.f,
+                        1.f);
+  Tower blueSideT2Tower(m_eventDispatcher,
+                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
+                        {1100.f, 400.f},
+                        1000.f,
+                        1.f);
+  Tower blueSideT3Tower1(m_eventDispatcher,
+                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
+                         {700.f, 300.f},
+                         1000.f,
+                         1.f);
+  Tower blueSideT3Tower2(m_eventDispatcher,
+                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
+                         {700.f, 500.f},
+                         1000.f,
+                         1.f);
 
-  Building redSideT3Tower1(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, {3300.f, 300.f}, 1.f);
-  Building redSideT3Tower2(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, {3300.f, 500.f}, 1.f);
-  Building redSideT2Tower(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, {2900.f, 400.f}, 1.f);
-  Building redSideT1Tower(m_eventDispatcher, Config::Textures::Buildings::T3_RED_SIDE_TOWER, {2400.f, 400.f}, 1.f);
+  Tower redSideT1Tower(m_eventDispatcher,
+                       Config::Textures::Buildings::T3_RED_SIDE_TOWER,
+                       Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                       {2400.f, 400.f},
+                       1000.f,
+                       1.f);
+  Tower redSideT2Tower(m_eventDispatcher,
+                       Config::Textures::Buildings::T3_RED_SIDE_TOWER,
+                       Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                       {2900.f, 400.f},
+                       1000.f,
+                       1.f);
+  Tower redSideT3Tower1(m_eventDispatcher,
+                        Config::Textures::Buildings::T3_RED_SIDE_TOWER,
+                        Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                        {3300.f, 300.f},
+                        1000.f,
+                        1.f);
+  Tower redSideT3Tower2(m_eventDispatcher,
+                        Config::Textures::Buildings::T3_RED_SIDE_TOWER,
+                        Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                        {3300.f, 500.f},
+                        1000.f,
+                        1.f);
 
   spawnEnemy(Config::Textures::Troops::TORCH_RED, {200.f, 200.f});
   spawnEnemy(Config::Textures::Troops::TNT_RED, {200.f, 300.f});
