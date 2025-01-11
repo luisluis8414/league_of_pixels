@@ -9,14 +9,14 @@ Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Ve
 
   m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
 
-  m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
-    const Entity& entityA = event.getEntityA();
-    const Entity& entityB = event.getEntityB();
+  // m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
+  //   const Entity& entityA = event.getEntityA();
+  //   const Entity& entityB = event.getEntityB();
 
-    if (&entityA == this || &entityB == this) {
-      onCollision();
-    }
-  });
+  //   if (&entityA == this || &entityB == this) {
+  //     onCollision();
+  //   }
+  // });
   // let them walk
   m_destination = {1800.f, 200.f};
 }
@@ -152,8 +152,4 @@ void Enemy::updateHitbox() {
 
 bool Enemy::isHitting() const {
   return m_state == EnemyAnimationState::Hitting;
-}
-
-void Enemy::onCollision() {
-  m_currentHealth--;
 }

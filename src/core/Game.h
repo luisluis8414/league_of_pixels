@@ -5,6 +5,7 @@
 #include "../components/Camera.h"
 #include "../components/Map.h"
 #include "../components/buildings/Building.h"
+#include "../components/buildings/Tower.h"
 #include "../entities/Enemy.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
@@ -28,7 +29,7 @@ class Game {
 
   Player m_player;
   TextRenderer m_textRenderer;
-  EntityManager m_movementManager;
+  MovementManager m_movementManager;
 
   sf::Clock m_clock;
 
@@ -51,6 +52,9 @@ class Game {
 
   std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
   std::vector<std::shared_ptr<Minion>> m_redSideMinions;
+
+  std::vector<std::shared_ptr<Tower>> m_blueSideTowers;
+  std::vector<std::shared_ptr<Tower>> m_redSideTowers;
 
   std::vector<Minion*> m_minionsToDestroy;
 

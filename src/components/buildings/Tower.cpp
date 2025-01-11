@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../../core/Config.h"
+
 Tower::Tower(EventDispatcher& dispatcher,
              const std::string& towerTexturePath,
              const std::string& archerTexturePath,
@@ -9,21 +11,31 @@ Tower::Tower(EventDispatcher& dispatcher,
              float health,
              float scale)
     : Building(dispatcher, towerTexturePath, position, health, scale),
-      m_aaRange(20.f),
-      m_archerSprite(m_archerTexture) {
-  if (!m_archerTexture.loadFromFile(archerTexturePath)) {
-    std::cerr << "Failed to load texture: " << archerTexturePath << std::endl;
-  }
-  m_archerSprite.setTextureRect(sf::IntRect({0, 0}, {192, 192}));
+      m_archer(dispatcher, {position.x + 65, position.y + 75}, archerTexturePath) {
+  m_range.setRadius(200.f);
+  m_range.setOrigin({m_range.getRadius(), m_range.getRadius()});
+  m_range.setPosition(getCenterPosition());
+  m_range.setFillColor(sf::Color(0, 0, 0, 0));
+  m_range.setOutlineColor(sf::Color::Red);
+  m_range.setOutlineThickness(1.5f);
 
-  m_archerTexture.setSmooth(false);
-  m_archerSprite.setTexture(m_archerTexture);
-  m_archerSprite.setPosition({position.x - 30.f, position.y - 20.f});
+  dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); });
 
-  dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
+  dispatcher.subscribe<EnityInTowerRangeEvent>(this, [this](EnityInTowerRangeEvent& event) {
+       if (&event.getTower() == this) {
+      m_archer.attackEntity(event.getEntity());
+    }
+  });
 }
+
+sf::CircleShape Tower::getRange() {
+  return m_range;
+};
 
 void Tower::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
-  window.draw(m_archerSprite);
-}
+
+  if (Config::Settings::showHitboxes) {
+    window.draw(m_range);
+  }
+};

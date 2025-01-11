@@ -1,4 +1,7 @@
+#pragma once
+
 #include "../../core/Event.h"
+#include "../../entities/Archer.h"
 #include "Building.h"
 
 class Tower : public Building {
@@ -10,10 +13,11 @@ class Tower : public Building {
         float health = 100,
         float scale = 1.0f);
 
+  sf::CircleShape getRange();
+
  private:
-  sf::Texture m_archerTexture;
-  sf::Sprite m_archerSprite;
-  float m_aaRange;
+  sf::CircleShape m_range;
+  Archer m_archer;
 
   void onDraw(DrawEvent& event);
 };

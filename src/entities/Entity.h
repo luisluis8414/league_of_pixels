@@ -7,7 +7,7 @@
 
 #include "../core/Event.h"
 
-enum class EntityType { Player, Enemy, Minion };
+enum class EntityType { Player, Enemy, Minion, Archer };
 
 struct AnimationConfig {
   int startFrame;
@@ -150,8 +150,6 @@ class Entity {
 
   virtual void onUpdate(float deltaTime) = 0;
   virtual void onDraw(DrawEvent& event) = 0;
-
-  virtual void onCollision() = 0;
 
   void setDestination(sf::Vector2f position) {
     sf::Vector2f direction = position - m_sprite.getPosition();

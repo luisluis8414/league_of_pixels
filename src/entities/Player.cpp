@@ -19,7 +19,7 @@ Player::Player(EventDispatcher& dispatcher,
              10.f,
              EntityType::Player,
              Config::Textures::Troops::PLAYER),
-      m_state(PlayerAnimationState::Idle) {
+      m_state(PlayerAnimationState::IDLE) {
   if (!m_qTexture.loadFromFile(qTexturePath)) {
     std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
   }
@@ -50,7 +50,7 @@ Player::Player(EventDispatcher& dispatcher,
   m_dispatcher.subscribe<ActionEvent>(this, [this](ActionEvent& event) {
     if (event.getActionType() == ActionEventType::TargetAction && event.getTarget()) {
       if (m_target != event.getTarget()) {
-        setAnimation(PlayerAnimationState::Walking);
+        setAnimation(PlayerAnimationState::WALKING);
       }
       m_target = event.getTarget();
     } else {
@@ -83,8 +83,8 @@ void Player::updateAnimation(float deltaTime) {
 
     m_currentFrame++;
     if (m_currentFrame > m_endFrame) {
-      if (m_state != PlayerAnimationState::Idle) {
-        setAnimation(PlayerAnimationState::Idle);
+      if (m_state != PlayerAnimationState::IDLE) {
+        setAnimation(PlayerAnimationState::IDLE);
       } else {
         m_currentFrame = m_startFrame;
       }
@@ -256,12 +256,12 @@ void Player::move(float deltaTime) {
 
     m_dispatcher.emit(moveEvent);
 
-    if (m_state != PlayerAnimationState::Walking) {
-      setAnimation(PlayerAnimationState::Walking);
+    if (m_state != PlayerAnimationState::WALKING) {
+      setAnimation(PlayerAnimationState::WALKING);
     }
   } else {
-    if (m_state != PlayerAnimationState::Idle) {
-      setAnimation(PlayerAnimationState::Idle);
+    if (m_state != PlayerAnimationState::IDLE) {
+      setAnimation(PlayerAnimationState::IDLE);
     }
   }
 }
@@ -372,10 +372,6 @@ void Player::autoAttack() {
   }
 }
 
-void Player::onCollision() {
-  m_currentHealth -= 0.1f;
-}
-
 bool Player::isHitting() const {
-  return (m_state != PlayerAnimationState::Idle && m_state != PlayerAnimationState::Walking);
+  return (m_state != PlayerAnimationState::IDLE && m_state != PlayerAnimationState::WALKING);
 }

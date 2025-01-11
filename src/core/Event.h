@@ -5,6 +5,7 @@
 #include <typeindex>
 #include <unordered_map>
 
+class Tower;
 class Entity;
 
 enum class RenderLayer { BACKGROUND = -1, MAP, BUILDINGS, ENTITIES, PLAYER, TEXT, UI };
@@ -26,7 +27,8 @@ enum class EventType {
   SCROLL_EVENT,
   CENTER_CAMERA_EVENT,
   CURSOR_ON_EDGE_EVENT,
-  ABILITY_DMG_EVENT
+  ABILITY_DMG_EVENT,
+  ENTITY_IN_TOWER_RANGE_EVENT
 };
 
 class Event {
@@ -173,6 +175,26 @@ class CollisionEvent : public Event {
  private:
   const Entity& m_entityA;
   const Entity& m_entityB;
+};
+
+class EnityInTowerRangeEvent : public Event {
+ public:
+  EnityInTowerRangeEvent(const Tower& tower, const Entity& entity)
+      : Event(EventType::ENTITY_IN_TOWER_RANGE_EVENT), m_tower(tower), m_entity(entity) {};
+  const char* getName() const override {
+    return "Entity in Tower Range Event";
+  }
+
+  const Tower& getTower() const {
+    return m_tower;
+  }
+  const Entity& getEntity() const {
+    return m_entity;
+  }
+
+ private:
+  const Tower& m_tower;
+  const Entity& m_entity;
 };
 
 enum class ActionEventType { TargetAction, MoveAction };

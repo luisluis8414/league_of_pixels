@@ -5,12 +5,6 @@
 
 #include <iostream>
 
-#include "../components/buildings/Building.h"
-#include "../components/buildings/Tower.h"
-#include "../entities/Enemy.h"
-#include "../entities/Minion.h"
-#include "../entities/Player.h"
-#include "../systems/MovementManager.h"
 #include "Config.h"
 
 Game::Game()
@@ -26,7 +20,7 @@ Game::Game()
       m_clock(),
       m_map(m_eventDispatcher),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
-      m_movementManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions) {
+      m_movementManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions, m_blueSideTowers) {
   sf::Image icon;
   if (!icon.loadFromFile(Config::Window::ICON_PATH)) {
     std::cerr << "failed to load icon!" << std::endl;
@@ -69,52 +63,55 @@ void Game::run() {
   Building castleBlue(m_eventDispatcher, Config::Textures::Buildings::BLUE_SIDE_NEXUS, {300.f, 400.f});
   Building castleRed(m_eventDispatcher, Config::Textures::Buildings::RED_SIDE_NEXUS, {3500.f, 400.f});
 
-  Tower blueSideT1Tower(m_eventDispatcher,
-                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
-                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
-                        {1600.f, 400.f},
-                        1000.f,
-                        1.f);
-  Tower blueSideT2Tower(m_eventDispatcher,
-                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
-                        Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
-                        {1100.f, 400.f},
-                        1000.f,
-                        1.f);
-  Tower blueSideT3Tower1(m_eventDispatcher,
-                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
-                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
-                         {700.f, 300.f},
-                         1000.f,
-                         1.f);
-  Tower blueSideT3Tower2(m_eventDispatcher,
-                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
-                         Config::Textures::Buildings::T3_BLUE_SIDE_TOWER_ARCHER,
-                         {700.f, 500.f},
-                         1000.f,
-                         1.f);
+  m_blueSideTowers.push_back(std::make_shared<Tower>(m_eventDispatcher,
+                                                     Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                                                     Config::Textures::Troops::BLUE_SIDE_ARCHER,
+                                                     sf::Vector2f(1600.f, 400.f),
+                                                     1000.f,
+                                                     1.f));
+
+  m_blueSideTowers.push_back(std::make_shared<Tower>(m_eventDispatcher,
+                                                     Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                                                     Config::Textures::Troops::BLUE_SIDE_ARCHER,
+                                                     sf::Vector2f(1100.f, 400.f),
+                                                     1000.f,
+                                                     1.f));
+
+  m_blueSideTowers.push_back(std::make_shared<Tower>(m_eventDispatcher,
+                                                     Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                                                     Config::Textures::Troops::BLUE_SIDE_ARCHER,
+                                                     sf::Vector2f(700.f, 300.f),
+                                                     1000.f,
+                                                     1.f));
+
+  m_blueSideTowers.push_back(std::make_shared<Tower>(m_eventDispatcher,
+                                                     Config::Textures::Buildings::T3_BLUE_SIDE_TOWER,
+                                                     Config::Textures::Troops::BLUE_SIDE_ARCHER,
+                                                     sf::Vector2f(700.f, 500.f),
+                                                     1000.f,
+                                                     1.f));
 
   Tower redSideT1Tower(m_eventDispatcher,
                        Config::Textures::Buildings::T3_RED_SIDE_TOWER,
-                       Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                       Config::Textures::Troops::RED_SIDE_ARCHER,
                        {2400.f, 400.f},
                        1000.f,
                        1.f);
   Tower redSideT2Tower(m_eventDispatcher,
                        Config::Textures::Buildings::T3_RED_SIDE_TOWER,
-                       Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                       Config::Textures::Troops::RED_SIDE_ARCHER,
                        {2900.f, 400.f},
                        1000.f,
                        1.f);
   Tower redSideT3Tower1(m_eventDispatcher,
                         Config::Textures::Buildings::T3_RED_SIDE_TOWER,
-                        Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                        Config::Textures::Troops::RED_SIDE_ARCHER,
                         {3300.f, 300.f},
                         1000.f,
                         1.f);
   Tower redSideT3Tower2(m_eventDispatcher,
                         Config::Textures::Buildings::T3_RED_SIDE_TOWER,
-                        Config::Textures::Buildings::T3_RED_SIDE_TOWER_ARCHER,
+                        Config::Textures::Troops::RED_SIDE_ARCHER,
                         {3300.f, 500.f},
                         1000.f,
                         1.f);
@@ -201,7 +198,7 @@ void Game::run() {
 }
 
 void Game::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
-  m_enemies.push_back(std::make_unique<Enemy>(m_eventDispatcher, texturePath, position));
+  m_enemies.push_back(std::make_shared<Enemy>(m_eventDispatcher, texturePath, position));
 }
 
 void Game::cleanUp() {
@@ -274,11 +271,11 @@ void Game::spawnMinions(Building& blueSideNexus, Building& redSideNexus) {
     float elapsed = m_spawnClock.getElapsedTime().asSeconds();
 
     if (elapsed >= 3.f && m_minionsSpawned < 3) {
-      m_blueSideMinions.push_back(std::make_unique<Minion>(m_eventDispatcher,
+      m_blueSideMinions.push_back(std::make_shared<Minion>(m_eventDispatcher,
                                                            Config::Textures::Troops::MINIONS_BLUE,
                                                            blueSideNexus.getCenterPosition(),
                                                            redSideNexus.getCenterPosition()));
-      m_redSideMinions.push_back(std::make_unique<Minion>(m_eventDispatcher,
+      m_redSideMinions.push_back(std::make_shared<Minion>(m_eventDispatcher,
                                                           Config::Textures::Troops::MINIONS_RED,
                                                           redSideNexus.getCenterPosition(),
                                                           blueSideNexus.getCenterPosition()));

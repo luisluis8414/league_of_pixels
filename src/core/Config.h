@@ -3,7 +3,7 @@
 
 namespace Config {
 namespace Settings {
-inline const bool showHitboxes = false;
+inline const bool showHitboxes = true;
 }
 
 namespace Fonts {
@@ -15,11 +15,9 @@ namespace Buildings {
 inline const std::string RED_SIDE_NEXUS = "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Red.png";
 inline const std::string BLUE_SIDE_NEXUS = "resources/tiny_swords/Factions/Knights/Buildings/Castle/Castle_Blue.png";
 inline const std::string T3_BLUE_SIDE_TOWER = "resources/tiny_swords/Factions/Knights/Buildings/Tower/Tower_Blue.png";
-inline const std::string T3_BLUE_SIDE_TOWER_ARCHER =
-    "resources/tiny_swords/Factions/Knights/Troops/Archer/Blue/Archer_Blue.png";
+
 inline const std::string T3_RED_SIDE_TOWER = "resources/tiny_swords/Factions/Knights/Buildings/Tower/Tower_RED.png";
-inline const std::string T3_RED_SIDE_TOWER_ARCHER =
-    "resources/tiny_swords/Factions/Knights/Troops/Archer/Red/Archer_Red.png";
+
 }  // namespace Buildings
 
 namespace Troops {
@@ -32,6 +30,9 @@ inline const std::string TNT_RED = "resources/tiny_swords/Factions/Goblins/Troop
 
 inline const std::string MINIONS_RED = "resources/minions/minionRed.png";
 inline const std::string MINIONS_BLUE = "resources/minions/minionBlue.png";
+
+inline const std::string BLUE_SIDE_ARCHER = "resources/tiny_swords/Factions/Knights/Troops/Archer/Blue/Archer_Blue.png";
+inline const std::string RED_SIDE_ARCHER = "resources/tiny_swords/Factions/Knights/Troops/Archer/Red/Archer_Red.png";
 }  // namespace Troops
 
 namespace Spells {

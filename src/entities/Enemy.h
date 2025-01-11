@@ -29,8 +29,6 @@ class Enemy : public Entity {
   void onUpdate(float deltaTime) override;
   void onDraw(DrawEvent& event) override;
 
-  void onCollision() override;
-
   void setAnimation(EnemyAnimationState state);
 
   const std::unordered_map<EnemyAnimationState, AnimationConfig> m_animationConfigs = {

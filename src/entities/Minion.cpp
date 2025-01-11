@@ -1,13 +1,12 @@
 #include "Minion.h"
 
 #include "../core/Config.h"
-#include "../systems/MovementManager.h"
 
 Minion::Minion(EventDispatcher& dispatcher,
                const std::string& texturePath,
                sf::Vector2f position,
                sf::Vector2f destination)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 50.f, 100.f, 5.f, EntityType::Minion, texturePath),
+    : Entity(dispatcher, 192, 192, position, 0.1f, 100.f, 100.f, 5.f, EntityType::Minion, texturePath),
       m_state(MinionAnimationState::Walking) {
   m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 
@@ -20,7 +19,7 @@ Minion::Minion(EventDispatcher& dispatcher,
     const Entity& entityB = event.getEntityB();
 
     if (&entityA == this || &entityB == this) {
-      onCollision();
+      // onCollision();
     }
   });
 }
@@ -186,10 +185,6 @@ void Minion::updateHitbox() {
     // reset when not attacking
     m_attackHitbox = sf::FloatRect({0.f, 0.f}, {0.f, 0.f});
   }
-}
-
-void Minion::onCollision() {
-  m_currentHealth -= 0.1f;
 }
 
 bool Minion::isHitting() const {
