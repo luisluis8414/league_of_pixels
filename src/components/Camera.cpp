@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Config.h"
+#include "../core/Config.h"
 
 Camera::Camera(EventDispatcher& dispatcher, sf::RenderWindow& window) : m_window(window) {
   dispatcher.subscribe<ScrollEvent>(

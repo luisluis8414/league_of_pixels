@@ -3,8 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 
-#include "../Ability.h"
-#include "../Event.h"
+#include "Ability.h"
+#include "../core/Event.h"
 #include "Entity.h"
 
 enum class PlayerAnimationState {

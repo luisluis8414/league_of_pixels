@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
-#include "Entitys/Enemy.h"
-#include "Entitys/Entity.h"
-#include "Entitys/Minion.h"
-#include "Entitys/Player.h"
-#include "Event.h"
+#include "../core/Event.h"
+#include "../entities/Enemy.h"
+#include "../entities/Entity.h"
+#include "../entities/Minion.h"
+#include "../entities/Player.h"
 
 class EntityManager {
  public:

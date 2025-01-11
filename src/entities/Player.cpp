@@ -1,8 +1,7 @@
 #include "Player.h"
 
-#include "../Config.h"
-#include "../MovementManager.h"
-#include "../Utils.h"
+#include "../core/Config.h"
+#include "../core/Utils.h"
 
 Player::Player(EventDispatcher& dispatcher,
                sf::Vector2f position,
@@ -21,7 +20,7 @@ Player::Player(EventDispatcher& dispatcher,
              EntityType::Player,
              Config::Textures::Troops::PLAYER),
       m_state(PlayerAnimationState::Idle) {
-    if (!m_qTexture.loadFromFile(qTexturePath)) {
+  if (!m_qTexture.loadFromFile(qTexturePath)) {
     std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
   }
 

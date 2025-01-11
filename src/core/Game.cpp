@@ -1,15 +1,16 @@
 #include "Game.h"
 
+// todo: replace ClipCursor with own thread
 #include <windows.h>
 
 #include <iostream>
 
-#include "Building.h"
+#include "../components/Building.h"
+#include "../entities/Enemy.h"
+#include "../entities/Minion.h"
+#include "../entities/Player.h"
+#include "../systems/MovementManager.h"
 #include "Config.h"
-#include "Entitys/Enemy.h"
-#include "Entitys/Minion.h"
-#include "Entitys/Player.h"
-#include "MovementManager.h"
 
 Game::Game()
     : m_window(sf::VideoMode::getFullscreenModes().at(1), Config::Window::TITLE, sf::State::Fullscreen),

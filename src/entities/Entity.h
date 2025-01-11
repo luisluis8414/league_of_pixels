@@ -5,7 +5,7 @@
 #include <optional>
 #include <vector>
 
-#include "../Event.h"
+#include "../core/Event.h"
 
 enum class EntityType { Player, Enemy, Minion };
 

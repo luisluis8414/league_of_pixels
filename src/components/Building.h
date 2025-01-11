@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Event.h"
+#include "../core/Event.h"
 #include "SFML/Graphics.hpp"
 
 class Building {

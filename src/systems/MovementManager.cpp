@@ -3,9 +3,9 @@
 #include <iostream>
 #include <vector>
 
-#include "Event.h"
-#include "Map.h"
-#include "Utils.h"
+#include "../components/Map.h"
+#include "../core/Event.h"
+#include "../core/Utils.h"
 
 EntityManager::EntityManager(EventDispatcher& dispatcher,
                              const Player& player,

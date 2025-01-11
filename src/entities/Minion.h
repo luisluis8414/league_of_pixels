@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 
-#include "../Event.h"
+#include "../core/Event.h"
 #include "Entity.h"
 
 enum class MinionAnimationState { Walking, Hitting, Dying };

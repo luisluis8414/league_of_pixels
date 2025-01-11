@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "Event.h"
+#include "../core/Event.h"
 
 class TextRenderer {
  public:

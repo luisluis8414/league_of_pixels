@@ -370,3 +370,4 @@ FodyWeavers.xsd
 Makefile
 *.make
 .vscode
+*.vcxproj.filters

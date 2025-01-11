@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/Graphics/Rect.hpp>
 #include <random>
 #include <string>
 

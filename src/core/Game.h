@@ -2,15 +2,15 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "Building.h"
-#include "Camera.h"
-#include "Entitys/Enemy.h"
-#include "Entitys/Minion.h"
-#include "Entitys/Player.h"
+#include "../components/Building.h"
+#include "../components/Camera.h"
+#include "../components/Map.h"
+#include "../entities/Enemy.h"
+#include "../entities/Minion.h"
+#include "../entities/Player.h"
+#include "../rendering/TextRenderer.h"
+#include "../systems/MovementManager.h"
 #include "Event.h"
-#include "Map.h"
-#include "MovementManager.h"
-#include "TextRenderer.h"
 
 class Game {
  public:

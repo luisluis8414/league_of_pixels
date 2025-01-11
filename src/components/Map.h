@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "Event.h"
+#include "../core/Event.h"
 
 namespace Map {
 inline const std::string filePath = "resources/map/allTiles.png";
