@@ -7,7 +7,7 @@
 
 class Entity;
 
-enum class RenderLayer { BACKGROUND = -1, MAP, ENTITIES, PLAYER, TEXT, UI };
+enum class RenderLayer { BACKGROUND = -1, MAP, BUILDINGS, ENTITIES, PLAYER, TEXT, UI };
 
 enum class EventType {
   DRAW,

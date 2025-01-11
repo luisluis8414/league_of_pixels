@@ -1,7 +1,7 @@
 #include "Minion.h"
 
-#include "../Config.h"
-#include "../MovementManager.h"
+#include "../core/Config.h"
+#include "../systems/MovementManager.h"
 
 Minion::Minion(EventDispatcher& dispatcher,
                const std::string& texturePath,
