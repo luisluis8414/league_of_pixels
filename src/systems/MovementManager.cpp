@@ -4,15 +4,16 @@
 #include <vector>
 
 #include "../components/Map.h"
+#include "../core/Config.h"
 #include "../core/Event.h"
 #include "../core/Utils.h"
 
 MovementManager::MovementManager(EventDispatcher& dispatcher,
                                  const Player& player,
-                                 const std::vector<std::shared_ptr<Enemy>>& enemies,
-                                 const std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                                 const std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                                 const std::vector<std::shared_ptr<Tower>>& blueSideTowers)
+                                 std::vector<std::shared_ptr<Enemy>>& enemies,
+                                 std::vector<std::shared_ptr<Minion>>& blueSideMinions,
+                                 std::vector<std::shared_ptr<Minion>>& redSideMinions,
+                                 std::vector<std::shared_ptr<Tower>>& blueSideTowers)
     : m_eventDispatcher(dispatcher),
       m_player(player),
       m_enemies(enemies),
@@ -20,16 +21,29 @@ MovementManager::MovementManager(EventDispatcher& dispatcher,
       m_redSideMinions(redSideMinions),
       m_blueSideTowers(blueSideTowers) {
   m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
-    handleEntityMove(moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getStep(), moveEvent.getDestination());
+    this->handleEntityMove(
+        moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getStep(), moveEvent.getDestination());
   });
 
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { checkCollisions(); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->checkCollisions(); });
 
   m_eventDispatcher.subscribe<MouseRightClickEvent>(
-      this, [this](MouseRightClickEvent event) { checkForTarget(event.getPosition()); });
+      this, [this](MouseRightClickEvent event) { this->checkForTarget(event.getPosition()); });
 
   m_eventDispatcher.subscribe<AbilityDmgEvent>(
-      this, [this](AbilityDmgEvent event) { checkAbilityDmg(event.getHitbox(), event.getSpellDmg()); });
+      this, [this](AbilityDmgEvent event) { this->checkAbilityDmg(event.getHitbox(), event.getSpellDmg()); });
+
+  m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
+
+  m_eventDispatcher.subscribe<DestroyEntityEvent>(
+      this, [this](DestroyEntityEvent& event) { m_entitiesToDestroy.push_back(event.getEntity()); });
+
+  m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent& event) { this->cleanUp(); });
+}
+
+void MovementManager::init() {
+  spawnEnemy(Config::Textures::Troops::TORCH_RED, {200.f, 200.f});
+  spawnEnemy(Config::Textures::Troops::TNT_RED, {200.f, 300.f});
 }
 
 void MovementManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
@@ -134,4 +148,32 @@ void MovementManager::handleEntityMove(sf::Sprite& sprite,
   } else {
     destination.y = sprite.getPosition().y;
   }
+}
+
+void MovementManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
+  m_enemies.push_back(std::make_shared<Enemy>(m_eventDispatcher, texturePath, position));
+}
+
+void MovementManager::cleanUp() {
+  for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
+    for (int j = 0; j < m_enemies.size(); ++j) {
+      if (m_enemies[j].get() == m_entitiesToDestroy[i]) {
+        m_enemies.erase(m_enemies.begin() + j);
+        break;
+      }
+    }
+    for (int j = 0; j < m_redSideMinions.size(); ++j) {
+      if (m_redSideMinions[j].get() == m_entitiesToDestroy[i]) {
+        m_redSideMinions.erase(m_redSideMinions.begin() + j);
+        break;
+      }
+    }
+    for (int j = 0; j < m_blueSideMinions.size(); ++j) {
+      if (m_blueSideMinions[j].get() == m_entitiesToDestroy[i]) {
+        m_blueSideMinions.erase(m_blueSideMinions.begin() + j);
+        break;
+      }
+    }
+  }
+  m_entitiesToDestroy.clear();
 }

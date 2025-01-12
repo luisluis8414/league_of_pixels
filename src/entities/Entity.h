@@ -142,7 +142,7 @@ class Entity {
   virtual void updateHitbox() = 0;
 
   virtual void move(float deltaTime) = 0;
-  virtual void updateAnimation(float deltaTime) = 0;
+  // virtual void updateAnimation(float deltaTime) = 0;
 
   virtual void setPosition(sf::Vector2f position) {
     m_sprite.setPosition({position.x, position.y});
@@ -166,4 +166,27 @@ class Entity {
   }
 
   EntityType m_type;
+
+  virtual void onAnimationEnd() = 0;
+  void updateAnimation(float deltaTime) {
+    m_elapsedTime += deltaTime;
+
+    if (m_elapsedTime >= m_frameTime) {
+      m_elapsedTime = 0.f;
+
+      m_currentFrame++;
+      if (m_currentFrame > m_endFrame) {
+        onAnimationEnd();
+      }
+
+      // if (shouldTriggerSpecialLogic(m_currentFrame)) {
+      //     handleSpecialLogic();
+      // }
+
+      int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
+      int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
+      m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
+      m_sprite.setTextureRect(m_frameRect);
+    }
+  }
 };

@@ -20,7 +20,7 @@ class Archer : public Entity {
   void onUpdate(float deltaTime) override;
   void onDraw(DrawEvent& event) override;
 
-  void updateAnimation(float deltaTime) override;
+  void onAnimationEnd() override;
 
   void setAnimation(ArcherAnimationState state);
 

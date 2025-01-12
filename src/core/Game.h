@@ -10,6 +10,7 @@
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
 #include "../rendering/TextRenderer.h"
+#include "../systems/BuildingManager.h"
 #include "../systems/MovementManager.h"
 #include "Event.h"
 
@@ -31,15 +32,13 @@ class Game {
   TextRenderer m_textRenderer;
   MovementManager m_movementManager;
 
+  BuildingManager m_buildingManager;
+
   sf::Clock m_clock;
 
   Map::Rift m_map;
 
   std::vector<std::shared_ptr<Enemy>> m_enemies;
-  std::vector<Entity*> m_entitiesToDestroy;
-
-  void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
-  void cleanUp();
 
   void releaseCursor();
   void confineCursorToWindow();
@@ -56,7 +55,6 @@ class Game {
   std::vector<std::shared_ptr<Tower>> m_blueSideTowers;
   std::vector<std::shared_ptr<Tower>> m_redSideTowers;
 
-  std::vector<Minion*> m_minionsToDestroy;
-
   void spawnMinions(Building& spawn, Building& targetBuilding);
+  void processSFMLEvents();
 };

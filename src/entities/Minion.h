@@ -28,7 +28,7 @@ class Minion : public Entity {
   void updateHitbox() override;
 
   void move(float deltaTime) override;
-  void updateAnimation(float deltaTime) override;
+  void onAnimationEnd() override;
 
   void onUpdate(float deltaTime) override;
   void onDraw(DrawEvent& event) override;

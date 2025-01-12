@@ -11,16 +11,15 @@ class Entity;
 enum class RenderLayer { BACKGROUND = -1, MAP, BUILDINGS, ENTITIES, PLAYER, TEXT, UI };
 
 enum class EventType {
+  INIT,
   DRAW,
-  TEXT_DRAW,
-  MAP_DRAW,
+  SECOND,
+  CLEAN_UP,
   TICK_UPDATE,
-  ANIMATION_UPDATE,
   GAME_OVER,
   DESTROY_ENTITY,
   KEYPRESSED,
   MOUSE_CLICKED,
-  WINDOW_RESIZE,
   COLLISION_EVENT,
   TARGET_EVENT,
   MOVE_EVENT,
@@ -35,7 +34,7 @@ class Event {
   friend class EventDispatcher;
 
  public:
-  virtual const char* getName() const = 0;
+  virtual const std::string getName() const = 0;
 
   virtual EventType getEventType() const {
     return m_eventType;
@@ -66,6 +65,15 @@ class Event {
 //	int m_x, m_y;
 // };
 
+class InitEvent : public Event {
+ public:
+  InitEvent() : Event(EventType::INIT) {};
+
+  const std::string getName() const override {
+    return "Init Event";
+  }
+};
+
 class DrawEvent : public Event {
  public:
   DrawEvent(sf::RenderWindow& window) : Event(EventType::DRAW), m_window(window) {};
@@ -73,12 +81,30 @@ class DrawEvent : public Event {
   sf::RenderWindow& getWindow() const {
     return m_window;
   }
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Draw Event";
   }
 
  private:
   sf::RenderWindow& m_window;
+};
+
+class SecondEvent : public Event {
+ public:
+  SecondEvent() : Event(EventType::SECOND) {};
+
+  const std::string getName() const override {
+    return "Second Event";
+  }
+};
+
+class CleanUpEvent : public Event {
+ public:
+  CleanUpEvent() : Event(EventType::CLEAN_UP) {};
+
+  const std::string getName() const override {
+    return "CleanUp Event";
+  }
 };
 
 class TickEvent : public Event {
@@ -88,7 +114,7 @@ class TickEvent : public Event {
   const float getDeltaTime() const {
     return m_detlaTime;
   }
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Update Event";
   }
 
@@ -101,7 +127,7 @@ class KeyPressedEvent : public Event {
   KeyPressedEvent(const sf::Keyboard::Key key_event, sf::Vector2f mousePosition)
       : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Key Pressed Event";
   }
 
@@ -124,7 +150,7 @@ class MouseRightClickEvent : public Event {
   const sf::Vector2f& getPosition() const {
     return m_position;
   }
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Left Mouse Click Event";
   }
 
@@ -136,7 +162,7 @@ class GameOverEvent : public Event {
  public:
   GameOverEvent() : Event(EventType::GAME_OVER) {};
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Key Pressed Event";
   }
 };
@@ -146,7 +172,7 @@ class DestroyEntityEvent : public Event {
   DestroyEntityEvent(Entity* entity) : Event(EventType::DESTROY_ENTITY), m_entity(entity) {
   }
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Destroy Entity Event";
   }
   Entity* getEntity() const {
@@ -161,7 +187,7 @@ class CollisionEvent : public Event {
  public:
   CollisionEvent(const Entity& entityA, const Entity& entityB)
       : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Collision Event";
   }
 
@@ -181,7 +207,7 @@ class EnityInTowerRangeEvent : public Event {
  public:
   EnityInTowerRangeEvent(const Tower& tower, const Entity& entity)
       : Event(EventType::ENTITY_IN_TOWER_RANGE_EVENT), m_tower(tower), m_entity(entity) {};
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Entity in Tower Range Event";
   }
 
@@ -209,7 +235,7 @@ class ActionEvent : public Event {
         m_actionType(actionType) {
   }
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Action Event";
   }
 
@@ -239,7 +265,7 @@ class AbilityDmgEvent : public Event {
       : Event(EventType::ABILITY_DMG_EVENT), m_Spelldmg(spellDmg), m_hitbox(hitbox) {
   }
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Ability Dmg Event";
   }
 
@@ -260,7 +286,7 @@ class MoveEvent : public Event {
   MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination)
       : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_step(step), m_destination(destination) {};
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Move Event";
   }
 
@@ -288,7 +314,7 @@ class ScrollEvent : public Event {
  public:
   ScrollEvent(int x, int y, float delta) : Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Scroll Event";
   }
 
@@ -316,7 +342,7 @@ class CenterCameraEvent : public Event {
   CenterCameraEvent(sf::Vector2f playerPosition)
       : Event(EventType::CENTER_CAMERA_EVENT), m_playerPosition(playerPosition) {};
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Center Camera Event";
   }
 
@@ -341,7 +367,7 @@ class MouseOnEdgeEvent : public Event {
   MouseOnEdgeEvent(int edges) : Event(EventType::CURSOR_ON_EDGE_EVENT), m_edges(edges) {
   }
 
-  const char* getName() const override {
+  const std::string getName() const override {
     return "Cursor on Edge Event";
   }
   int getEdges() const {

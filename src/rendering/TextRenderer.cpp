@@ -10,11 +10,18 @@ TextRenderer::TextRenderer(EventDispatcher& dispatcher, const std::string& fontP
   m_text.setFillColor(sf::Color::Green);
 
   m_eventDispatcher.subscribe<DrawEvent>(
-      this, [this](DrawEvent& event) { draw(event.getWindow()); }, RenderLayer::TEXT);
+      this,
+      [this](DrawEvent& event) {
+        m_fps++;
+        this->draw(event.getWindow());
+      },
+      RenderLayer::TEXT);
+
+  m_eventDispatcher.subscribe<SecondEvent>(this, [this](SecondEvent& event) { m_fps = 0; });
 }
 
 void TextRenderer::setText(const std::string& text) {
-  m_text.setString(text);
+  m_text.setString("FPS: " + std::to_string(m_fps));
 }
 
 void TextRenderer::draw(sf::RenderWindow& window) {

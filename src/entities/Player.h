@@ -63,7 +63,8 @@ class Player : public Entity {
   void updateHitbox() override;
 
   void move(float deltaTime) override;
-  void updateAnimation(float deltaTime) override;
+  // void updateAnimation(float deltaTime) override;
+  void onAnimationEnd() override;
 
   void onUpdate(float deltaTime) override;
   void onDraw(DrawEvent& event) override;
@@ -74,7 +75,7 @@ class Player : public Entity {
   void updateAbilities(float deltaTime);
   void drawAbilities(sf::RenderWindow& window);
 
-  void checkTargetInRange();
+  void checkTargetInRange(Entity* target);
   void autoAttack();
 
   const std::unordered_map<PlayerAnimationState, AnimationConfig> m_animationConfigs = {

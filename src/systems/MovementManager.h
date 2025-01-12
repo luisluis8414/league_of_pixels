@@ -14,10 +14,10 @@ class MovementManager {
  public:
   MovementManager(EventDispatcher& dispatcher,
                   const Player& player,
-                  const std::vector<std::shared_ptr<Enemy>>& enemies,
-                  const std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                  const std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                  const std::vector<std::shared_ptr<Tower>>& blueSideTowers);
+                  std::vector<std::shared_ptr<Enemy>>& enemies,
+                  std::vector<std::shared_ptr<Minion>>& blueSideMinions,
+                  std::vector<std::shared_ptr<Minion>>& redSideMinions,
+                  std::vector<std::shared_ptr<Tower>>& blueSideTowers);
 
   ~MovementManager() = default;
 
@@ -26,10 +26,12 @@ class MovementManager {
  private:
   EventDispatcher& m_eventDispatcher;
   const Player& m_player;
-  const std::vector<std::shared_ptr<Enemy>>& m_enemies;
-  const std::vector<std::shared_ptr<Minion>>& m_blueSideMinions;
-  const std::vector<std::shared_ptr<Minion>>& m_redSideMinions;
-  const std::vector<std::shared_ptr<Tower>>& m_blueSideTowers;
+  std::vector<std::shared_ptr<Enemy>>& m_enemies;
+  std::vector<std::shared_ptr<Minion>>& m_blueSideMinions;
+  std::vector<std::shared_ptr<Minion>>& m_redSideMinions;
+  std::vector<std::shared_ptr<Tower>>& m_blueSideTowers;
+
+  std::vector<Entity*> m_entitiesToDestroy;
 
   void handleEntityMove(sf::Sprite& sprite,
                         const sf::FloatRect& hitbox,
@@ -37,4 +39,9 @@ class MovementManager {
                         sf::Vector2f& destination);
   void checkForTarget(sf::Vector2f position);
   void checkAbilityDmg(sf::FloatRect hitbox, float spellDmg);
+
+  void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
+  void init();
+
+  void cleanUp();
 };

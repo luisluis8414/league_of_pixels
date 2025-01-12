@@ -21,25 +21,11 @@ Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Ve
   m_destination = {1800.f, 200.f};
 }
 
-void Enemy::updateAnimation(float deltaTime) {
-  m_elapsedTime += deltaTime;
-
-  if (m_elapsedTime >= m_frameTime) {
-    m_elapsedTime = 0.f;
-
-    m_currentFrame++;
-    if (m_currentFrame > m_endFrame) {
-      if (m_state != EnemyAnimationState::Idle) {
-        setAnimation(EnemyAnimationState::Idle);
-      } else {
-        m_currentFrame = m_startFrame;
-      }
-    }
-
-    int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
-    int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-    m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
-    m_sprite.setTextureRect(m_frameRect);
+void Enemy::onAnimationEnd() {
+  if (m_state != EnemyAnimationState::Idle) {
+    setAnimation(EnemyAnimationState::Idle);
+  } else {
+    m_currentFrame = m_startFrame;
   }
 }
 

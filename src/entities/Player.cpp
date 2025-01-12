@@ -75,35 +75,43 @@ Player::Player(EventDispatcher& dispatcher,
   });
 }
 
-void Player::updateAnimation(float deltaTime) {
-  m_elapsedTime += deltaTime;
-
-  if (m_elapsedTime >= m_frameTime) {
-    m_elapsedTime = 0.f;
-
-    m_currentFrame++;
-    if (m_currentFrame > m_endFrame) {
-      if (m_state != PlayerAnimationState::IDLE) {
-        setAnimation(PlayerAnimationState::IDLE);
-      } else {
-        m_currentFrame = m_startFrame;
-      }
-    }
-
-    if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
-      if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
-        if (m_target.has_value()) {
-          m_target.value()->takeDmg(m_physicalDmg);
-        }
-      }
-    }
-
-    int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
-    int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-    m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
-    m_sprite.setTextureRect(m_frameRect);
+void Player::onAnimationEnd() {
+  if (m_state != PlayerAnimationState::IDLE) {
+    setAnimation(PlayerAnimationState::IDLE);
+  } else {
+    m_currentFrame = m_startFrame;
   }
 }
+
+// void Player::updateAnimation(float deltaTime) {
+//   m_elapsedTime += deltaTime;
+
+//   if (m_elapsedTime >= m_frameTime) {
+//     m_elapsedTime = 0.f;
+
+//     m_currentFrame++;
+//     if (m_currentFrame > m_endFrame) {
+//       if (m_state != PlayerAnimationState::IDLE) {
+//         setAnimation(PlayerAnimationState::IDLE);
+//       } else {
+//         m_currentFrame = m_startFrame;
+//       }
+//     }
+
+//     if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
+//       if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
+//         if (m_target.has_value()) {
+//           m_target.value()->takeDmg(m_physicalDmg);
+//         }
+//       }
+//     }
+
+//     int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
+//     int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
+//     m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
+//     m_sprite.setTextureRect(m_frameRect);
+//   }
+// }
 
 void Player::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
@@ -272,11 +280,20 @@ void Player::onUpdate(const float deltaTime) {
   updateAnimation(deltaTime);
   updateAbilities(deltaTime);
 
-  if (isHitting()) return;
+  if (isHitting()) {
+    if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
+      if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
+        if (m_target.has_value()) {
+          m_target.value()->takeDmg(m_physicalDmg);
+        }
+      }
+    }
+    return;
+  };
 
   if (m_target.has_value()) {
     setDestination(m_target.value()->getPosition());
-    checkTargetInRange();
+    checkTargetInRange(m_target.value());
   }
 
   move(deltaTime);
@@ -351,11 +368,7 @@ void Player::updateHitbox() {
   //}
 }
 
-void Player::checkTargetInRange() {
-  if (!m_target.has_value()) return;
-
-  Entity* target = m_target.value();
-
+void Player::checkTargetInRange(Entity* target) {
   const sf::Rect targetHitbox = target->getHitbox();
   const sf::Rect playerHitbox = getHitbox();
 

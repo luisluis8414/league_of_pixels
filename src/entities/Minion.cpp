@@ -24,25 +24,11 @@ Minion::Minion(EventDispatcher& dispatcher,
   });
 }
 
-void Minion::updateAnimation(float deltaTime) {
-  m_elapsedTime += deltaTime;
-
-  if (m_elapsedTime >= m_frameTime) {
-    m_elapsedTime = 0.f;
-
-    m_currentFrame++;
-    if (m_currentFrame > m_endFrame) {
-      if (m_state != MinionAnimationState::Walking) {
-        setAnimation(MinionAnimationState::Walking);
-      } else {
-        m_currentFrame = m_startFrame;
-      }
-    }
-
-    int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
-    int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-    m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
-    m_sprite.setTextureRect(m_frameRect);
+void Minion::onAnimationEnd() {
+  if (m_state != MinionAnimationState::Walking) {
+    setAnimation(MinionAnimationState::Walking);
+  } else {
+    m_currentFrame = m_startFrame;
   }
 }
 
