@@ -89,9 +89,9 @@ class DrawEvent : public Event {
   sf::RenderWindow& m_window;
 };
 
-class SecondEvent : public Event {
+class SecondsEvent : public Event {
  public:
-  SecondEvent() : Event(EventType::SECOND) {};
+  SecondsEvent() : Event(EventType::SECOND) {};
 
   const std::string getName() const override {
     return "Second Event";
@@ -335,23 +335,6 @@ class ScrollEvent : public Event {
                   // owner window.
   float m_delta;  // Number of ticks the wheel has moved (positive is up,
                   // negative is down)
-};
-
-class CenterCameraEvent : public Event {
- public:
-  CenterCameraEvent(sf::Vector2f playerPosition)
-      : Event(EventType::CENTER_CAMERA_EVENT), m_playerPosition(playerPosition) {};
-
-  const std::string getName() const override {
-    return "Center Camera Event";
-  }
-
-  sf::Vector2f getPlayerPosition() {
-    return m_playerPosition;
-  }
-
- private:
-  sf::Vector2f m_playerPosition;
 };
 
 enum MouseEdge {

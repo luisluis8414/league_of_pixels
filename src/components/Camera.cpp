@@ -10,9 +10,6 @@ Camera::Camera(EventDispatcher& dispatcher, sf::RenderWindow& window) : m_window
 
   dispatcher.subscribe<MouseOnEdgeEvent>(this,
                                          [this](MouseOnEdgeEvent& event) { handleCursorOnEdge(event.getEdges()); });
-
-  dispatcher.subscribe<CenterCameraEvent>(
-      this, [this](CenterCameraEvent& event) { centerCamera(event.getPlayerPosition()); });
 }
 
 void Camera::centerCamera(sf::Vector2f playerPosition) {

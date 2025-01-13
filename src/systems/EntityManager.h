@@ -9,27 +9,31 @@
 #include "../entities/Entity.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
+#include "MinionManager.h"
 
-class MovementManager {
+class EntityManager {
  public:
-  MovementManager(EventDispatcher& dispatcher,
-                  const Player& player,
-                  std::vector<std::shared_ptr<Enemy>>& enemies,
-                  std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                  std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                  std::vector<std::shared_ptr<Tower>>& blueSideTowers);
+  EntityManager(EventDispatcher& dispatcher,
+                const Player& player,
+                std::vector<std::shared_ptr<Enemy>>& enemies,
+                std::vector<std::shared_ptr<Minion>>& blueSideMinions,
+                std::vector<std::shared_ptr<Minion>>& redSideMinions,
+                std::vector<std::shared_ptr<Tower>>& blueSideTowers);
 
-  ~MovementManager() = default;
+  ~EntityManager() = default;
 
   void checkCollisions();
 
  private:
   EventDispatcher& m_eventDispatcher;
+
   const Player& m_player;
   std::vector<std::shared_ptr<Enemy>>& m_enemies;
   std::vector<std::shared_ptr<Minion>>& m_blueSideMinions;
   std::vector<std::shared_ptr<Minion>>& m_redSideMinions;
   std::vector<std::shared_ptr<Tower>>& m_blueSideTowers;
+
+  MinionManager m_minionsManager;
 
   std::vector<Entity*> m_entitiesToDestroy;
 

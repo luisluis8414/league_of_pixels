@@ -3,7 +3,14 @@
 #include "../components/buildings/Tower.h"
 #include "../core/Config.h"
 
-BuildingManager::BuildingManager(EventDispatcher& dispatcher) : m_eventDispatcher(dispatcher) {
+BuildingManager::BuildingManager(EventDispatcher& dispatcher,
+                                 std::vector<std::shared_ptr<Tower>>& m_blueSideTowers,
+                                 std::vector<std::shared_ptr<Tower>>& m_redSideTowers)
+    : m_eventDispatcher(dispatcher),
+      m_blueSideTowers(m_blueSideTowers),
+      m_redSideTowers(m_redSideTowers),
+      m_blueSideNexus(m_eventDispatcher, Config::Textures::Buildings::BLUE_SIDE_NEXUS, {300.f, 400.f}),
+      m_redSideNexus(m_eventDispatcher, Config::Textures::Buildings::RED_SIDE_NEXUS, {3500.f, 400.f}) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent) { this->initBuildings(); });
 }
 

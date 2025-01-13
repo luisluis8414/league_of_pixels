@@ -1,4 +1,4 @@
-#include "MovementManager.h"
+#include "EntityManager.h"
 
 #include <iostream>
 #include <vector>
@@ -8,22 +8,24 @@
 #include "../core/Event.h"
 #include "../core/Utils.h"
 
-MovementManager::MovementManager(EventDispatcher& dispatcher,
-                                 const Player& player,
-                                 std::vector<std::shared_ptr<Enemy>>& enemies,
-                                 std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                                 std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                                 std::vector<std::shared_ptr<Tower>>& blueSideTowers)
+EntityManager::EntityManager(EventDispatcher& dispatcher,
+                             const Player& player,
+                             std::vector<std::shared_ptr<Enemy>>& enemies,
+                             std::vector<std::shared_ptr<Minion>>& blueSideMinions,
+                             std::vector<std::shared_ptr<Minion>>& redSideMinions,
+                             std::vector<std::shared_ptr<Tower>>& blueSideTowers)
     : m_eventDispatcher(dispatcher),
       m_player(player),
       m_enemies(enemies),
       m_blueSideMinions(blueSideMinions),
       m_redSideMinions(redSideMinions),
-      m_blueSideTowers(blueSideTowers) {
+      m_blueSideTowers(blueSideTowers),
+      m_minionsManager(dispatcher, blueSideMinions, redSideMinions) {
   m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
     this->handleEntityMove(
         moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getStep(), moveEvent.getDestination());
   });
+  m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->checkCollisions(); });
 
@@ -33,20 +35,18 @@ MovementManager::MovementManager(EventDispatcher& dispatcher,
   m_eventDispatcher.subscribe<AbilityDmgEvent>(
       this, [this](AbilityDmgEvent event) { this->checkAbilityDmg(event.getHitbox(), event.getSpellDmg()); });
 
-  m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
-
   m_eventDispatcher.subscribe<DestroyEntityEvent>(
       this, [this](DestroyEntityEvent& event) { m_entitiesToDestroy.push_back(event.getEntity()); });
 
   m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent& event) { this->cleanUp(); });
 }
 
-void MovementManager::init() {
+void EntityManager::init() {
   spawnEnemy(Config::Textures::Troops::TORCH_RED, {200.f, 200.f});
   spawnEnemy(Config::Textures::Troops::TNT_RED, {200.f, 300.f});
 }
 
-void MovementManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
+void EntityManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
   for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
     if (Utils::aabbCollision(redSideMinion->getHitbox(), hitbox)) {
       redSideMinion->takeDmg(spellDmg);
@@ -59,7 +59,7 @@ void MovementManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
   }
 }
 
-void MovementManager::checkForTarget(sf::Vector2f position) {
+void EntityManager::checkForTarget(sf::Vector2f position) {
   Entity* target = nullptr;
 
   for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
@@ -84,7 +84,7 @@ void MovementManager::checkForTarget(sf::Vector2f position) {
   m_eventDispatcher.emit(actionEvent);
 }
 
-void MovementManager::checkCollisions() {
+void EntityManager::checkCollisions() {
   for (const std::shared_ptr<Tower>& tower : m_blueSideTowers) {
     for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
       sf::CircleShape range = tower->getRange();
@@ -124,10 +124,10 @@ void MovementManager::checkCollisions() {
 }
 
 // handles a move for an entity and does terrain collision check
-void MovementManager::handleEntityMove(sf::Sprite& sprite,
-                                       const sf::FloatRect& hitbox,
-                                       const sf::Vector2f& step,
-                                       sf::Vector2f& destination) {
+void EntityManager::handleEntityMove(sf::Sprite& sprite,
+                                     const sf::FloatRect& hitbox,
+                                     const sf::Vector2f& step,
+                                     sf::Vector2f& destination) {
   sf::FloatRect newXHitbox = hitbox;
   newXHitbox.position.x += step.x;
 
@@ -150,11 +150,11 @@ void MovementManager::handleEntityMove(sf::Sprite& sprite,
   }
 }
 
-void MovementManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
+void EntityManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
   m_enemies.push_back(std::make_shared<Enemy>(m_eventDispatcher, texturePath, position));
 }
 
-void MovementManager::cleanUp() {
+void EntityManager::cleanUp() {
   for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
     for (int j = 0; j < m_enemies.size(); ++j) {
       if (m_enemies[j].get() == m_entitiesToDestroy[i]) {

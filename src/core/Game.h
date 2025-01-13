@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-
 #include "../components/Camera.h"
 #include "../components/Map.h"
 #include "../components/buildings/Building.h"
@@ -11,8 +9,9 @@
 #include "../entities/Player.h"
 #include "../rendering/TextRenderer.h"
 #include "../systems/BuildingManager.h"
-#include "../systems/MovementManager.h"
+#include "../systems/EntityManager.h"
 #include "Event.h"
+#include "Window.h"
 
 class Game {
  public:
@@ -25,12 +24,12 @@ class Game {
 
  private:
   EventDispatcher m_eventDispatcher;
-  sf::RenderWindow m_window;
+  Window m_window;
   Camera m_camera;
 
   Player m_player;
   TextRenderer m_textRenderer;
-  MovementManager m_movementManager;
+  EntityManager m_entityManager;
 
   BuildingManager m_buildingManager;
 
@@ -40,21 +39,11 @@ class Game {
 
   std::vector<std::shared_ptr<Enemy>> m_enemies;
 
-  void releaseCursor();
-  void confineCursorToWindow();
-
-  void handleCursorOnEdge();
-
-  sf::Clock m_spawnClock;
-  int m_minionsSpawned = 0;
-  bool m_spawnCycleActive = false;
-
   std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
   std::vector<std::shared_ptr<Minion>> m_redSideMinions;
 
   std::vector<std::shared_ptr<Tower>> m_blueSideTowers;
   std::vector<std::shared_ptr<Tower>> m_redSideTowers;
 
-  void spawnMinions(Building& spawn, Building& targetBuilding);
   void processSFMLEvents();
 };

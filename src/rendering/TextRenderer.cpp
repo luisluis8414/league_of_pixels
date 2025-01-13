@@ -17,7 +17,7 @@ TextRenderer::TextRenderer(EventDispatcher& dispatcher, const std::string& fontP
       },
       RenderLayer::TEXT);
 
-  m_eventDispatcher.subscribe<SecondEvent>(this, [this](SecondEvent& event) { m_fps = 0; });
+  m_eventDispatcher.subscribe<SecondsEvent>(this, [this](SecondsEvent& event) { m_fps = 0; });
 }
 
 void TextRenderer::setText(const std::string& text) {

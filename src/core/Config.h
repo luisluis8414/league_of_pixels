@@ -62,5 +62,8 @@ inline const float SCOLLSPEED = 20.f;
 
 namespace Minions {
 inline const float SPAWN_TIMER = 10.0f;
-}
+
+inline const sf::Vector2f BLUE_SIDE_SPAWN = {500.f, 550.f};
+inline const sf::Vector2f RED_SIDE_SPAWN = {3620.f, 550.f};
+}  // namespace Minions
 }  // namespace Config
