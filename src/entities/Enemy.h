@@ -6,7 +6,7 @@
 #include "../core/Event.h"
 #include "Entity.h"
 
-enum class EnemyAnimationState { Idle, Walking, Hitting };
+enum class EnemyAnimationState { IDLE, WALKING, Hitting };
 
 class Enemy : public Entity {
  public:
@@ -23,7 +23,9 @@ class Enemy : public Entity {
   void updateHealthBar() override;
   void updateHitbox() override;
 
-  void move(float deltaTime) override;
+  void setWalking() override;
+  void setIdle() override;
+
   void onAnimationEnd() override;
 
   void onUpdate(float deltaTime) override;
@@ -32,8 +34,8 @@ class Enemy : public Entity {
   void setAnimation(EnemyAnimationState state);
 
   const std::unordered_map<EnemyAnimationState, AnimationConfig> m_animationConfigs = {
-      {EnemyAnimationState::Idle, {0, 5, 0.1f}},
-      {EnemyAnimationState::Walking, {6, 11, 0.1f}},
+      {EnemyAnimationState::IDLE, {0, 5, 0.1f}},
+      {EnemyAnimationState::WALKING, {6, 11, 0.1f}},
       {EnemyAnimationState::Hitting, {6, 11, 0.1f}},
   };
 

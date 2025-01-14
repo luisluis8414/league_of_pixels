@@ -42,3 +42,13 @@ void Archer::setAnimation(ArcherAnimationState animationState) {
 void Archer::attackEntity(const Entity& entity) {
   setAnimation(ArcherAnimationState::SHOOTING);
 }
+
+void Archer::setWalking() {
+  setIdle();
+}
+
+void Archer::setIdle() {
+  if (m_state != ArcherAnimationState::IDLE) {
+    setAnimation(ArcherAnimationState::IDLE);
+  }
+}

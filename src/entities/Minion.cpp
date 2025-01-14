@@ -7,7 +7,7 @@ Minion::Minion(EventDispatcher& dispatcher,
                sf::Vector2f position,
                sf::Vector2f destination)
     : Entity(dispatcher, 192, 192, position, 0.1f, 100.f, 100.f, 5.f, EntityType::Minion, texturePath),
-      m_state(MinionAnimationState::Walking) {
+      m_state(MinionAnimationState::WALKING) {
   m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 
   m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
@@ -25,8 +25,8 @@ Minion::Minion(EventDispatcher& dispatcher,
 }
 
 void Minion::onAnimationEnd() {
-  if (m_state != MinionAnimationState::Walking) {
-    setAnimation(MinionAnimationState::Walking);
+  if (m_state != MinionAnimationState::WALKING) {
+    setAnimation(MinionAnimationState::WALKING);
   } else {
     m_currentFrame = m_startFrame;
   }
@@ -81,33 +81,6 @@ void Minion::setAnimation(MinionAnimationState animationState) {
     m_currentFrame = m_startFrame;
   }
   m_state = animationState;
-}
-
-void Minion::move(float deltaTime) {
-  sf::Vector2f direction = m_destination - m_sprite.getPosition();
-
-  float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-  constexpr float epsilon = 2.f;
-
-  if (distance > epsilon) {
-    direction /= distance;
-
-    constexpr float minDirectionThreshold = 0.01f;
-    if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
-    if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
-
-    float deltaX = direction.x * m_speed * deltaTime;
-    float deltaY = direction.y * m_speed * deltaTime;
-
-    MoveEvent moveEvent(m_sprite, m_hitbox, {deltaX, deltaY}, m_destination);
-
-    m_dispatcher.emit(moveEvent);
-
-    if (m_state != MinionAnimationState::Walking) {
-      setAnimation(MinionAnimationState::Walking);
-    }
-  }
 }
 
 void Minion::onUpdate(const float deltaTime) {
@@ -174,5 +147,15 @@ void Minion::updateHitbox() {
 }
 
 bool Minion::isHitting() const {
-  return (m_state != MinionAnimationState::Walking);
+  return (m_state != MinionAnimationState::WALKING);
+}
+
+void Minion::setWalking() {
+  if (m_state != MinionAnimationState::WALKING) {
+    setAnimation(MinionAnimationState::WALKING);
+  }
+}
+
+void Minion::setIdle() {
+  setWalking();
 }

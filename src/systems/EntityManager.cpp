@@ -21,10 +21,6 @@ EntityManager::EntityManager(EventDispatcher& dispatcher,
       m_redSideMinions(redSideMinions),
       m_blueSideTowers(blueSideTowers),
       m_minionsManager(dispatcher, blueSideMinions, redSideMinions) {
-  m_eventDispatcher.subscribe<MoveEvent>(this, [this](MoveEvent& moveEvent) {
-    this->handleEntityMove(
-        moveEvent.getSprite(), moveEvent.getHitbox(), moveEvent.getStep(), moveEvent.getDestination());
-  });
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->checkCollisions(); });
@@ -120,33 +116,6 @@ void EntityManager::checkCollisions() {
       CollisionEvent collisionEvent(m_player, *redSideMinion);
       m_eventDispatcher.emit(collisionEvent);
     }
-  }
-}
-
-// handles a move for an entity and does terrain collision check
-void EntityManager::handleEntityMove(sf::Sprite& sprite,
-                                     const sf::FloatRect& hitbox,
-                                     const sf::Vector2f& step,
-                                     sf::Vector2f& destination) {
-  sf::FloatRect newXHitbox = hitbox;
-  newXHitbox.position.x += step.x;
-
-  sf::FloatRect newYHitbox = hitbox;
-  newYHitbox.position.y += step.y;
-
-  bool canMoveX = Map::isTileWalkable(newXHitbox);
-  bool canMoveY = Map::isTileWalkable(newYHitbox);
-
-  if (canMoveX) {
-    sprite.move({step.x, 0.f});
-  } else {
-    destination.x = sprite.getPosition().x;
-  }
-
-  if (canMoveY) {
-    sprite.move({0.f, step.y});
-  } else {
-    destination.y = sprite.getPosition().y;
   }
 }
 

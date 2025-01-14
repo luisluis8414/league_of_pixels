@@ -28,4 +28,7 @@ class Archer : public Entity {
 
   void updateHealthBar() {};
   void updateHitbox() {};
+
+  void setWalking() override;
+  void setIdle() override;
 };

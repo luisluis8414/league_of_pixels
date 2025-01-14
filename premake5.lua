@@ -15,11 +15,6 @@ project "LeagueOfPixels"
    includedirs { "include" }
 
    libdirs { "lib" }
-   links { 
-      "sfml-graphics-d", 
-      "sfml-window-d", 
-      "sfml-system-d", 
-   }
 
    filter "configurations:Debug"
       defines { "DEBUG" }
@@ -30,6 +25,11 @@ project "LeagueOfPixels"
          "{COPY} vendor/SFML-3.0.0/bin/sfml-system-d-3.dll %{cfg.targetdir}",
          "{COPY} resources %{cfg.targetdir}/resources",
      }
+     links { 
+      "sfml-graphics-d", 
+      "sfml-window-d", 
+      "sfml-system-d", 
+   }
      
 
    filter "configurations:Release"
@@ -39,7 +39,12 @@ project "LeagueOfPixels"
          "{COPY} vendor/SFML-3.0.0/bin/sfml-graphics-3.dll %{cfg.targetdir}",
          "{COPY} vendor/SFML-3.0.0/bin/sfml-window-3.dll %{cfg.targetdir}",
          "{COPY} vendor/SFML-3.0.0/bin/sfml-system-3.dll %{cfg.targetdir}",
-         "{COPY} resources %{cfg.targetdir}",
+         "{COPY} resources %{cfg.targetdir}/resources",
+      }
+      links { 
+         "sfml-graphics", 
+         "sfml-window", 
+         "sfml-system", 
       }
 
    filter { "system:windows", "action:vs*" }

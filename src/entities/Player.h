@@ -62,7 +62,8 @@ class Player : public Entity {
   void updateHealthBar() override;
   void updateHitbox() override;
 
-  void move(float deltaTime) override;
+  void setWalking() override;
+  void setIdle() override;
   // void updateAnimation(float deltaTime) override;
   void onAnimationEnd() override;
 

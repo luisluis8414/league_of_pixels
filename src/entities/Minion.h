@@ -6,7 +6,7 @@
 #include "../core/Event.h"
 #include "Entity.h"
 
-enum class MinionAnimationState { Walking, Hitting, Dying };
+enum class MinionAnimationState { WALKING, Hitting, Dying };
 
 class Minion : public Entity {
  public:
@@ -27,8 +27,10 @@ class Minion : public Entity {
   void updateHealthBar() override;
   void updateHitbox() override;
 
-  void move(float deltaTime) override;
   void onAnimationEnd() override;
+
+  void setWalking() override;
+  void setIdle() override;
 
   void onUpdate(float deltaTime) override;
   void onDraw(DrawEvent& event) override;
@@ -36,7 +38,7 @@ class Minion : public Entity {
   void setAnimation(MinionAnimationState state);
 
   const std::unordered_map<MinionAnimationState, AnimationConfig> m_animationConfigs = {
-      {MinionAnimationState::Walking, {0, 5, 0.1f}},
+      {MinionAnimationState::WALKING, {0, 5, 0.1f}},
       {MinionAnimationState::Hitting, {6, 15, 0.1f}},
       {MinionAnimationState::Dying, {16, 22, 0.1f}},
   };

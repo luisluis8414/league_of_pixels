@@ -4,7 +4,7 @@
 
 Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 1000.f, 10.f, EntityType::Enemy, texturePath),
-      m_state(EnemyAnimationState::Idle) {
+      m_state(EnemyAnimationState::IDLE) {
   m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 
   m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
@@ -22,8 +22,8 @@ Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Ve
 }
 
 void Enemy::onAnimationEnd() {
-  if (m_state != EnemyAnimationState::Idle) {
-    setAnimation(EnemyAnimationState::Idle);
+  if (m_state != EnemyAnimationState::IDLE) {
+    setAnimation(EnemyAnimationState::IDLE);
   } else {
     m_currentFrame = m_startFrame;
   }
@@ -67,37 +67,6 @@ void Enemy::setAnimation(EnemyAnimationState animationState) {
   m_state = animationState;
 }
 
-void Enemy::move(float deltaTime) {
-  sf::Vector2f direction = m_destination - m_sprite.getPosition();
-
-  float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-  constexpr float epsilon = 2.f;
-
-  if (distance > epsilon) {
-    direction /= distance;
-
-    constexpr float minDirectionThreshold = 0.01f;
-    if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
-    if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
-
-    float deltaX = direction.x * m_speed * deltaTime;
-    float deltaY = direction.y * m_speed * deltaTime;
-
-    MoveEvent moveEvent(m_sprite, m_hitbox, {deltaX, deltaY}, m_destination);
-
-    m_dispatcher.emit(moveEvent);
-
-    if (m_state != EnemyAnimationState::Walking) {
-      setAnimation(EnemyAnimationState::Walking);
-    }
-  } else {
-    if (m_state != EnemyAnimationState::Idle) {
-      setAnimation(EnemyAnimationState::Idle);
-    }
-  }
-}
-
 void Enemy::onUpdate(const float deltaTime) {
   updateHealthBar();
   updateHitbox();
@@ -138,4 +107,16 @@ void Enemy::updateHitbox() {
 
 bool Enemy::isHitting() const {
   return m_state == EnemyAnimationState::Hitting;
+}
+
+void Enemy::setWalking() {
+  if (m_state != EnemyAnimationState::WALKING) {
+    setAnimation(EnemyAnimationState::WALKING);
+  }
+}
+
+void Enemy::setIdle() {
+  if (m_state != EnemyAnimationState::IDLE) {
+    setAnimation(EnemyAnimationState::IDLE);
+  }
 }

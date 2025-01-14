@@ -22,7 +22,6 @@ enum class EventType {
   MOUSE_CLICKED,
   COLLISION_EVENT,
   TARGET_EVENT,
-  MOVE_EVENT,
   SCROLL_EVENT,
   CENTER_CAMERA_EVENT,
   CURSOR_ON_EDGE_EVENT,
@@ -279,35 +278,6 @@ class AbilityDmgEvent : public Event {
  private:
   sf::FloatRect m_hitbox;
   float m_Spelldmg;
-};
-
-class MoveEvent : public Event {
- public:
-  MoveEvent(sf::Sprite& sprite, const sf::FloatRect& hitbox, const sf::Vector2f& step, sf::Vector2f& destination)
-      : Event(EventType::MOVE_EVENT), m_sprite(sprite), m_hitbox(hitbox), m_step(step), m_destination(destination) {};
-
-  const std::string getName() const override {
-    return "Move Event";
-  }
-
-  sf::Sprite& getSprite() const {
-    return m_sprite;
-  }
-  const sf::Vector2f& getStep() const {
-    return m_step;
-  }
-  const sf::FloatRect& getHitbox() const {
-    return m_hitbox;
-  }
-  sf::Vector2f& getDestination() {
-    return m_destination;
-  }
-
- private:
-  sf::Sprite& m_sprite;
-  const sf::Vector2f& m_step;
-  const sf::FloatRect& m_hitbox;
-  sf::Vector2f& m_destination;
 };
 
 class ScrollEvent : public Event {

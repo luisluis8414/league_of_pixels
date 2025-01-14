@@ -83,36 +83,6 @@ void Player::onAnimationEnd() {
   }
 }
 
-// void Player::updateAnimation(float deltaTime) {
-//   m_elapsedTime += deltaTime;
-
-//   if (m_elapsedTime >= m_frameTime) {
-//     m_elapsedTime = 0.f;
-
-//     m_currentFrame++;
-//     if (m_currentFrame > m_endFrame) {
-//       if (m_state != PlayerAnimationState::IDLE) {
-//         setAnimation(PlayerAnimationState::IDLE);
-//       } else {
-//         m_currentFrame = m_startFrame;
-//       }
-//     }
-
-//     if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
-//       if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
-//         if (m_target.has_value()) {
-//           m_target.value()->takeDmg(m_physicalDmg);
-//         }
-//       }
-//     }
-
-//     int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
-//     int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-//     m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
-//     m_sprite.setTextureRect(m_frameRect);
-//   }
-// }
-
 void Player::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
   window.draw(m_sprite);
@@ -242,35 +212,15 @@ void Player::setAnimation(PlayerAnimationState animationState) {
   m_state = animationState;
 }
 
-void Player::move(float deltaTime) {
-  if (isHitting()) return;
-  sf::Vector2f direction = m_destination - m_sprite.getPosition();
+void Player::setWalking() {
+  if (m_state != PlayerAnimationState::WALKING) {
+    setAnimation(PlayerAnimationState::WALKING);
+  }
+}
 
-  float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-  constexpr float epsilon = 2.f;
-
-  if (distance > epsilon) {
-    direction /= distance;
-
-    constexpr float minDirectionThreshold = 0.01f;
-    if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
-    if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
-
-    float deltaX = direction.x * m_speed * deltaTime;
-    float deltaY = direction.y * m_speed * deltaTime;
-
-    MoveEvent moveEvent(m_sprite, m_hitbox, {deltaX, deltaY}, m_destination);
-
-    m_dispatcher.emit(moveEvent);
-
-    if (m_state != PlayerAnimationState::WALKING) {
-      setAnimation(PlayerAnimationState::WALKING);
-    }
-  } else {
-    if (m_state != PlayerAnimationState::IDLE) {
-      setAnimation(PlayerAnimationState::IDLE);
-    }
+void Player::setIdle() {
+  if (m_state != PlayerAnimationState::IDLE) {
+    setAnimation(PlayerAnimationState::IDLE);
   }
 }
 
@@ -289,26 +239,16 @@ void Player::onUpdate(const float deltaTime) {
       }
     }
     return;
-  };
+  }
 
   if (m_target.has_value()) {
     setDestination(m_target.value()->getPosition());
     checkTargetInRange(m_target.value());
   }
 
-  move(deltaTime);
-
-  /*   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-         setAnimation(PlayerAnimationState::SlashUp);
-     }
-
-     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-         setAnimation(PlayerAnimationState::SlashUp);
-     }*/
-
-  /* if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-       setAnimation(PlayerAnimationState::SlashBehindLeft);
-   }*/
+  if (!isHitting()) {
+    move(deltaTime);
+  }
 }
 
 void Player::updateHealthBar() {

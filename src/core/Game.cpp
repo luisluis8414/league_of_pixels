@@ -43,8 +43,8 @@ void Game::run() {
     processSFMLEvents();
 
     // game tick
-    // pass deltaTime , hard coded value for debugging
-    m_eventDispatcher.emit(TickEvent(0.016f));
+    // pass deltaTime , hard coded value for debugging 0.016f
+    m_eventDispatcher.emit(TickEvent(deltaTime.asSeconds()));
 
     // render frame
     m_window.clear();

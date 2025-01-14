@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+#include "../components/Map.h"
 #include "../core/Event.h"
 
 enum class EntityType { Player, Enemy, Minion, Archer };
@@ -141,8 +142,53 @@ class Entity {
   virtual void updateHealthBar() = 0;
   virtual void updateHitbox() = 0;
 
-  virtual void move(float deltaTime) = 0;
-  // virtual void updateAnimation(float deltaTime) = 0;
+  virtual void move(float deltaTime) {
+    sf::Vector2f direction = m_destination - m_sprite.getPosition();
+
+    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+    constexpr float epsilon = 2.f;
+
+    if (distance > epsilon) {
+      direction /= distance;
+
+      constexpr float minDirectionThreshold = 0.01f;
+      if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
+      if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
+
+      float deltaX = direction.x * m_speed * deltaTime;
+      float deltaY = direction.y * m_speed * deltaTime;
+
+      {
+        sf::FloatRect newXHitbox = m_hitbox;
+        newXHitbox.position.x += deltaX;
+
+        sf::FloatRect newYHitbox = m_hitbox;
+        newYHitbox.position.y += deltaY;
+
+        bool canMoveX = Map::isTileWalkable(newXHitbox);
+        bool canMoveY = Map::isTileWalkable(newYHitbox);
+
+        if (canMoveX) {
+          m_sprite.move({deltaX, 0.f});
+        } else {
+          m_destination.x = m_sprite.getPosition().x;
+        }
+
+        if (canMoveY) {
+          m_sprite.move({0.f, deltaY});
+        } else {
+          m_destination.y = m_sprite.getPosition().y;
+        }
+      }
+      setWalking();
+    } else {
+      setIdle();
+    }
+  }
+
+  virtual void setWalking() = 0;
+  virtual void setIdle() = 0;
 
   virtual void setPosition(sf::Vector2f position) {
     m_sprite.setPosition({position.x, position.y});

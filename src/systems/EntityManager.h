@@ -37,10 +37,6 @@ class EntityManager {
 
   std::vector<Entity*> m_entitiesToDestroy;
 
-  void handleEntityMove(sf::Sprite& sprite,
-                        const sf::FloatRect& hitbox,
-                        const sf::Vector2f& step,
-                        sf::Vector2f& destination);
   void checkForTarget(sf::Vector2f position);
   void checkAbilityDmg(sf::FloatRect hitbox, float spellDmg);
 
