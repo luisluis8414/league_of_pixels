@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../core/Event.h"
 #include "Entity.h"
 
@@ -7,7 +9,7 @@ class Archer : public Entity {
  public:
   Archer(EventDispatcher& dispatcher, sf::Vector2f position, const std::string& texturePath);
 
-  void attackEntity(const Entity& entity);
+  void attackEntity(Entity& entity);
 
  private:
   ArcherAnimationState m_state;

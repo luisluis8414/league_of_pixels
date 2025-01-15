@@ -6,7 +6,7 @@ Minion::Minion(EventDispatcher& dispatcher,
                const std::string& texturePath,
                sf::Vector2f position,
                sf::Vector2f destination)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 100.f, 100.f, 5.f, EntityType::Minion, texturePath),
+    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 5.f, EntityType::Minion, texturePath),
       m_state(MinionAnimationState::WALKING) {
   m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 

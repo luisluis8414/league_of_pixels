@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/System/Clock.hpp>
+
 #include "../../core/Event.h"
 #include "../../entities/Archer.h"
 #include "Building.h"
@@ -15,9 +17,14 @@ class Tower : public Building {
 
   sf::CircleShape getRange();
 
+  void attackEntity(std::shared_ptr<Entity> entity);
+
  private:
   sf::CircleShape m_range;
   Archer m_archer;
+
+  sf::Clock m_attackCooldownClock;
+  float m_attackCooldown = 1.0f;
 
   void onDraw(DrawEvent& event);
 };

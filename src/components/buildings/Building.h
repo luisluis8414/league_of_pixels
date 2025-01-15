@@ -15,6 +15,9 @@ class Building {
 
   sf::Vector2f getCenterPosition();
 
+ protected:
+  EventDispatcher& m_eventDispatcher;
+
  private:
   sf::Texture m_texture;
   sf::Sprite m_sprite;

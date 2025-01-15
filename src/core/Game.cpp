@@ -18,7 +18,8 @@ Game::Game()
       m_map(m_eventDispatcher),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
       m_entityManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions, m_blueSideTowers),
-      m_buildingManager(m_eventDispatcher, m_blueSideTowers, m_redSideTowers) {
+      m_buildingManager(m_eventDispatcher, m_blueSideTowers, m_redSideTowers),
+      m_projectileManager(m_eventDispatcher) {
 }
 
 Game::~Game() {

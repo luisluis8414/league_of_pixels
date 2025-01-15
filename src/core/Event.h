@@ -7,6 +7,7 @@
 
 class Tower;
 class Entity;
+class Projectile;
 
 enum class RenderLayer { BACKGROUND = -1, MAP, BUILDINGS, ENTITIES, PLAYER, TEXT, UI };
 
@@ -18,6 +19,7 @@ enum class EventType {
   TICK_UPDATE,
   GAME_OVER,
   DESTROY_ENTITY,
+  DESTROY_PROJECTILE,
   KEYPRESSED,
   MOUSE_CLICKED,
   COLLISION_EVENT,
@@ -38,9 +40,6 @@ class Event {
   virtual EventType getEventType() const {
     return m_eventType;
   };
-  virtual std::string toString() const {
-    return getName();
-  }
 
  protected:
   Event(EventType type) : m_eventType(type) {
@@ -68,6 +67,8 @@ class InitEvent : public Event {
  public:
   InitEvent() : Event(EventType::INIT) {};
 
+  ~InitEvent() = default;
+
   const std::string getName() const override {
     return "Init Event";
   }
@@ -76,6 +77,8 @@ class InitEvent : public Event {
 class DrawEvent : public Event {
  public:
   DrawEvent(sf::RenderWindow& window) : Event(EventType::DRAW), m_window(window) {};
+
+  ~DrawEvent() = default;
 
   sf::RenderWindow& getWindow() const {
     return m_window;
@@ -92,6 +95,8 @@ class SecondsEvent : public Event {
  public:
   SecondsEvent() : Event(EventType::SECOND) {};
 
+  ~SecondsEvent() = default;
+
   const std::string getName() const override {
     return "Second Event";
   }
@@ -101,6 +106,8 @@ class CleanUpEvent : public Event {
  public:
   CleanUpEvent() : Event(EventType::CLEAN_UP) {};
 
+  ~CleanUpEvent() = default;
+
   const std::string getName() const override {
     return "CleanUp Event";
   }
@@ -109,6 +116,8 @@ class CleanUpEvent : public Event {
 class TickEvent : public Event {
  public:
   TickEvent(const float& deltaTime) : Event(EventType::TICK_UPDATE), m_detlaTime(deltaTime) {};
+
+  ~TickEvent() = default;
 
   const float getDeltaTime() const {
     return m_detlaTime;
@@ -125,6 +134,8 @@ class KeyPressedEvent : public Event {
  public:
   KeyPressedEvent(const sf::Keyboard::Key key_event, sf::Vector2f mousePosition)
       : Event(EventType::KEYPRESSED), m_keyEvent(key_event), m_mousePosition(mousePosition) {};
+
+  ~KeyPressedEvent() = default;
 
   const std::string getName() const override {
     return "Key Pressed Event";
@@ -146,6 +157,8 @@ class MouseRightClickEvent : public Event {
  public:
   MouseRightClickEvent(const sf::Vector2f& position) : Event(EventType::MOUSE_CLICKED), m_position(position) {};
 
+  ~MouseRightClickEvent() = default;
+
   const sf::Vector2f& getPosition() const {
     return m_position;
   }
@@ -161,6 +174,8 @@ class GameOverEvent : public Event {
  public:
   GameOverEvent() : Event(EventType::GAME_OVER) {};
 
+  ~GameOverEvent() = default;
+
   const std::string getName() const override {
     return "Key Pressed Event";
   }
@@ -170,6 +185,8 @@ class DestroyEntityEvent : public Event {
  public:
   DestroyEntityEvent(Entity* entity) : Event(EventType::DESTROY_ENTITY), m_entity(entity) {
   }
+
+  ~DestroyEntityEvent() = default;
 
   const std::string getName() const override {
     return "Destroy Entity Event";
@@ -182,10 +199,31 @@ class DestroyEntityEvent : public Event {
   Entity* m_entity;
 };
 
+class DestroyProjectileEvent : public Event {
+ public:
+  DestroyProjectileEvent(Projectile* projectile) : Event(EventType::DESTROY_PROJECTILE), m_projectile(projectile) {
+  }
+
+  ~DestroyProjectileEvent() = default;
+
+  const std::string getName() const override {
+    return "Destroy Projectile Event";
+  }
+  Projectile* getProjectile() const {
+    return m_projectile;
+  }
+
+ private:
+  Projectile* m_projectile;
+};
+
 class CollisionEvent : public Event {
  public:
   CollisionEvent(const Entity& entityA, const Entity& entityB)
       : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
+
+  ~CollisionEvent() = default;
+
   const std::string getName() const override {
     return "Collision Event";
   }
@@ -202,24 +240,23 @@ class CollisionEvent : public Event {
   const Entity& m_entityB;
 };
 
-class EnityInTowerRangeEvent : public Event {
+class RegisterProjectileEvent : public Event {
  public:
-  EnityInTowerRangeEvent(const Tower& tower, const Entity& entity)
-      : Event(EventType::ENTITY_IN_TOWER_RANGE_EVENT), m_tower(tower), m_entity(entity) {};
+  RegisterProjectileEvent(std::shared_ptr<Projectile> projectile)
+      : Event(EventType::COLLISION_EVENT), m_projectile(projectile) {};
+
+  ~RegisterProjectileEvent() = default;
+
   const std::string getName() const override {
-    return "Entity in Tower Range Event";
+    return "Register Projectile Event";
   }
 
-  const Tower& getTower() const {
-    return m_tower;
-  }
-  const Entity& getEntity() const {
-    return m_entity;
+  const std::shared_ptr<Projectile> getProjectile() {
+    return m_projectile;
   }
 
  private:
-  const Tower& m_tower;
-  const Entity& m_entity;
+  std::shared_ptr<Projectile> m_projectile;
 };
 
 enum class ActionEventType { TargetAction, MoveAction };
@@ -233,6 +270,8 @@ class ActionEvent : public Event {
         m_destination(position),
         m_actionType(actionType) {
   }
+
+  ~ActionEvent() = default;
 
   const std::string getName() const override {
     return "Action Event";
@@ -264,6 +303,8 @@ class AbilityDmgEvent : public Event {
       : Event(EventType::ABILITY_DMG_EVENT), m_Spelldmg(spellDmg), m_hitbox(hitbox) {
   }
 
+  ~AbilityDmgEvent() = default;
+
   const std::string getName() const override {
     return "Ability Dmg Event";
   }
@@ -283,6 +324,8 @@ class AbilityDmgEvent : public Event {
 class ScrollEvent : public Event {
  public:
   ScrollEvent(int x, int y, float delta) : Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
+
+  ~ScrollEvent() = default;
 
   const std::string getName() const override {
     return "Scroll Event";
@@ -319,6 +362,8 @@ class MouseOnEdgeEvent : public Event {
  public:
   MouseOnEdgeEvent(int edges) : Event(EventType::CURSOR_ON_EDGE_EVENT), m_edges(edges) {
   }
+
+  ~MouseOnEdgeEvent() = default;
 
   const std::string getName() const override {
     return "Cursor on Edge Event";

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../components/buildings/Building.h"
 #include "../core/Event.h"
 

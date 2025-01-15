@@ -10,6 +10,7 @@
 #include "../rendering/TextRenderer.h"
 #include "../systems/BuildingManager.h"
 #include "../systems/EntityManager.h"
+#include "../systems/ProjectileManager.h"
 #include "Event.h"
 #include "Window.h"
 
@@ -32,6 +33,7 @@ class Game {
   EntityManager m_entityManager;
 
   BuildingManager m_buildingManager;
+  ProjectileManager m_projectileManager;
 
   sf::Clock m_clock;
 

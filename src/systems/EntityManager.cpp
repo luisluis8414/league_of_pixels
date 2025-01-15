@@ -98,8 +98,7 @@ void EntityManager::checkCollisions() {
       float dy = circleCenter.y - closestY;
 
       if ((dx * dx + dy * dy) <= (radius * radius)) {
-        EnityInTowerRangeEvent event(*tower, *redSideMinion);
-        m_eventDispatcher.emit(event);
+        tower->attackEntity(redSideMinion);
       }
     }
   }

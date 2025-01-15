@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../../core/Config.h"
+#include "../../projectiles/projectile.h"
 
 Tower::Tower(EventDispatcher& dispatcher,
              const std::string& towerTexturePath,
@@ -20,17 +21,25 @@ Tower::Tower(EventDispatcher& dispatcher,
   m_range.setOutlineThickness(1.5f);
 
   dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); });
-
-  dispatcher.subscribe<EnityInTowerRangeEvent>(this, [this](EnityInTowerRangeEvent& event) {
-       if (&event.getTower() == this) {
-      m_archer.attackEntity(event.getEntity());
-    }
-  });
 }
 
 sf::CircleShape Tower::getRange() {
   return m_range;
 };
+
+void Tower::attackEntity(std::shared_ptr<Entity> entity) {
+  if (m_attackCooldownClock.getElapsedTime().asSeconds() >= m_attackCooldown) {
+    m_archer.attackEntity(*entity);
+
+    std::shared_ptr<Projectile> projectile = std::make_shared<Projectile>(
+        m_eventDispatcher, Config::Textures::Projectiles::ARROW, m_archer.getPosition(), entity, 500.0f);
+
+    RegisterProjectileEvent event(projectile);
+    m_eventDispatcher.emit(event);
+
+    m_attackCooldownClock.restart();
+  }
+}
 
 void Tower::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();

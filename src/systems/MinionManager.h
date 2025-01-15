@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../entities/Minion.h"
 
 class MinionManager {

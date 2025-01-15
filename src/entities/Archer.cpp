@@ -39,7 +39,7 @@ void Archer::setAnimation(ArcherAnimationState animationState) {
   m_state = animationState;
 }
 
-void Archer::attackEntity(const Entity& entity) {
+void Archer::attackEntity(Entity& entity) {
   setAnimation(ArcherAnimationState::SHOOTING);
 }
 
