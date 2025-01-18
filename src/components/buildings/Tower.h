@@ -15,16 +15,13 @@ class Tower : public Building {
         float health = 100,
         float scale = 1.0f);
 
-  sf::CircleShape getRange();
+  const sf::CircleShape& getRange();
 
   void attackEntity(std::shared_ptr<Entity> entity);
 
  private:
   sf::CircleShape m_range;
   Archer m_archer;
-
-  sf::Clock m_attackCooldownClock;
-  float m_attackCooldown = 1.0f;
 
   void onDraw(DrawEvent& event);
 };

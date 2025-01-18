@@ -43,6 +43,7 @@ void Window::confineCursorToWindow() {
 }
 
 void Window::handleCursorOnEdge() {
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) return;
   int threshold = 10;
 
   sf::Vector2i mousePos = sf::Mouse::getPosition();

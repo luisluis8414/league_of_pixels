@@ -9,14 +9,15 @@ class Archer : public Entity {
  public:
   Archer(EventDispatcher& dispatcher, sf::Vector2f position, const std::string& texturePath);
 
-  void attackEntity(Entity& entity);
+  void attackEntity(std::shared_ptr<Entity> entity);
 
  private:
   ArcherAnimationState m_state;
+  std::weak_ptr<Entity> m_target;
 
   const std::unordered_map<ArcherAnimationState, AnimationConfig> m_animationConfigs = {
       {ArcherAnimationState::IDLE, {0, 5, 0.1f}},
-      {ArcherAnimationState::SHOOTING, {25, 33, 0.1f}},
+      {ArcherAnimationState::SHOOTING, {41, 48, 0.1f, 46}},
   };
 
   void onUpdate(float deltaTime) override;
@@ -33,4 +34,6 @@ class Archer : public Entity {
 
   void setWalking() override;
   void setIdle() override;
+
+  void onDmgFrame() override;
 };

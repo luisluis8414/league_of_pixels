@@ -9,16 +9,18 @@
 #include "../entities/Entity.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
+#include "BuildingManager.h"
 #include "MinionManager.h"
 
 class EntityManager {
  public:
   EntityManager(EventDispatcher& dispatcher,
-                const Player& player,
+                std::shared_ptr<Player> player,
                 std::vector<std::shared_ptr<Enemy>>& enemies,
                 std::vector<std::shared_ptr<Minion>>& blueSideMinions,
                 std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                std::vector<std::shared_ptr<Tower>>& blueSideTowers);
+                std::vector<std::shared_ptr<Tower>>& blueSideTowers,
+                std::vector<std::shared_ptr<Tower>>& redSideTowers);
 
   ~EntityManager() = default;
 
@@ -26,8 +28,9 @@ class EntityManager {
 
  private:
   EventDispatcher& m_eventDispatcher;
+  BuildingManager m_buildingManager;
 
-  const Player& m_player;
+  std::shared_ptr<Player> m_player;
   std::vector<std::shared_ptr<Enemy>>& m_enemies;
   std::vector<std::shared_ptr<Minion>>& m_blueSideMinions;
   std::vector<std::shared_ptr<Minion>>& m_redSideMinions;

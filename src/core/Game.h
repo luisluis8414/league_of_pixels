@@ -28,11 +28,10 @@ class Game {
   Window m_window;
   Camera m_camera;
 
-  Player m_player;
+  std::shared_ptr<Player> m_player;
   TextRenderer m_textRenderer;
   EntityManager m_entityManager;
 
-  BuildingManager m_buildingManager;
   ProjectileManager m_projectileManager;
 
   sf::Clock m_clock;

@@ -1,13 +1,17 @@
 #include "Archer.h"
 
+#include <memory>
+
 #include "../core/Config.h"
+#include "../projectiles/Projectile.h"
 
 Archer::Archer(EventDispatcher& dispatcher, sf::Vector2f position, const std::string& texturePath)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 10.f, EntityType::Archer, texturePath),
       m_state(ArcherAnimationState::IDLE) {
-  m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::ENTITIES);
+  m_eventDispatcher.subscribe<DrawEvent>(
+      this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::ENTITIES);
 
-  m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
 }
 
 void Archer::onUpdate(float deltaTime) {
@@ -34,13 +38,33 @@ void Archer::setAnimation(ArcherAnimationState animationState) {
     m_startFrame = config.startFrame;
     m_endFrame = config.endFrame;
     m_frameTime = config.frameTime;
+    m_dmgFrame = 46;
     m_currentFrame = m_startFrame;
   }
   m_state = animationState;
 }
 
-void Archer::attackEntity(Entity& entity) {
+void Archer::attackEntity(std::shared_ptr<Entity> entity) {
   setAnimation(ArcherAnimationState::SHOOTING);
+
+  if (entity->getPosition().x < getPosition().x) {
+    m_sprite.setScale({-1.f, 1.f});
+  } else {
+    m_sprite.setScale({1.f, 1.});
+  }
+
+  m_target = entity;
+}
+
+void Archer::onDmgFrame() {
+  if (std::shared_ptr<Entity> target = m_target.lock()) {
+    std::shared_ptr<Projectile> projectile = std::make_shared<Projectile>(
+        m_eventDispatcher, Config::Textures::Projectiles::ARROW, getPosition(), target, 500.0f);
+
+    RegisterProjectileEvent event(projectile);
+    m_eventDispatcher.emit(event);
+    m_target.reset();
+  }
 }
 
 void Archer::setWalking() {

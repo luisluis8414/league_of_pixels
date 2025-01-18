@@ -9,16 +9,21 @@
 Game::Game()
     : m_window(m_eventDispatcher),
       m_camera(m_eventDispatcher, m_window),
-      m_player(m_eventDispatcher,
-               {600.f, 600.f},
-               Config::Textures::Spells::Garen::Q,
-               Config::Textures::Spells::Garen::W,
-               Config::Textures::Spells::Garen::E,
-               Config::Textures::Spells::Garen::R),
+      m_player(std::make_shared<Player>(m_eventDispatcher,
+                                        sf::Vector2f(600.f, 600.f),
+                                        Config::Textures::Spells::Garen::Q,
+                                        Config::Textures::Spells::Garen::W,
+                                        Config::Textures::Spells::Garen::E,
+                                        Config::Textures::Spells::Garen::R)),
       m_map(m_eventDispatcher),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
-      m_entityManager(m_eventDispatcher, m_player, m_enemies, m_blueSideMinions, m_redSideMinions, m_blueSideTowers),
-      m_buildingManager(m_eventDispatcher, m_blueSideTowers, m_redSideTowers),
+      m_entityManager(m_eventDispatcher,
+                      m_player,
+                      m_enemies,
+                      m_blueSideMinions,
+                      m_redSideMinions,
+                      m_blueSideTowers,
+                      m_redSideTowers),
       m_projectileManager(m_eventDispatcher) {
 }
 
@@ -90,7 +95,7 @@ void Game::processSFMLEvents() {
   }
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-    m_camera.centerCamera(m_player.getPosition());
+    m_camera.centerCamera(m_player->getPosition());
   };
 }
 

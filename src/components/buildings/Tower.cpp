@@ -23,22 +23,12 @@ Tower::Tower(EventDispatcher& dispatcher,
   dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); });
 }
 
-sf::CircleShape Tower::getRange() {
+const sf::CircleShape& Tower::getRange() {
   return m_range;
 };
 
 void Tower::attackEntity(std::shared_ptr<Entity> entity) {
-  if (m_attackCooldownClock.getElapsedTime().asSeconds() >= m_attackCooldown) {
-    m_archer.attackEntity(*entity);
-
-    std::shared_ptr<Projectile> projectile = std::make_shared<Projectile>(
-        m_eventDispatcher, Config::Textures::Projectiles::ARROW, m_archer.getPosition(), entity, 500.0f);
-
-    RegisterProjectileEvent event(projectile);
-    m_eventDispatcher.emit(event);
-
-    m_attackCooldownClock.restart();
-  }
+  m_archer.attackEntity(entity);
 }
 
 void Tower::onDraw(DrawEvent& event) {

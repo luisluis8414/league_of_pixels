@@ -9,12 +9,14 @@
 #include "../core/Utils.h"
 
 EntityManager::EntityManager(EventDispatcher& dispatcher,
-                             const Player& player,
+                             std::shared_ptr<Player> player,
                              std::vector<std::shared_ptr<Enemy>>& enemies,
                              std::vector<std::shared_ptr<Minion>>& blueSideMinions,
                              std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                             std::vector<std::shared_ptr<Tower>>& blueSideTowers)
+                             std::vector<std::shared_ptr<Tower>>& blueSideTowers,
+                             std::vector<std::shared_ptr<Tower>>& redSideTowers)
     : m_eventDispatcher(dispatcher),
+      m_buildingManager(dispatcher, player, blueSideTowers, redSideTowers, blueSideMinions, redSideMinions),
       m_player(player),
       m_enemies(enemies),
       m_blueSideMinions(blueSideMinions),
@@ -76,43 +78,21 @@ void EntityManager::checkForTarget(sf::Vector2f position) {
 
   if (target) actionType = ActionEventType::TargetAction;
 
-  ActionEvent actionEvent(actionType, m_player, target, position);
+  ActionEvent actionEvent(actionType, *m_player, target, position);
   m_eventDispatcher.emit(actionEvent);
 }
 
 void EntityManager::checkCollisions() {
-  for (const std::shared_ptr<Tower>& tower : m_blueSideTowers) {
-    for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
-      sf::CircleShape range = tower->getRange();
-      const sf::FloatRect& hitbox = redSideMinion->getHitbox();
-
-      sf::Vector2f circleCenter = range.getPosition();
-      float radius = range.getRadius();
-
-      sf::Vector2f rectCenter(hitbox.position.x + hitbox.size.x / 2.f, hitbox.position.y + hitbox.size.y / 2.f);
-
-      float closestX = std::max(hitbox.position.x, std::min(circleCenter.x, hitbox.position.x + hitbox.size.x));
-      float closestY = std::max(hitbox.position.y, std::min(circleCenter.y, hitbox.position.y + hitbox.size.y));
-
-      float dx = circleCenter.x - closestX;
-      float dy = circleCenter.y - closestY;
-
-      if ((dx * dx + dy * dy) <= (radius * radius)) {
-        tower->attackEntity(redSideMinion);
-      }
-    }
-  }
-
   for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
-    if (m_player.isHitting() && Utils::aabbCollision(m_player.getAttackHitbox(), enemy->getHitbox())) {
-      CollisionEvent collisionEvent(m_player, *enemy);
+    if (m_player->isHitting() && Utils::aabbCollision(m_player->getAttackHitbox(), enemy->getHitbox())) {
+      CollisionEvent collisionEvent(*m_player, *enemy);
       m_eventDispatcher.emit(collisionEvent);
     }
   }
 
   for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
-    if (m_player.isHitting() && Utils::aabbCollision(m_player.getAttackHitbox(), redSideMinion->getHitbox())) {
-      CollisionEvent collisionEvent(m_player, *redSideMinion);
+    if (m_player->isHitting() && Utils::aabbCollision(m_player->getAttackHitbox(), redSideMinion->getHitbox())) {
+      CollisionEvent collisionEvent(*m_player, *redSideMinion);
       m_eventDispatcher.emit(collisionEvent);
     }
   }
@@ -124,7 +104,7 @@ void EntityManager::spawnEnemy(const std::string& texturePath, sf::Vector2f posi
 
 void EntityManager::cleanUp() {
   for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
-    for (int j = 0; j < m_enemies.size(); ++j) {
+       for (int j = 0; j < m_enemies.size(); ++j) {
       if (m_enemies[j].get() == m_entitiesToDestroy[i]) {
         m_enemies.erase(m_enemies.begin() + j);
         break;

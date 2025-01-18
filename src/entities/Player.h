@@ -33,10 +33,10 @@ class Player : public Entity {
  public:
   Player(EventDispatcher& dispatcher,
          sf::Vector2f position,
-         std::string qTexturePath,
-         std::string wTexturePath,
-         std::string eTexturePath,
-         std::string rTexturePath);
+         const std::string& qTexturePath,
+         const std::string& wTexturePath,
+         const std::string& eTexturePath,
+         const std::string& rTexturePath);
 
   ~Player() = default;
 
@@ -46,9 +46,15 @@ class Player : public Entity {
 
   bool isHitting() const;
 
+  const bool isAlive() {
+    return m_alive;
+  }
+
  private:
   PlayerAnimationState m_state;
   sf::FloatRect m_attackHitbox;
+
+  bool m_alive = true;
 
   sf::Texture m_qTexture;
   sf::Texture m_wTexture;
@@ -59,12 +65,14 @@ class Player : public Entity {
 
   AbilityAnimationState m_qAnimationState;
 
+  void subscribe();
+
   void updateHealthBar() override;
   void updateHitbox() override;
 
   void setWalking() override;
   void setIdle() override;
-  // void updateAnimation(float deltaTime) override;
+
   void onAnimationEnd() override;
 
   void onUpdate(float deltaTime) override;

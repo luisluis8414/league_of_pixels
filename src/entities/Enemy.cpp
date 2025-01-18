@@ -5,9 +5,9 @@
 Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 1000.f, 10.f, EntityType::Enemy, texturePath),
       m_state(EnemyAnimationState::IDLE) {
-  m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
+  m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 
-  m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
 
   // m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
   //   const Entity& entityA = event.getEntityA();
@@ -80,7 +80,7 @@ void Enemy::onUpdate(const float deltaTime) {
 void Enemy::updateHealthBar() {
   if (m_currentHealth <= 0) {
     DestroyEntityEvent destroyEvent(this);
-    m_dispatcher.emit(destroyEvent);
+    m_eventDispatcher.emit(destroyEvent);
     return;
   }
   float healthPercentage = m_currentHealth / m_maxHealth;

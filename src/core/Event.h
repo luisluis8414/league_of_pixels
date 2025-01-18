@@ -393,19 +393,7 @@ class EventDispatcher {
   }
 
   void unsubscribe(void* ref) {
-    for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
-      std::vector<Subscription>& subscriptions = it->second;
-      subscriptions.erase(std::remove_if(subscriptions.begin(),
-                                         subscriptions.end(),
-                                         [ref](const Subscription& sub) { return sub.subscriber == ref; }),
-                          subscriptions.end());
-
-      if (subscriptions.empty()) {
-        it = m_subscriptions.erase(it);
-      } else {
-        ++it;
-      }
-    }
+    m_pendingUnsubscribes.push_back(ref);
   }
 
   void emit(Event& event) {
@@ -416,6 +404,8 @@ class EventDispatcher {
         subscription.callback(event);
       }
     }
+
+    processPendingUnsubscribes();
   }
 
  private:
@@ -426,4 +416,24 @@ class EventDispatcher {
   };
 
   std::unordered_map<std::type_index, std::vector<Subscription>> m_subscriptions;
+  std::vector<void*> m_pendingUnsubscribes;
+
+  void processPendingUnsubscribes() {
+    for (void* ref : m_pendingUnsubscribes) {
+      for (auto it = m_subscriptions.begin(); it != m_subscriptions.end();) {
+        std::vector<Subscription>& subscriptions = it->second;
+        subscriptions.erase(std::remove_if(subscriptions.begin(),
+                                           subscriptions.end(),
+                                           [ref](const Subscription& sub) { return sub.subscriber == ref; }),
+                            subscriptions.end());
+
+        if (subscriptions.empty()) {
+          it = m_subscriptions.erase(it);
+        } else {
+          ++it;
+        }
+      }
+    }
+    m_pendingUnsubscribes.clear();
+  }
 };

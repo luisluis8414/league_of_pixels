@@ -5,10 +5,10 @@
 
 Player::Player(EventDispatcher& dispatcher,
                sf::Vector2f position,
-               std::string qTexturePath,
-               std::string wTexturePath,
-               std::string eTexturePath,
-               std::string rTexturePath)
+               const std::string& qTexturePath,
+               const std::string& wTexturePath,
+               const std::string& eTexturePath,
+               const std::string& rTexturePath)
     : Entity(dispatcher,
              192,
              192,
@@ -36,18 +36,22 @@ Player::Player(EventDispatcher& dispatcher,
     std::cerr << "Failed to load sprite sheet: " << rTexturePath << std::endl;
   }
 
-  m_dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::PLAYER);
+  subscribe();
+}
 
-  m_dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
+void Player::subscribe() {
+  m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::PLAYER);
 
-  m_dispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
+
+  m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
     if (m_target.has_value() && m_target.value() == event.getEntity()) {
       m_target.reset();
       setDestination(m_sprite.getPosition());
     }
   });
 
-  m_dispatcher.subscribe<ActionEvent>(this, [this](ActionEvent& event) {
+  m_eventDispatcher.subscribe<ActionEvent>(this, [this](ActionEvent& event) {
     if (event.getActionType() == ActionEventType::TargetAction && event.getTarget()) {
       if (m_target != event.getTarget()) {
         setAnimation(PlayerAnimationState::WALKING);
@@ -59,7 +63,7 @@ Player::Player(EventDispatcher& dispatcher,
     }
   });
 
-  m_dispatcher.subscribe<KeyPressedEvent>(this, [this](KeyPressedEvent& event) {
+  m_eventDispatcher.subscribe<KeyPressedEvent>(this, [this](KeyPressedEvent& event) {
     if (event.getKeyboardEvent() == sf::Keyboard::Key::Q) {
       castAbility(PlayerAbilities::Q, event.getMousePosition());
     }
@@ -72,6 +76,13 @@ Player::Player(EventDispatcher& dispatcher,
     if (event.getKeyboardEvent() == sf::Keyboard::Key::R) {
       castAbility(PlayerAbilities::R, event.getMousePosition());
     }
+  });
+
+  m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent& event) {
+    if (m_currentHealth <= 0) {
+      m_alive = false;
+      m_eventDispatcher.unsubscribe(this);
+    };
   });
 }
 
@@ -164,7 +175,7 @@ void Player::updateAbilities(float deltaTime) {
     it->update(deltaTime);
     if (it->isInDmgFrame() && !it->hasEmitted()) {
       AbilityDmgEvent event(it->getHitbox(), it->getDmg());
-      m_dispatcher.emit(event);
+      m_eventDispatcher.emit(event);
       it->emit();
     }
     if (!it->isActive()) {
@@ -252,11 +263,6 @@ void Player::onUpdate(const float deltaTime) {
 }
 
 void Player::updateHealthBar() {
-  if (m_currentHealth <= 0) {
-    DestroyEntityEvent destroyEvent(this);
-    m_dispatcher.emit(destroyEvent);
-    return;
-  }
   float healthPercentage = m_currentHealth / m_maxHealth;
   m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 

@@ -43,7 +43,7 @@ class Entity {
          float physicalDmg,
          EntityType type,
          std::string texturePath)
-      : m_dispatcher(dispatcher),
+      : m_eventDispatcher(dispatcher),
         m_frameWidth(frameWidth),
         m_frameHeight(frameHeight),
         m_elapsedTime(0.f),
@@ -83,7 +83,7 @@ class Entity {
   }
 
   ~Entity() {
-    m_dispatcher.unsubscribe(this);
+    m_eventDispatcher.unsubscribe(this);
   }
 
   EntityType getType() const {
@@ -110,7 +110,7 @@ class Entity {
   }
 
  protected:
-  EventDispatcher& m_dispatcher;
+  EventDispatcher& m_eventDispatcher;
 
   sf::FloatRect m_hitbox;
 
@@ -123,6 +123,7 @@ class Entity {
   int m_currentFrame;
   float m_frameTime;
   float m_elapsedTime;
+  int m_dmgFrame = 0;
 
   int m_frameWidth;
   int m_frameHeight;
@@ -142,7 +143,7 @@ class Entity {
   virtual void updateHealthBar() = 0;
   virtual void updateHitbox() = 0;
 
-  virtual void move(float deltaTime) {
+  void move(float deltaTime) {
     sf::Vector2f direction = m_destination - m_sprite.getPosition();
 
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
@@ -197,6 +198,8 @@ class Entity {
   virtual void onUpdate(float deltaTime) = 0;
   virtual void onDraw(DrawEvent& event) = 0;
 
+  virtual void onDmgFrame() {};
+
   void setDestination(sf::Vector2f position) {
     sf::Vector2f direction = position - m_sprite.getPosition();
 
@@ -225,9 +228,9 @@ class Entity {
         onAnimationEnd();
       }
 
-      // if (shouldTriggerSpecialLogic(m_currentFrame)) {
-      //     handleSpecialLogic();
-      // }
+      if (m_currentFrame == m_dmgFrame) {
+        onDmgFrame();
+      }
 
       int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
       int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);

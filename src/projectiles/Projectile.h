@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-
+#include <memory>
 #include "../core/Event.h"
 #include "../entities/Entity.h"
 
@@ -12,8 +12,9 @@ class Projectile {
              sf::Vector2f position,
              std::shared_ptr<Entity> target,
              float velocity);
+
   ~Projectile();
-  void update(float deltatime);
+  void update(float deltaTime);
 
  private:
   EventDispatcher& m_eventDispatcher;
@@ -22,7 +23,7 @@ class Projectile {
   sf::Sprite m_sprite;
 
   sf::Vector2f m_position;
-  std::shared_ptr<Entity> m_target;
+  std::weak_ptr<Entity> m_target;
   sf::Vector2f m_direction;
   float m_velocity;
   float m_initialVelocity;
