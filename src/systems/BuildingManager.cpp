@@ -2,6 +2,7 @@
 
 #include "../components/buildings/Tower.h"
 #include "../core/Config.h"
+#include "../core/Utils.h"
 
 BuildingManager::BuildingManager(EventDispatcher& dispatcher,
                                  std::shared_ptr<Player> player,
@@ -23,43 +24,48 @@ BuildingManager::BuildingManager(EventDispatcher& dispatcher,
 }
 
 void BuildingManager::checkForTargets() {
-  for (const std::shared_ptr<Tower> tower : m_blueSideTowers) {
-    for (std::shared_ptr<Minion> minion : m_redSideMinions) {
-      if (this->isHitboxInRange(minion->getHitbox(), tower->getRange())) {
-        tower->attackEntity(minion);
+  for (const std::shared_ptr<Tower>& tower : m_blueSideTowers) {
+    std::shared_ptr<Minion> closestMinion = nullptr;
+    float closestDistance = std::numeric_limits<float>::max();
+
+    for (const std::shared_ptr<Minion>& minion : m_redSideMinions) {
+      float distance = getDistance(tower->getPosition(), minion->getPosition());
+      if (Utils::isRectInCircle(minion->getHitbox(), tower->getRange()) && distance < closestDistance) {
+        closestMinion = minion;
+        closestDistance = distance;
       }
+    }
+
+    if (closestMinion) {
+      tower->attackEntity(closestMinion);
     }
   }
 
-  for (const std::shared_ptr<Tower> tower : m_redSideTowers) {
-    for (std::shared_ptr<Minion> minion : m_blueSideMinions) {
-      if (this->isHitboxInRange(minion->getHitbox(), tower->getRange())) {
-        tower->attackEntity(minion);
+  for (const std::shared_ptr<Tower>& tower : m_redSideTowers) {
+    std::shared_ptr<Minion> closestMinion = nullptr;
+    float closestDistance = std::numeric_limits<float>::max();
+
+    for (const std::shared_ptr<Minion>& minion : m_blueSideMinions) {
+      float distance = getDistance(tower->getPosition(), minion->getPosition());
+      if (Utils::isRectInCircle(minion->getHitbox(), tower->getRange()) && distance < closestDistance) {
+        closestMinion = minion;
+        closestDistance = distance;
       }
     }
-    if (m_player->isAlive() && isHitboxInRange(m_player->getHitbox(), tower->getRange())) {
+
+    if (closestMinion) {
+      tower->attackEntity(closestMinion);
+    } else if (m_player->isAlive() && Utils::isRectInCircle(m_player->getHitbox(), tower->getRange())) {
       tower->attackEntity(m_player);
     }
   }
 }
 
-bool BuildingManager::isHitboxInRange(const sf::FloatRect& hitbox, const sf::CircleShape& range) {
-  sf::Vector2f circleCenter = range.getPosition();
-  float radius = range.getRadius();
-
-  sf::Vector2f rectCenter(hitbox.position.x + hitbox.size.x / 2.f, hitbox.position.y + hitbox.size.y / 2.f);
-
-  float closestX = std::max(hitbox.position.x, std::min(circleCenter.x, hitbox.position.x + hitbox.size.x));
-  float closestY = std::max(hitbox.position.y, std::min(circleCenter.y, hitbox.position.y + hitbox.size.y));
-
-  float dx = circleCenter.x - closestX;
-  float dy = circleCenter.y - closestY;
-
-  if ((dx * dx + dy * dy) <= (radius * radius)) {
-    return true;
-  }
-  return false;
-};
+float BuildingManager::getDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2) {
+  float dx = pos1.x - pos2.x;
+  float dy = pos1.y - pos2.y;
+  return std::sqrt(dx * dx + dy * dy);
+}
 
 void BuildingManager::initBuildings() {
   m_blueSideTowers.push_back(std::make_shared<Tower>(m_eventDispatcher,

@@ -7,13 +7,16 @@ enum class ArcherAnimationState { IDLE, SHOOTING };
 
 class Archer : public Entity {
  public:
-  Archer(EventDispatcher& dispatcher, sf::Vector2f position, const std::string& texturePath);
+  Archer(EventDispatcher& dispatcher,
+         sf::Vector2f position,
+         const std::string& texturePath,
+         std::weak_ptr<Entity>& target);
 
-  void attackEntity(std::shared_ptr<Entity> entity);
+  void attackEntity(std::weak_ptr<Entity>& target);
 
  private:
   ArcherAnimationState m_state;
-  std::weak_ptr<Entity> m_target;
+  std::weak_ptr<Entity>& m_target;
 
   const std::unordered_map<ArcherAnimationState, AnimationConfig> m_animationConfigs = {
       {ArcherAnimationState::IDLE, {0, 5, 0.1f}},

@@ -17,13 +17,13 @@ Game::Game()
                                         Config::Textures::Spells::Garen::R)),
       m_map(m_eventDispatcher),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
-      m_entityManager(m_eventDispatcher,
-                      m_player,
-                      m_enemies,
-                      m_blueSideMinions,
-                      m_redSideMinions,
-                      m_blueSideTowers,
-                      m_redSideTowers),
+      m_worldManager(m_eventDispatcher,
+                     m_player,
+                     m_enemies,
+                     m_blueSideMinions,
+                     m_redSideMinions,
+                     m_blueSideTowers,
+                     m_redSideTowers),
       m_projectileManager(m_eventDispatcher) {
 }
 
@@ -57,7 +57,7 @@ void Game::run() {
     m_eventDispatcher.emit(DrawEvent(m_window));
     m_window.display();
 
-    // emit each second event
+    // emit event each second
     if (secondsClock.getElapsedTime().asSeconds() >= 1.0f) {
       m_eventDispatcher.emit(SecondsEvent());
       secondsClock.restart();

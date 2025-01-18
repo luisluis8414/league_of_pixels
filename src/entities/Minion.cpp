@@ -5,14 +5,21 @@
 Minion::Minion(EventDispatcher& dispatcher,
                const std::string& texturePath,
                sf::Vector2f position,
-               sf::Vector2f destination)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 5.f, EntityType::Minion, texturePath),
+               sf::Vector2f destination,
+               sf::Color healthbarColor)
+    : Entity(dispatcher, 192, 192, position, 0.1f, 100.f, 100.f, 5.f, EntityType::Minion, texturePath),
       m_state(MinionAnimationState::WALKING) {
   m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
 
   setDestination(destination);
+
+  m_healthBarBackground.setSize({50.f, 5.f});
+  m_healthBarBackground.setFillColor(sf::Color::Black);
+
+  m_healthBarForeground.setSize({50.f, 5.f});
+  m_healthBarForeground.setFillColor(healthbarColor);
 
   m_eventDispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
     const Entity& entityA = event.getEntityA();
@@ -100,11 +107,11 @@ void Minion::updateHealthBar() {
     return;
   }
   float healthPercentage = m_currentHealth / m_maxHealth;
-  m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
+  m_healthBarForeground.setSize({healthPercentage * 50.f, 5.f});
 
   sf::FloatRect bounds = m_sprite.getGlobalBounds();
   float healthBarX = bounds.position.x + (bounds.size.x / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
-  float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 25.f;  // offset for spacing from top
+  float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 60.f;  // offset for spacing from top
   m_healthBarBackground.setPosition({healthBarX, healthBarY});
   m_healthBarForeground.setPosition({healthBarX, healthBarY});
 }

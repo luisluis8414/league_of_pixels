@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../../core/Config.h"
+#include "../../core/Utils.h"
 #include "../../projectiles/projectile.h"
 
 Tower::Tower(EventDispatcher& dispatcher,
@@ -12,8 +13,8 @@ Tower::Tower(EventDispatcher& dispatcher,
              float health,
              float scale)
     : Building(dispatcher, towerTexturePath, position, health, scale),
-      m_archer(dispatcher, {position.x + 65, position.y + 75}, archerTexturePath) {
-  m_range.setRadius(200.f);
+      m_archer(dispatcher, {position.x + 65, position.y + 75}, archerTexturePath, m_target) {
+  m_range.setRadius(250.f);
   m_range.setOrigin({m_range.getRadius(), m_range.getRadius()});
   m_range.setPosition(getCenterPosition());
   m_range.setFillColor(sf::Color(0, 0, 0, 0));
@@ -27,8 +28,23 @@ const sf::CircleShape& Tower::getRange() {
   return m_range;
 };
 
+const sf::Vector2f Tower::getPosition() {
+  return m_archer.getPosition();
+}
+
 void Tower::attackEntity(std::shared_ptr<Entity> entity) {
-  m_archer.attackEntity(entity);
+  if (!hasTarget()) {
+    m_target = entity;
+  }
+  m_archer.attackEntity(m_target);
+}
+
+bool Tower::hasTarget() {
+  if (std::shared_ptr<Entity> target = m_target.lock()) {
+    return !m_target.expired() && Utils::isRectInCircle(target->getHitbox(), getRange());
+  } else {
+    return false;
+  }
 }
 
 void Tower::onDraw(DrawEvent& event) {

@@ -12,17 +12,17 @@
 #include "BuildingManager.h"
 #include "MinionManager.h"
 
-class EntityManager {
+class WorldManager {
  public:
-  EntityManager(EventDispatcher& dispatcher,
-                std::shared_ptr<Player> player,
-                std::vector<std::shared_ptr<Enemy>>& enemies,
-                std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                std::vector<std::shared_ptr<Tower>>& blueSideTowers,
-                std::vector<std::shared_ptr<Tower>>& redSideTowers);
+  WorldManager(EventDispatcher& dispatcher,
+               std::shared_ptr<Player> player,
+               std::vector<std::shared_ptr<Enemy>>& enemies,
+               std::vector<std::shared_ptr<Minion>>& blueSideMinions,
+               std::vector<std::shared_ptr<Minion>>& redSideMinions,
+               std::vector<std::shared_ptr<Tower>>& blueSideTowers,
+               std::vector<std::shared_ptr<Tower>>& redSideTowers);
 
-  ~EntityManager() = default;
+  ~WorldManager() = default;
 
   void checkCollisions();
 

@@ -9,8 +9,8 @@
 #include "../entities/Player.h"
 #include "../rendering/TextRenderer.h"
 #include "../systems/BuildingManager.h"
-#include "../systems/EntityManager.h"
 #include "../systems/ProjectileManager.h"
+#include "../systems/WorldManager.h"
 #include "Event.h"
 #include "Window.h"
 
@@ -30,7 +30,7 @@ class Game {
 
   std::shared_ptr<Player> m_player;
   TextRenderer m_textRenderer;
-  EntityManager m_entityManager;
+  WorldManager m_worldManager;
 
   ProjectileManager m_projectileManager;
 

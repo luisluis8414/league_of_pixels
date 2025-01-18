@@ -33,5 +33,5 @@ class BuildingManager {
   void initBuildings();
 
   void checkForTargets();
-  bool isHitboxInRange(const sf::FloatRect& hitbox, const sf::CircleShape& range);
+  float getDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2);
 };

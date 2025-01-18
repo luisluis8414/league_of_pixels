@@ -1,4 +1,4 @@
-#include "EntityManager.h"
+#include "WorldManager.h"
 
 #include <iostream>
 #include <vector>
@@ -8,13 +8,13 @@
 #include "../core/Event.h"
 #include "../core/Utils.h"
 
-EntityManager::EntityManager(EventDispatcher& dispatcher,
-                             std::shared_ptr<Player> player,
-                             std::vector<std::shared_ptr<Enemy>>& enemies,
-                             std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                             std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                             std::vector<std::shared_ptr<Tower>>& blueSideTowers,
-                             std::vector<std::shared_ptr<Tower>>& redSideTowers)
+WorldManager::WorldManager(EventDispatcher& dispatcher,
+                           std::shared_ptr<Player> player,
+                           std::vector<std::shared_ptr<Enemy>>& enemies,
+                           std::vector<std::shared_ptr<Minion>>& blueSideMinions,
+                           std::vector<std::shared_ptr<Minion>>& redSideMinions,
+                           std::vector<std::shared_ptr<Tower>>& blueSideTowers,
+                           std::vector<std::shared_ptr<Tower>>& redSideTowers)
     : m_eventDispatcher(dispatcher),
       m_buildingManager(dispatcher, player, blueSideTowers, redSideTowers, blueSideMinions, redSideMinions),
       m_player(player),
@@ -39,12 +39,12 @@ EntityManager::EntityManager(EventDispatcher& dispatcher,
   m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent& event) { this->cleanUp(); });
 }
 
-void EntityManager::init() {
+void WorldManager::init() {
   spawnEnemy(Config::Textures::Troops::TORCH_RED, {200.f, 200.f});
   spawnEnemy(Config::Textures::Troops::TNT_RED, {200.f, 300.f});
 }
 
-void EntityManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
+void WorldManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
   for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
     if (Utils::aabbCollision(redSideMinion->getHitbox(), hitbox)) {
       redSideMinion->takeDmg(spellDmg);
@@ -57,7 +57,7 @@ void EntityManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
   }
 }
 
-void EntityManager::checkForTarget(sf::Vector2f position) {
+void WorldManager::checkForTarget(sf::Vector2f position) {
   Entity* target = nullptr;
 
   for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
@@ -82,7 +82,7 @@ void EntityManager::checkForTarget(sf::Vector2f position) {
   m_eventDispatcher.emit(actionEvent);
 }
 
-void EntityManager::checkCollisions() {
+void WorldManager::checkCollisions() {
   for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
     if (m_player->isHitting() && Utils::aabbCollision(m_player->getAttackHitbox(), enemy->getHitbox())) {
       CollisionEvent collisionEvent(*m_player, *enemy);
@@ -98,13 +98,13 @@ void EntityManager::checkCollisions() {
   }
 }
 
-void EntityManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
+void WorldManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
   m_enemies.push_back(std::make_shared<Enemy>(m_eventDispatcher, texturePath, position));
 }
 
-void EntityManager::cleanUp() {
+void WorldManager::cleanUp() {
   for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
-       for (int j = 0; j < m_enemies.size(); ++j) {
+    for (int j = 0; j < m_enemies.size(); ++j) {
       if (m_enemies[j].get() == m_entitiesToDestroy[i]) {
         m_enemies.erase(m_enemies.begin() + j);
         break;

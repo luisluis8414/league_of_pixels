@@ -3,7 +3,7 @@
 
 namespace Config {
 namespace Settings {
-inline static const bool showHitboxes = false;
+inline static const bool showHitboxes = true;
 }
 
 namespace Fonts {

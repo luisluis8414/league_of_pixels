@@ -5,9 +5,13 @@
 #include "../core/Config.h"
 #include "../projectiles/Projectile.h"
 
-Archer::Archer(EventDispatcher& dispatcher, sf::Vector2f position, const std::string& texturePath)
+Archer::Archer(EventDispatcher& dispatcher,
+               sf::Vector2f position,
+               const std::string& texturePath,
+               std::weak_ptr<Entity>& target)
     : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 10.f, EntityType::Archer, texturePath),
-      m_state(ArcherAnimationState::IDLE) {
+      m_state(ArcherAnimationState::IDLE),
+      m_target(target) {
   m_eventDispatcher.subscribe<DrawEvent>(
       this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::ENTITIES);
 
@@ -44,16 +48,18 @@ void Archer::setAnimation(ArcherAnimationState animationState) {
   m_state = animationState;
 }
 
-void Archer::attackEntity(std::shared_ptr<Entity> entity) {
+void Archer::attackEntity(std::weak_ptr<Entity>& target) {
   setAnimation(ArcherAnimationState::SHOOTING);
 
-  if (entity->getPosition().x < getPosition().x) {
-    m_sprite.setScale({-1.f, 1.f});
-  } else {
-    m_sprite.setScale({1.f, 1.});
+  if (std::shared_ptr<Entity> target = m_target.lock()) {
+    if (target->getPosition().x < getPosition().x) {
+      m_sprite.setScale({-1.f, 1.f});
+    } else {
+      m_sprite.setScale({1.f, 1.});
+    }
   }
 
-  m_target = entity;
+  m_target = target;
 }
 
 void Archer::onDmgFrame() {

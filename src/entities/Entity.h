@@ -101,7 +101,7 @@ class Entity {
     return sf::Vector2f(currentPosition.x + bounds.size.x / 2.f, currentPosition.y + bounds.size.y / 2.f);
   }
 
-  sf::Vector2f getPosition() {
+  const sf::Vector2f getPosition() {
     return m_sprite.getPosition();
   }
 

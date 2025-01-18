@@ -25,15 +25,17 @@ void MinionManager::spawnMinions() {
   if (m_spawnCycleActive) {
     float elapsed = m_spawnClock.getElapsedTime().asSeconds();
 
-    if (elapsed >= 3.f && m_minionsSpawned < 3) {
+    if (elapsed >= 1.f && m_minionsSpawned < 3) {
       m_blueSideMinions.push_back(std::make_shared<Minion>(m_eventDispatcher,
                                                            Config::Textures::Troops::MINIONS_BLUE,
                                                            Config::Minions::BLUE_SIDE_SPAWN,
-                                                           Config::Minions::RED_SIDE_SPAWN));
+                                                           Config::Minions::RED_SIDE_SPAWN,
+                                                           sf::Color::Blue));
       m_redSideMinions.push_back(std::make_shared<Minion>(m_eventDispatcher,
                                                           Config::Textures::Troops::MINIONS_RED,
                                                           Config::Minions::RED_SIDE_SPAWN,
-                                                          Config::Minions::BLUE_SIDE_SPAWN));
+                                                          Config::Minions::BLUE_SIDE_SPAWN,
+                                                          sf::Color::Red));
 
       m_spawnClock.restart();
       m_minionsSpawned++;

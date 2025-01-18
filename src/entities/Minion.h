@@ -10,7 +10,11 @@ enum class MinionAnimationState { WALKING, Hitting, Dying };
 
 class Minion : public Entity {
  public:
-  Minion(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, sf::Vector2f destination);
+  Minion(EventDispatcher& dispatcher,
+         const std::string& texturePath,
+         sf::Vector2f position,
+         sf::Vector2f destination,
+         sf::Color healthbarColor);
 
   ~Minion() = default;
 
@@ -23,6 +27,8 @@ class Minion : public Entity {
  private:
   MinionAnimationState m_state;
   sf::FloatRect m_attackHitbox;
+
+  sf::Color m_healthBarColor;
 
   void updateHealthBar() override;
   void updateHitbox() override;

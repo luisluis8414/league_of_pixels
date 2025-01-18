@@ -10,15 +10,13 @@ class TextRenderer {
  public:
   TextRenderer(EventDispatcher& dispatcher, const std::string& fontPath);
 
-  void setText(const std::string& text);
-
   void draw(sf::RenderWindow& window);
 
  private:
   EventDispatcher& m_eventDispatcher;
 
   sf::Font m_font;
-  sf::Text m_text;
 
   int m_fps = 0;
+  sf::Text m_fpsText;
 };
