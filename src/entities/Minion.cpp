@@ -20,15 +20,6 @@ Minion::Minion(EventDispatcher& dispatcher,
 
   m_healthBarForeground.setSize({50.f, 5.f});
   m_healthBarForeground.setFillColor(healthbarColor);
-
-  m_eventDispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
-    const Entity& entityA = event.getEntityA();
-    const Entity& entityB = event.getEntityB();
-
-    if (&entityA == this || &entityB == this) {
-      // onCollision();
-    }
-  });
 }
 
 void Minion::onAnimationEnd() {

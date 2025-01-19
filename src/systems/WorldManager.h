@@ -11,6 +11,7 @@
 #include "../entities/Player.h"
 #include "BuildingManager.h"
 #include "MinionManager.h"
+#include "ProjectileManager.h"
 
 class WorldManager {
  public:
@@ -24,11 +25,10 @@ class WorldManager {
 
   ~WorldManager() = default;
 
-  void checkCollisions();
-
  private:
   EventDispatcher& m_eventDispatcher;
   BuildingManager m_buildingManager;
+  ProjectileManager m_projectileManager;
 
   std::shared_ptr<Player> m_player;
   std::vector<std::shared_ptr<Enemy>>& m_enemies;
@@ -40,11 +40,12 @@ class WorldManager {
 
   std::vector<Entity*> m_entitiesToDestroy;
 
+  void init();
+
   void checkForTarget(sf::Vector2f position);
   void checkAbilityDmg(sf::FloatRect hitbox, float spellDmg);
 
   void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
-  void init();
 
   void cleanUp();
 };

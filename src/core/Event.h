@@ -5,7 +5,6 @@
 #include <typeindex>
 #include <unordered_map>
 
-class Tower;
 class Entity;
 class Projectile;
 
@@ -16,19 +15,16 @@ enum class EventType {
   DRAW,
   SECOND,
   CLEAN_UP,
-  TICK_UPDATE,
+  TICK,
   GAME_OVER,
   DESTROY_ENTITY,
   DESTROY_PROJECTILE,
   KEYPRESSED,
   MOUSE_CLICKED,
-  COLLISION_EVENT,
-  TARGET_EVENT,
-  SCROLL_EVENT,
-  CENTER_CAMERA_EVENT,
+  REGISER_PROJECTILE,
+  ACTION_EVENT,
   CURSOR_ON_EDGE_EVENT,
   ABILITY_DMG_EVENT,
-  ENTITY_IN_TOWER_RANGE_EVENT
 };
 
 class Event {
@@ -45,23 +41,7 @@ class Event {
   Event(EventType type) : m_eventType(type) {
   }
   EventType m_eventType;
-  bool m_handled = false;
 };
-
-// class PlayerMovedEvent : public Event {
-// public:
-//	PlayerMovedEvent(int x, int y) : m_x(x), m_y(y) {};
-//	int GetX() const { return m_x; }
-//	int GetY() const { return m_y; }
-//
-//	std::string ToString() const override {
-//		std::stringstream ss;
-//		ss << "PlayerMovedEvent: x: " << m_x << ", y: " << m_y;
-//		return ss.str();
-//	}
-// private:
-//	int m_x, m_y;
-// };
 
 class InitEvent : public Event {
  public:
@@ -115,7 +95,7 @@ class CleanUpEvent : public Event {
 
 class TickEvent : public Event {
  public:
-  TickEvent(const float& deltaTime) : Event(EventType::TICK_UPDATE), m_detlaTime(deltaTime) {};
+  TickEvent(const float& deltaTime) : Event(EventType::TICK), m_detlaTime(deltaTime) {};
 
   ~TickEvent() = default;
 
@@ -217,33 +197,10 @@ class DestroyProjectileEvent : public Event {
   Projectile* m_projectile;
 };
 
-class CollisionEvent : public Event {
- public:
-  CollisionEvent(const Entity& entityA, const Entity& entityB)
-      : Event(EventType::COLLISION_EVENT), m_entityA(entityA), m_entityB(entityB) {};
-
-  ~CollisionEvent() = default;
-
-  const std::string getName() const override {
-    return "Collision Event";
-  }
-
-  const Entity& getEntityA() const {
-    return m_entityA;
-  }
-  const Entity& getEntityB() const {
-    return m_entityB;
-  }
-
- private:
-  const Entity& m_entityA;
-  const Entity& m_entityB;
-};
-
 class RegisterProjectileEvent : public Event {
  public:
   RegisterProjectileEvent(std::shared_ptr<Projectile> projectile)
-      : Event(EventType::COLLISION_EVENT), m_projectile(projectile) {};
+      : Event(EventType::REGISER_PROJECTILE), m_projectile(projectile) {};
 
   ~RegisterProjectileEvent() = default;
 
@@ -264,7 +221,7 @@ enum class ActionEventType { TargetAction, MoveAction };
 class ActionEvent : public Event {
  public:
   ActionEvent(const ActionEventType actionType, const Entity& targeter, Entity* target, const sf::Vector2f& position)
-      : Event(EventType::TARGET_EVENT),
+      : Event(EventType::ACTION_EVENT),
         m_actor(targeter),
         m_target(target),
         m_destination(position),
@@ -321,35 +278,6 @@ class AbilityDmgEvent : public Event {
   float m_Spelldmg;
 };
 
-class ScrollEvent : public Event {
- public:
-  ScrollEvent(int x, int y, float delta) : Event(EventType::SCROLL_EVENT), m_delta(delta), m_x(x), m_y(y) {};
-
-  ~ScrollEvent() = default;
-
-  const std::string getName() const override {
-    return "Scroll Event";
-  }
-
-  int getX() const {
-    return m_x;
-  }
-  int getY() const {
-    return m_y;
-  }
-  float getDelta() const {
-    return m_delta;
-  }
-
- private:
-  int m_x;        // X position of the mouse pointer, relative to the left of the
-                  // owner window.
-  int m_y;        // Y position of the mouse pointer, relative to the top of the
-                  // owner window.
-  float m_delta;  // Number of ticks the wheel has moved (positive is up,
-                  // negative is down)
-};
-
 enum MouseEdge {
   None = 0,
   Left = 1 << 0,   // 0001
@@ -400,7 +328,6 @@ class EventDispatcher {
     auto it = m_subscriptions.find(std::type_index(typeid(event)));
     if (it != m_subscriptions.end()) {
       for (Subscription& subscription : it->second) {
-        if (event.m_handled) break;
         subscription.callback(event);
       }
     }

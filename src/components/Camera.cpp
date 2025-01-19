@@ -5,10 +5,7 @@
 #include "../core/Config.h"
 
 Camera::Camera(EventDispatcher& dispatcher, sf::RenderWindow& window) : m_window(window) {
-  dispatcher.subscribe<ScrollEvent>(
-      this, [this](ScrollEvent& event) { handleScroll(event.getX(), event.getY(), event.getDelta()); });
-
-  dispatcher.subscribe<MouseOnEdgeEvent>(this,
+   dispatcher.subscribe<MouseOnEdgeEvent>(this,
                                          [this](MouseOnEdgeEvent& event) { handleCursorOnEdge(event.getEdges()); });
 }
 

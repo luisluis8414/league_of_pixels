@@ -22,10 +22,9 @@ WorldManager::WorldManager(EventDispatcher& dispatcher,
       m_blueSideMinions(blueSideMinions),
       m_redSideMinions(redSideMinions),
       m_blueSideTowers(blueSideTowers),
-      m_minionsManager(dispatcher, blueSideMinions, redSideMinions) {
+      m_minionsManager(dispatcher, blueSideMinions, redSideMinions),
+      m_projectileManager(m_eventDispatcher) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
-
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->checkCollisions(); });
 
   m_eventDispatcher.subscribe<MouseRightClickEvent>(
       this, [this](MouseRightClickEvent event) { this->checkForTarget(event.getPosition()); });
@@ -80,22 +79,6 @@ void WorldManager::checkForTarget(sf::Vector2f position) {
 
   ActionEvent actionEvent(actionType, *m_player, target, position);
   m_eventDispatcher.emit(actionEvent);
-}
-
-void WorldManager::checkCollisions() {
-  for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
-    if (m_player->isHitting() && Utils::aabbCollision(m_player->getAttackHitbox(), enemy->getHitbox())) {
-      CollisionEvent collisionEvent(*m_player, *enemy);
-      m_eventDispatcher.emit(collisionEvent);
-    }
-  }
-
-  for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
-    if (m_player->isHitting() && Utils::aabbCollision(m_player->getAttackHitbox(), redSideMinion->getHitbox())) {
-      CollisionEvent collisionEvent(*m_player, *redSideMinion);
-      m_eventDispatcher.emit(collisionEvent);
-    }
-  }
 }
 
 void WorldManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {

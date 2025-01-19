@@ -9,15 +9,6 @@ Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Ve
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
 
-  // m_dispatcher.subscribe<CollisionEvent>(this, [this](CollisionEvent& event) {
-  //   const Entity& entityA = event.getEntityA();
-  //   const Entity& entityB = event.getEntityB();
-
-  //   if (&entityA == this || &entityB == this) {
-  //     onCollision();
-  //   }
-  // });
-  // let them walk
   m_destination = {1800.f, 200.f};
 }
 

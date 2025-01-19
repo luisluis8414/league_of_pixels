@@ -10,10 +10,10 @@ class Camera {
 
   void centerCamera(sf::Vector2f playerPosition);
 
+  void handleScroll(int x, int y, float delta);
+
  private:
   sf::RenderWindow& m_window;
-
-  void handleScroll(int x, int y, float delta);
 
   void handleCursorOnEdge(int edgeMask);
 };

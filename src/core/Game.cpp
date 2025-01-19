@@ -23,8 +23,7 @@ Game::Game()
                      m_blueSideMinions,
                      m_redSideMinions,
                      m_blueSideTowers,
-                     m_redSideTowers),
-      m_projectileManager(m_eventDispatcher) {
+                     m_redSideTowers) {
 }
 
 Game::~Game() {
@@ -89,8 +88,7 @@ void Game::processSFMLEvents() {
       sf::View newView(sf::FloatRect({0.f, 0.f}, {(float)resizedEvent->size.x, (float)resizedEvent->size.y}));
       m_window.setView(newView);
     } else if (const sf::Event::MouseWheelScrolled* resizedEvent = event->getIf<sf::Event::MouseWheelScrolled>()) {
-      ScrollEvent scrollEvent(resizedEvent->position.x, resizedEvent->position.y, resizedEvent->delta);
-      m_eventDispatcher.emit(scrollEvent);
+      m_camera.handleScroll(resizedEvent->position.x, resizedEvent->position.y, resizedEvent->delta);
     }
   }
 

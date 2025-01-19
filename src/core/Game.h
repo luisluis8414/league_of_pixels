@@ -25,14 +25,13 @@ class Game {
 
  private:
   EventDispatcher m_eventDispatcher;
+
   Window m_window;
   Camera m_camera;
-
   std::shared_ptr<Player> m_player;
+
   TextRenderer m_textRenderer;
   WorldManager m_worldManager;
-
-  ProjectileManager m_projectileManager;
 
   sf::Clock m_clock;
 
