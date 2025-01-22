@@ -17,13 +17,7 @@ Game::Game()
                                         Config::Textures::Spells::Garen::R)),
       m_map(m_eventDispatcher),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
-      m_worldManager(m_eventDispatcher,
-                     m_player,
-                     m_enemies,
-                     m_blueSideMinions,
-                     m_redSideMinions,
-                     m_blueSideTowers,
-                     m_redSideTowers) {
+      m_worldManager(m_eventDispatcher, m_player) {
 }
 
 Game::~Game() {

@@ -8,21 +8,11 @@
 #include "../core/Event.h"
 #include "../core/Utils.h"
 
-WorldManager::WorldManager(EventDispatcher& dispatcher,
-                           std::shared_ptr<Player> player,
-                           std::vector<std::shared_ptr<Enemy>>& enemies,
-                           std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-                           std::vector<std::shared_ptr<Minion>>& redSideMinions,
-                           std::vector<std::shared_ptr<Tower>>& blueSideTowers,
-                           std::vector<std::shared_ptr<Tower>>& redSideTowers)
+WorldManager::WorldManager(EventDispatcher& dispatcher, std::shared_ptr<Player> player)
     : m_eventDispatcher(dispatcher),
-      m_buildingManager(dispatcher, player, blueSideTowers, redSideTowers, blueSideMinions, redSideMinions),
+      m_buildingManager(dispatcher, player, m_blueSideTowers, m_redSideTowers, m_blueSideMinions, m_redSideMinions),
       m_player(player),
-      m_enemies(enemies),
-      m_blueSideMinions(blueSideMinions),
-      m_redSideMinions(redSideMinions),
-      m_blueSideTowers(blueSideTowers),
-      m_minionsManager(dispatcher, blueSideMinions, redSideMinions),
+      m_minionsManager(dispatcher, m_blueSideMinions, m_redSideMinions),
       m_projectileManager(m_eventDispatcher) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
 

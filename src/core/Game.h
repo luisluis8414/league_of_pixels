@@ -37,13 +37,5 @@ class Game {
 
   Map::Rift m_map;
 
-  std::vector<std::shared_ptr<Enemy>> m_enemies;
-
-  std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
-  std::vector<std::shared_ptr<Minion>> m_redSideMinions;
-
-  std::vector<std::shared_ptr<Tower>> m_blueSideTowers;
-  std::vector<std::shared_ptr<Tower>> m_redSideTowers;
-
   void processSFMLEvents();
 };

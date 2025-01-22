@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../components/buildings/Building.h"
+#include "../components/buildings/Tower.h"
 #include "../core/Event.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"

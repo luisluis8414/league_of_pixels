@@ -15,13 +15,7 @@
 
 class WorldManager {
  public:
-  WorldManager(EventDispatcher& dispatcher,
-               std::shared_ptr<Player> player,
-               std::vector<std::shared_ptr<Enemy>>& enemies,
-               std::vector<std::shared_ptr<Minion>>& blueSideMinions,
-               std::vector<std::shared_ptr<Minion>>& redSideMinions,
-               std::vector<std::shared_ptr<Tower>>& blueSideTowers,
-               std::vector<std::shared_ptr<Tower>>& redSideTowers);
+  WorldManager(EventDispatcher& dispatcher, std::shared_ptr<Player> player);
 
   ~WorldManager() = default;
 
@@ -31,10 +25,11 @@ class WorldManager {
   ProjectileManager m_projectileManager;
 
   std::shared_ptr<Player> m_player;
-  std::vector<std::shared_ptr<Enemy>>& m_enemies;
-  std::vector<std::shared_ptr<Minion>>& m_blueSideMinions;
-  std::vector<std::shared_ptr<Minion>>& m_redSideMinions;
-  std::vector<std::shared_ptr<Tower>>& m_blueSideTowers;
+  std::vector<std::shared_ptr<Enemy>> m_enemies;
+  std::vector<std::shared_ptr<Minion>> m_blueSideMinions;
+  std::vector<std::shared_ptr<Minion>> m_redSideMinions;
+  std::vector<std::shared_ptr<Tower>> m_blueSideTowers;
+  std::vector<std::shared_ptr<Tower>> m_redSideTowers;
 
   MinionManager m_minionsManager;
 

@@ -57,16 +57,16 @@ void Minion::onDraw(DrawEvent& event) {
       window.draw(attackHitboxShape);
     }
 
-    sf::FloatRect bounds = m_sprite.getGlobalBounds();
+    // sf::FloatRect bounds = m_sprite.getGlobalBounds();
 
-    sf::RectangleShape border;
-    border.setPosition({bounds.position.x, bounds.position.y});
-    border.setSize({bounds.size.x, bounds.size.y});
-    border.setFillColor(sf::Color::Transparent);
-    border.setOutlineColor(sf::Color::Red);
-    border.setOutlineThickness(1.f);
+    // sf::RectangleShape border;
+    // border.setPosition({bounds.position.x, bounds.position.y});
+    // border.setSize({bounds.size.x, bounds.size.y});
+    // border.setFillColor(sf::Color::Transparent);
+    // border.setOutlineColor(sf::Color::Red);
+    // border.setOutlineThickness(1.f);
 
-    window.draw(border);
+    // window.draw(border);
   }
 }
 

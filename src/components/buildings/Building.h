@@ -11,8 +11,6 @@ class Building {
            float health = 100,
            float scale = 1.0f);
 
-  void onDraw(DrawEvent& event);
-
   sf::Vector2f getCenterPosition();
 
  protected:
@@ -23,5 +21,15 @@ class Building {
   sf::Sprite m_sprite;
   sf::Vector2f m_position;
 
-  float m_health;
+  float m_maxHealth;
+  float m_currentHealth;
+  sf::RectangleShape m_healthBarBackground;
+  sf::RectangleShape m_healthBarForeground;
+
+  sf::FloatRect m_hitbox;
+
+  void onDraw(DrawEvent& event);
+  void onUpdate();
+
+  void updateHealthBar();
 };
