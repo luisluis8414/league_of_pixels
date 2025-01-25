@@ -9,6 +9,28 @@ Minion::Minion(EventDispatcher& dispatcher,
                sf::Color healthbarColor)
     : Entity(dispatcher, 192, 192, position, 0.1f, 100.f, 100.f, 5.f, EntityType::Minion, texturePath),
       m_state(MinionAnimationState::WALKING) {
+  if (!m_texture.loadFromFile(texturePath)) {
+    std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
+  }
+
+  m_texture.setSmooth(false);
+  m_sprite.setTexture(m_texture);
+
+  m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});
+  m_sprite.setTextureRect(m_frameRect);
+
+  m_sprite.setPosition({position.x, position.y});
+
+  m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
+
+  m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
+  m_healthBarBackground.setFillColor(sf::Color::Red);
+  m_healthBarBackground.setPosition({10.f, 10.f});
+
+  m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
+  m_healthBarForeground.setFillColor(sf::Color::Green);
+  m_healthBarForeground.setPosition({10.f, 10.f});
+
   m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });

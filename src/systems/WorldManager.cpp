@@ -63,6 +63,13 @@ void WorldManager::checkForTarget(sf::Vector2f position) {
     }
   }
 
+  for (const std::shared_ptr<Tower>& tower : m_redSideTowers) {
+    if (tower->getHitbox().contains(position)) {
+      target = tower.get();
+      break;
+    }
+  }
+
   ActionEventType actionType = ActionEventType::MoveAction;
 
   if (target) actionType = ActionEventType::TargetAction;
@@ -92,6 +99,12 @@ void WorldManager::cleanUp() {
     for (int j = 0; j < m_blueSideMinions.size(); ++j) {
       if (m_blueSideMinions[j].get() == m_entitiesToDestroy[i]) {
         m_blueSideMinions.erase(m_blueSideMinions.begin() + j);
+        break;
+      }
+    }
+    for (int j = 0; j < m_redSideTowers.size(); ++j) {
+      if (m_redSideTowers[j].get() == m_entitiesToDestroy[i]) {
+        m_redSideTowers.erase(m_redSideTowers.begin() + j);
         break;
       }
     }

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../../core/Event.h"
+#include "../../entities/Entity.h"
 #include "SFML/Graphics.hpp"
 
-class Building {
+class Building : public Entity {
  public:
   Building(EventDispatcher& dispatcher,
            const std::string& texturePath,
@@ -14,22 +15,16 @@ class Building {
   sf::Vector2f getCenterPosition();
 
  protected:
-  EventDispatcher& m_eventDispatcher;
+  void onDraw(DrawEvent& event) override;
 
  private:
-  sf::Texture m_texture;
-  sf::Sprite m_sprite;
   sf::Vector2f m_position;
 
-  float m_maxHealth;
-  float m_currentHealth;
-  sf::RectangleShape m_healthBarBackground;
-  sf::RectangleShape m_healthBarForeground;
-
-  sf::FloatRect m_hitbox;
-
-  void onDraw(DrawEvent& event);
-  void onUpdate();
-
   void updateHealthBar();
+
+  void updateHitbox() override;
+  void setIdle() override;
+  void setWalking() override;
+  void onUpdate(float deltaTime) override;
+  void onAnimationEnd() override;
 };

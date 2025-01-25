@@ -6,11 +6,7 @@
 
 Building::Building(
     EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, float health, float scale)
-    : m_eventDispatcher(dispatcher),
-      m_position(position),
-      m_sprite(m_texture),
-      m_maxHealth(health),
-      m_currentHealth(health) {
+    : Entity(dispatcher, 0, 0, position, 0, 0, 1000.f, 0.f, EntityType::Building, texturePath), m_position(position) {
   if (!m_texture.loadFromFile(texturePath)) {
     std::cerr << "Failed to load texture: " << texturePath << std::endl;
   }
@@ -37,12 +33,13 @@ Building::Building(
 
   m_hitbox = sf::FloatRect({hitboxLeft, hitboxTop}, {hitboxWidth, hitboxHeight});
 
-  dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::BUILDINGS);
+  m_eventDispatcher.subscribe<DrawEvent>(
+      this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::BUILDINGS);
 
-  dispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
 }
 
-void Building::onUpdate() {
+void Building::onUpdate(float deltaTime) {
   updateHealthBar();
 }
 
@@ -76,6 +73,12 @@ sf::Vector2f Building::getCenterPosition() {
 }
 
 void Building::updateHealthBar() {
+  if (m_currentHealth <= 0) {
+    DestroyEntityEvent destroyEvent(this);
+    m_eventDispatcher.emit(destroyEvent);
+    return;
+  }
+
   float healthPercentage = m_currentHealth / m_maxHealth;
   m_healthBarForeground.setSize(sf::Vector2f(healthPercentage * 100.f, 10.f));
 
@@ -85,3 +88,8 @@ void Building::updateHealthBar() {
   m_healthBarBackground.setPosition({healthBarX, healthBarY});
   m_healthBarForeground.setPosition({healthBarX, healthBarY});
 }
+
+void Building::updateHitbox() {};
+void Building::setIdle() {};
+void Building::setWalking() {};
+void Building::onAnimationEnd() {};

@@ -20,6 +20,28 @@ Player::Player(EventDispatcher& dispatcher,
              EntityType::Player,
              Config::Textures::Troops::PLAYER),
       m_state(PlayerAnimationState::IDLE) {
+  if (!m_texture.loadFromFile(Config::Textures::Troops::PLAYER)) {
+    std::cerr << "Failed to load sprite sheet: " << Config::Textures::Troops::PLAYER << std::endl;
+  }
+
+  m_texture.setSmooth(false);
+  m_sprite.setTexture(m_texture);
+
+  m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});
+  m_sprite.setTextureRect(m_frameRect);
+
+  m_sprite.setPosition({position.x, position.y});
+
+  m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
+
+  m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
+  m_healthBarBackground.setFillColor(sf::Color::Red);
+  m_healthBarBackground.setPosition({10.f, 10.f});
+
+  m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
+  m_healthBarForeground.setFillColor(sf::Color::Green);
+  m_healthBarForeground.setPosition({10.f, 10.f});
+
   if (!m_qTexture.loadFromFile(qTexturePath)) {
     std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
   }
@@ -253,7 +275,7 @@ void Player::onUpdate(const float deltaTime) {
   }
 
   if (m_target.has_value()) {
-    setDestination(m_target.value()->getPosition());
+    setDestination(m_target.value()->getHitbox().getCenter());
     checkTargetInRange(m_target.value());
   }
 
@@ -283,35 +305,6 @@ void Player::updateHitbox() {
   float hitboxTop = spriteBounds.position.y + (spriteBounds.size.y - hitboxHeight) / 2.f;
 
   m_hitbox = sf::FloatRect({hitboxLeft, hitboxTop}, {hitboxWidth, hitboxHeight});
-
-  // attack hitbox based on animation state
-  // if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
-  //    const auto& config = m_attackHitboxConfigs.at(m_state);
-
-  //    // check if current frame is within the last two frames of the animation
-  //    if (m_currentFrame >= (m_endFrame - 2)) {
-  //        float attackHitboxWidth = spriteBounds.width * config.widthFactor;
-  //        float attackHitboxHeight = spriteBounds.height * config.heightFactor;
-
-  //        float attackHitboxLeft = spriteBounds.left + spriteBounds.width * config.offsetXFactor;
-  //        float attackHitboxTop = spriteBounds.top + spriteBounds.height * config.offsetYFactor;
-
-  //        // flip the attack hitbox if facing left
-  //        float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
-  //        if (direction < 0.f) {
-  //            float centerX = spriteBounds.left + spriteBounds.width * 0.5f;
-  //            float offsetFromCenter = attackHitboxLeft - centerX;
-  //            attackHitboxLeft = centerX - offsetFromCenter - attackHitboxWidth;
-  //        }
-
-  //        m_attackHitbox = sf::FloatRect(attackHitboxLeft, attackHitboxTop, attackHitboxWidth, attackHitboxHeight);
-  //    }
-
-  //}
-  // else {
-  //    // reset when not attacking
-  //    m_attackHitbox = sf::FloatRect(0.f, 0.f, 0.f, 0.f);
-  //}
 }
 
 void Player::checkTargetInRange(Entity* target) {

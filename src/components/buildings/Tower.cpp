@@ -49,6 +49,7 @@ bool Tower::hasTarget() {
 
 void Tower::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
+  Building::onDraw(event);
 
   if (Config::Settings::showHitboxes) {
     window.draw(m_range);
