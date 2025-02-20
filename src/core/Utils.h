@@ -41,4 +41,10 @@ inline static bool isRectInCircle(const sf::FloatRect& hitbox, const sf::CircleS
   }
   return false;
 };
+
+inline static float getVectorDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2) {
+  float dx = pos1.x - pos2.x;
+  float dy = pos1.y - pos2.y;
+  return std::sqrt(dx * dx + dy * dy);
+}
 }  // namespace Utils

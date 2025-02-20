@@ -29,7 +29,7 @@ Game::~Game() {
 void Game::run() {
   m_eventDispatcher.emit(InitEvent());
 
-  const float fpsTarget = 60.0f;
+  const float fpsTarget = 120.0f;
   const float targetFrameTime = 1.0f / fpsTarget;  // 60fps and ticks
 
   sf::Clock clock;
@@ -58,9 +58,13 @@ void Game::run() {
 
     m_eventDispatcher.emit(CleanUpEvent());
 
-    // cap frame rate
-    sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
-    if (frameEnd > sf::Time::Zero) sf::sleep(frameEnd);
+    // cap frame rate loop
+    while (sf::seconds(targetFrameTime) >= clock.getElapsedTime()) {
+      // wait until targetFrameTime is reached
+    }
+    // cap frame rate threads
+    // sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
+    // if (frameEnd > sf::Time::Zero) sf::sleep(frameEnd);
   }
 }
 

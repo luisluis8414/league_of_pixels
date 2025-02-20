@@ -1,6 +1,7 @@
 #include "Minion.h"
 
 #include "../core/Config.h"
+#include "../core/Utils.h"
 
 Minion::Minion(EventDispatcher& dispatcher,
                const std::string& texturePath,
@@ -12,6 +13,13 @@ Minion::Minion(EventDispatcher& dispatcher,
   if (!m_texture.loadFromFile(texturePath)) {
     std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
   }
+
+  m_range.setRadius(120.f);
+  m_range.setOrigin({m_range.getRadius(), m_range.getRadius()});
+  m_range.setPosition(getCenter());
+  m_range.setFillColor(sf::Color(0, 0, 0, 0));
+  m_range.setOutlineColor(sf::Color::Red);
+  m_range.setOutlineThickness(1.5f);
 
   m_texture.setSmooth(false);
   m_sprite.setTexture(m_texture);
@@ -44,6 +52,28 @@ Minion::Minion(EventDispatcher& dispatcher,
   m_healthBarForeground.setFillColor(healthbarColor);
 }
 
+void Minion::attackEntity(std::shared_ptr<Entity> entity) {
+  if (!hasTarget()) {
+    m_target = entity;
+
+    if (std::shared_ptr<Entity> target = m_target.lock()) {
+      if (target->getPosition().x < getPosition().x) {
+        m_sprite.setScale({-1.f, 1.f});
+      } else {
+        m_sprite.setScale({1.f, 1.});
+      }
+    }
+  }
+}
+
+bool Minion::hasTarget() {
+  if (std::shared_ptr<Entity> target = m_target.lock()) {
+    return !m_target.expired() && Utils::isRectInCircle(target->getHitbox(), getRange());
+  } else {
+    return false;
+  }
+}
+
 void Minion::onAnimationEnd() {
   if (m_state != MinionAnimationState::WALKING) {
     setAnimation(MinionAnimationState::WALKING);
@@ -66,6 +96,8 @@ void Minion::onDraw(DrawEvent& event) {
     hitboxShape.setFillColor(sf::Color::Transparent);
     hitboxShape.setOutlineColor(sf::Color::Red);
     hitboxShape.setOutlineThickness(1.f);
+
+    window.draw(m_range);
 
     window.draw(hitboxShape);
 
@@ -108,6 +140,10 @@ void Minion::onUpdate(const float deltaTime) {
   updateHitbox();
   updateAnimation(deltaTime);
 
+  if (std::shared_ptr<Entity> target = m_target.lock()) {
+    setDestination(target->getCenter());
+  }
+
   if (isHitting()) return;
 
   move(deltaTime);
@@ -130,6 +166,8 @@ void Minion::updateHealthBar() {
 }
 
 void Minion::updateHitbox() {
+  m_range.setPosition(m_sprite.getPosition());
+
   sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
 
   float hitboxWidth = spriteBounds.size.x * 0.2f;

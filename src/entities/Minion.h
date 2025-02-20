@@ -23,6 +23,8 @@ class Minion : public Entity {
   };
 
   bool isHitting() const;
+  void attackEntity(std::shared_ptr<Entity> entity);
+  bool hasTarget();
 
  private:
   MinionAnimationState m_state;
@@ -42,6 +44,8 @@ class Minion : public Entity {
   void onDraw(DrawEvent& event) override;
 
   void setAnimation(MinionAnimationState state);
+
+  std::weak_ptr<Entity> m_target;
 
   const std::unordered_map<MinionAnimationState, AnimationConfig> m_animationConfigs = {
       {MinionAnimationState::WALKING, {0, 5, 0.1f}},

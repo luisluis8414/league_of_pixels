@@ -16,17 +16,13 @@ Tower::Tower(EventDispatcher& dispatcher,
       m_archer(dispatcher, {position.x + 65, position.y + 75}, archerTexturePath, m_target) {
   m_range.setRadius(250.f);
   m_range.setOrigin({m_range.getRadius(), m_range.getRadius()});
-  m_range.setPosition(getCenterPosition());
+  m_range.setPosition(getCenter());
   m_range.setFillColor(sf::Color(0, 0, 0, 0));
   m_range.setOutlineColor(sf::Color::Red);
   m_range.setOutlineThickness(1.5f);
 
   dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); });
 }
-
-const sf::CircleShape& Tower::getRange() {
-  return m_range;
-};
 
 const sf::Vector2f Tower::getPosition() {
   return m_archer.getPosition();

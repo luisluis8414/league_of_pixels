@@ -59,7 +59,7 @@ class Entity {
         m_destination(position),
         m_target(std::nullopt),
         m_sprite(m_texture) {
-   }
+  }
 
   ~Entity() {
     m_eventDispatcher.unsubscribe(this);
@@ -68,11 +68,16 @@ class Entity {
   EntityType getType() const {
     return m_type;
   }
+
   const sf::FloatRect& getHitbox() const {
     return m_hitbox;
   }
 
-  const sf::Vector2f getSpriteCenter() {
+  const sf::CircleShape& getRange() {
+    return m_range;
+  };
+
+  const sf::Vector2f getCenter() {
     sf::Vector2f currentPosition = m_sprite.getPosition();
 
     sf::FloatRect bounds = m_sprite.getGlobalBounds();
@@ -113,6 +118,7 @@ class Entity {
 
   float m_maxHealth;
   float m_currentHealth;
+  sf::CircleShape m_range;
 
   float m_physicalDmg;
 

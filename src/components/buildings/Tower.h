@@ -15,7 +15,6 @@ class Tower : public Building {
         float health = 100,
         float scale = 1.0f);
 
-  const sf::CircleShape& getRange();
   std::weak_ptr<Entity> m_target;
 
   void attackEntity(std::shared_ptr<Entity> entity);
@@ -25,7 +24,6 @@ class Tower : public Building {
   const sf::Vector2f getPosition();
 
  private:
-  sf::CircleShape m_range;
   Archer m_archer;
 
   void onDraw(DrawEvent& event);

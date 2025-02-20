@@ -62,16 +62,6 @@ void Building::onDraw(DrawEvent& event) {
   }
 }
 
-sf::Vector2f Building::getCenterPosition() {
-  sf::FloatRect bounds = m_sprite.getGlobalBounds();
-
-  sf::Vector2f center;
-  center.x = bounds.position.x + bounds.size.x / 2.0f;
-  center.y = bounds.position.y + bounds.size.y / 2.0f;
-
-  return center;
-}
-
 void Building::updateHealthBar() {
   if (m_currentHealth <= 0) {
     DestroyEntityEvent destroyEvent(this);

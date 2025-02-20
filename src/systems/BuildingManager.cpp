@@ -29,7 +29,7 @@ void BuildingManager::checkForTargets() {
     float closestDistance = std::numeric_limits<float>::max();
 
     for (const std::shared_ptr<Minion>& minion : m_redSideMinions) {
-      float distance = getDistance(tower->getPosition(), minion->getPosition());
+      float distance = Utils::getVectorDistance(tower->getPosition(), minion->getPosition());
       if (Utils::isRectInCircle(minion->getHitbox(), tower->getRange()) && distance < closestDistance) {
         closestMinion = minion;
         closestDistance = distance;
@@ -46,7 +46,7 @@ void BuildingManager::checkForTargets() {
     float closestDistance = std::numeric_limits<float>::max();
 
     for (const std::shared_ptr<Minion>& minion : m_blueSideMinions) {
-      float distance = getDistance(tower->getPosition(), minion->getPosition());
+      float distance = Utils::getVectorDistance(tower->getPosition(), minion->getPosition());
       if (Utils::isRectInCircle(minion->getHitbox(), tower->getRange()) && distance < closestDistance) {
         closestMinion = minion;
         closestDistance = distance;
@@ -59,12 +59,6 @@ void BuildingManager::checkForTargets() {
       tower->attackEntity(m_player);
     }
   }
-}
-
-float BuildingManager::getDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2) {
-  float dx = pos1.x - pos2.x;
-  float dy = pos1.y - pos2.y;
-  return std::sqrt(dx * dx + dy * dy);
 }
 
 void BuildingManager::initBuildings() {

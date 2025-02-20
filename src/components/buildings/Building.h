@@ -12,8 +12,6 @@ class Building : public Entity {
            float health = 100,
            float scale = 1.0f);
 
-  sf::Vector2f getCenterPosition();
-
  protected:
   void onDraw(DrawEvent& event) override;
 

@@ -17,7 +17,7 @@ Window::Window(EventDispatcher& dispatcher)
   }
 
   setVerticalSyncEnabled(true);
-  setFramerateLimit(60);
+  setFramerateLimit(240);
 
   setIcon(icon);
 

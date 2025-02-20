@@ -34,5 +34,4 @@ class BuildingManager {
   void initBuildings();
 
   void checkForTargets();
-  float getDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2);
 };

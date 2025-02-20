@@ -12,7 +12,7 @@ WorldManager::WorldManager(EventDispatcher& dispatcher, std::shared_ptr<Player> 
     : m_eventDispatcher(dispatcher),
       m_buildingManager(dispatcher, player, m_blueSideTowers, m_redSideTowers, m_blueSideMinions, m_redSideMinions),
       m_player(player),
-      m_minionsManager(dispatcher, m_blueSideMinions, m_redSideMinions),
+      m_minionsManager(dispatcher, m_blueSideMinions, m_redSideMinions, m_blueSideTowers, m_redSideTowers),
       m_projectileManager(m_eventDispatcher) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
 
