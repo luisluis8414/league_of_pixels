@@ -24,13 +24,6 @@ struct HitboxConfig {
   float offsetYFactor;
 };
 
-// inline uint64_t generateRandomId() {
-//     static std::random_device rd;
-//     static std::mt19937_64 gen(rd());
-//     static std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX);
-//     return dist(gen);
-// }
-
 class Entity {
  public:
   Entity(EventDispatcher& dispatcher,
@@ -42,56 +35,21 @@ class Entity {
          float maxHealth,
          float physicalDmg,
          EntityType type,
-         std::string texturePath)
-      : m_eventDispatcher(dispatcher),
-        m_frameWidth(frameWidth),
-        m_frameHeight(frameHeight),
-        m_elapsedTime(0.f),
-        m_startFrame(0),
-        m_endFrame(5),
-        m_currentFrame(0),
-        m_frameTime(frameTime),
-        m_speed(speed),
-        m_maxHealth(maxHealth),
-        m_currentHealth(maxHealth),
-        m_physicalDmg(physicalDmg),
-        m_type(type),
-        m_destination(position),
-        m_target(std::nullopt),
-        m_sprite(m_texture) {
-  }
+         std::string texturePath);
 
-  ~Entity() {
-    m_eventDispatcher.unsubscribe(this);
-  }
+  ~Entity();
 
-  EntityType getType() const {
-    return m_type;
-  }
+  EntityType getType() const;
 
-  const sf::FloatRect& getHitbox() const {
-    return m_hitbox;
-  }
+  const sf::FloatRect& getHitbox() const;
 
-  const sf::CircleShape& getRange() {
-    return m_range;
-  };
+  const sf::CircleShape& getRange();
 
-  const sf::Vector2f getCenter() {
-    sf::Vector2f currentPosition = m_sprite.getPosition();
+  const sf::Vector2f getCenter();
 
-    sf::FloatRect bounds = m_sprite.getGlobalBounds();
+  const sf::Vector2f getPosition();
 
-    return sf::Vector2f(currentPosition.x + bounds.size.x / 2.f, currentPosition.y + bounds.size.y / 2.f);
-  }
-
-  const sf::Vector2f getPosition() {
-    return m_sprite.getPosition();
-  }
-
-  void takeDmg(float dmg) {
-    m_currentHealth -= dmg;
-  }
+  void takeDmg(float dmg);
 
  protected:
   EventDispatcher& m_eventDispatcher;
@@ -128,99 +86,22 @@ class Entity {
   virtual void updateHealthBar() = 0;
   virtual void updateHitbox() = 0;
 
-  void move(float deltaTime) {
-    sf::Vector2f direction = m_destination - m_sprite.getPosition();
-
-    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-    constexpr float epsilon = 2.f;
-
-    if (distance > epsilon) {
-      direction /= distance;
-
-      constexpr float minDirectionThreshold = 0.01f;
-      if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
-      if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
-
-      float deltaX = direction.x * m_speed * deltaTime;
-      float deltaY = direction.y * m_speed * deltaTime;
-
-      {
-        sf::FloatRect newXHitbox = m_hitbox;
-        newXHitbox.position.x += deltaX;
-
-        sf::FloatRect newYHitbox = m_hitbox;
-        newYHitbox.position.y += deltaY;
-
-        bool canMoveX = Map::isTileWalkable(newXHitbox);
-        bool canMoveY = Map::isTileWalkable(newYHitbox);
-
-        if (canMoveX) {
-          m_sprite.move({deltaX, 0.f});
-        } else {
-          m_destination.x = m_sprite.getPosition().x;
-        }
-
-        if (canMoveY) {
-          m_sprite.move({0.f, deltaY});
-        } else {
-          m_destination.y = m_sprite.getPosition().y;
-        }
-      }
-      setWalking();
-    } else {
-      setIdle();
-    }
-  }
+  void move(float deltaTime);
 
   virtual void setWalking() = 0;
   virtual void setIdle() = 0;
 
-  virtual void setPosition(sf::Vector2f position) {
-    m_sprite.setPosition({position.x, position.y});
-  };
+  virtual void setPosition(sf::Vector2f position);
 
   virtual void onUpdate(float deltaTime) = 0;
   virtual void onDraw(DrawEvent& event) = 0;
 
-  virtual void onDmgFrame() {};
+  virtual void onDmgFrame();
 
-  void setDestination(sf::Vector2f position) {
-    sf::Vector2f direction = position - m_sprite.getPosition();
-
-    constexpr float flipThreshold = 1.f;
-
-    if (direction.x < -flipThreshold && m_sprite.getScale().x != -1.f) {
-      m_sprite.setScale({-1.f, 1.f});
-    } else if (direction.x > flipThreshold && m_sprite.getScale().x != 1.f) {
-      m_sprite.setScale({1.f, 1.f});
-    }
-
-    m_destination = position;
-  }
+  void setDestination(sf::Vector2f position);
 
   EntityType m_type;
 
   virtual void onAnimationEnd() = 0;
-  void updateAnimation(float deltaTime) {
-    m_elapsedTime += deltaTime;
-
-    if (m_elapsedTime >= m_frameTime) {
-      m_elapsedTime = 0.f;
-
-      m_currentFrame++;
-      if (m_currentFrame > m_endFrame) {
-        onAnimationEnd();
-      }
-
-      if (m_currentFrame == m_dmgFrame) {
-        onDmgFrame();
-      }
-
-      int column = m_currentFrame % (m_texture.getSize().x / m_frameWidth);
-      int row = m_currentFrame / (m_texture.getSize().x / m_frameWidth);
-      m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
-      m_sprite.setTextureRect(m_frameRect);
-    }
-  }
+  void updateAnimation(float deltaTime);
 };
