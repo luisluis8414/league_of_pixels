@@ -9,7 +9,8 @@ Entity::Entity(EventDispatcher& dispatcher,
                float maxHealth,
                float physicalDmg,
                EntityType type,
-               std::string texturePath)
+               std::string texturePath,
+               RenderLayer renderLayer)
     : m_eventDispatcher(dispatcher),
       m_frameWidth(frameWidth),
       m_frameHeight(frameHeight),
@@ -24,8 +25,21 @@ Entity::Entity(EventDispatcher& dispatcher,
       m_physicalDmg(physicalDmg),
       m_type(type),
       m_destination(position),
-      m_target(std::nullopt),
+      m_target(),
       m_sprite(m_texture) {
+  m_texture.setSmooth(false);
+  m_sprite.setTexture(m_texture);
+
+  m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});
+  m_sprite.setTextureRect(m_frameRect);
+
+  m_sprite.setPosition({position.x, position.y});
+
+  m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
+
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
+
+  m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, renderLayer);
 }
 
 Entity::~Entity() {
@@ -146,4 +160,29 @@ void Entity::updateAnimation(float deltaTime) {
     m_frameRect = sf::IntRect({column * m_frameWidth, row * m_frameHeight}, {m_frameWidth, m_frameHeight});
     m_sprite.setTextureRect(m_frameRect);
   }
+}
+
+void Entity::setTarget(std::shared_ptr<Entity> target) {
+  m_target = target;
+}
+
+void Entity::clearTarget() {
+  m_target.reset();
+}
+
+std::shared_ptr<Entity> Entity::getTarget() const {
+  return m_target.lock();  // Attempt to get a shared_ptr from the weak_ptr
+}
+
+bool Entity::hasTarget() const {
+  return !m_target.expired();  // Check if the weak_ptr is still valid
+}
+
+bool Entity::isTargetInRange(std::shared_ptr<Entity> target) {
+  if (!target) return false;
+
+  const sf::Rect targetHitbox = target->getHitbox();
+  const sf::Rect playerHitbox = getHitbox();
+
+  return Utils::aabbCollision(playerHitbox, targetHitbox);
 }

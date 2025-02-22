@@ -18,21 +18,12 @@ Player::Player(EventDispatcher& dispatcher,
              100.f,
              10.f,
              EntityType::Player,
-             Config::Textures::Troops::PLAYER),
+             Config::Textures::Troops::PLAYER,
+             RenderLayer::PLAYER),
       m_state(PlayerAnimationState::IDLE) {
   if (!m_texture.loadFromFile(Config::Textures::Troops::PLAYER)) {
     std::cerr << "Failed to load sprite sheet: " << Config::Textures::Troops::PLAYER << std::endl;
   }
-
-  m_texture.setSmooth(false);
-  m_sprite.setTexture(m_texture);
-
-  m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});
-  m_sprite.setTextureRect(m_frameRect);
-
-  m_sprite.setPosition({position.x, position.y});
-
-  m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
 
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
@@ -62,26 +53,11 @@ Player::Player(EventDispatcher& dispatcher,
 }
 
 void Player::subscribe() {
-  m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::PLAYER);
-
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
-
   m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
-    if (m_target.has_value() && m_target.value() == event.getEntity()) {
-      m_target.reset();
+    std::shared_ptr<Entity> target = getTarget();
+    if (target && target.get() == event.getEntity()) {
+      clearTarget();
       setDestination(m_sprite.getPosition());
-    }
-  });
-
-  m_eventDispatcher.subscribe<ActionEvent>(this, [this](ActionEvent& event) {
-    if (event.getActionType() == ActionEventType::TargetAction && event.getTarget()) {
-      if (m_target != event.getTarget()) {
-        setAnimation(PlayerAnimationState::WALKING);
-      }
-      m_target = event.getTarget();
-    } else {
-      setDestination(event.getPosition());
-      if (m_target.has_value()) m_target.reset();
     }
   });
 
@@ -144,17 +120,6 @@ void Player::onDraw(DrawEvent& event) {
       attackHitboxShape.setOutlineThickness(1.f);
       window.draw(attackHitboxShape);
     }
-
-    // sf::FloatRect bounds = m_sprite.getGlobalBounds();
-
-    // sf::RectangleShape border;
-    // border.setPosition({bounds.position.x, bounds.position.y});
-    // border.setSize({bounds.size.x, bounds.size.y});
-    // border.setFillColor(sf::Color::Transparent);
-    // border.setOutlineColor(sf::Color::Red);
-    // border.setOutlineThickness(1.f);
-
-    // window.draw(border);
   }
 }
 
@@ -215,20 +180,16 @@ void Player::drawAbilities(sf::RenderWindow& window) {
     if (spell.isInDmgFrame() && Config::Settings::showHitboxes) {
       sf::CircleShape attackHitboxShape;
 
-      // Set the radius based on the hitbox dimensions (assume a circular hitbox fits within the rectangle dimensions)
       float radius = std::min(spell.getHitbox().size.x, spell.getHitbox().size.y) / 2.f;
       attackHitboxShape.setRadius(radius);
 
-      // Position the circle, adjusting for the radius to center it
       attackHitboxShape.setPosition({spell.getHitbox().position.x + spell.getHitbox().size.x / 2.f - radius,
                                      spell.getHitbox().position.y + spell.getHitbox().size.y / 2.f - radius});
 
-      // Style the circle
       attackHitboxShape.setFillColor(sf::Color::Transparent);
       attackHitboxShape.setOutlineColor(sf::Color::Red);
       attackHitboxShape.setOutlineThickness(2.f);
 
-      // Draw the circle
       window.draw(attackHitboxShape);
     }
   }
@@ -266,17 +227,23 @@ void Player::onUpdate(const float deltaTime) {
   if (isHitting()) {
     if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
       if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
-        if (m_target.has_value()) {
-          m_target.value()->takeDmg(m_physicalDmg);
+        std::shared_ptr<Entity> target = getTarget();
+        if (target) {
+          target->takeDmg(m_physicalDmg);
         }
       }
     }
     return;
   }
 
-  if (m_target.has_value()) {
-    setDestination(m_target.value()->getHitbox().getCenter());
-    checkTargetInRange(m_target.value());
+  if (hasTarget()) {
+    std::shared_ptr<Entity> target = getTarget();
+    if (target) {
+      setDestination(target->getHitbox().getCenter());
+      if (isTargetInRange(target)) {
+        onTargetInRange();
+      }
+    }
   }
 
   if (!isHitting()) {
@@ -290,7 +257,7 @@ void Player::updateHealthBar() {
 
   sf::FloatRect bounds = m_sprite.getGlobalBounds();
   float healthBarX = bounds.position.x + (bounds.size.x / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
-  float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 25.f;  // offset for spacing from top
+  float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 25.f;
   m_healthBarBackground.setPosition({healthBarX, healthBarY});
   m_healthBarForeground.setPosition({healthBarX, healthBarY});
 }
@@ -307,13 +274,8 @@ void Player::updateHitbox() {
   m_hitbox = sf::FloatRect({hitboxLeft, hitboxTop}, {hitboxWidth, hitboxHeight});
 }
 
-void Player::checkTargetInRange(Entity* target) {
-  const sf::Rect targetHitbox = target->getHitbox();
-  const sf::Rect playerHitbox = getHitbox();
-
-  if (Utils::aabbCollision(playerHitbox, targetHitbox)) {
-    autoAttack();
-  }
+void Player::onTargetInRange() {
+  autoAttack();
 }
 
 void Player::autoAttack() {

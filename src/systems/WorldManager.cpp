@@ -47,35 +47,35 @@ void WorldManager::checkAbilityDmg(sf::FloatRect hitbox, float spellDmg) {
 }
 
 void WorldManager::checkForTarget(sf::Vector2f position) {
-  Entity* target = nullptr;
+  std::shared_ptr<Entity> target = nullptr;
 
   for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
     if (redSideMinion->getHitbox().contains(position)) {
-      target = redSideMinion.get();
+      target = redSideMinion;
       break;
     }
   }
 
   for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
     if (enemy->getHitbox().contains(position)) {
-      target = enemy.get();
+      target = enemy;
       break;
     }
   }
 
   for (const std::shared_ptr<Tower>& tower : m_redSideTowers) {
     if (tower->getHitbox().contains(position)) {
-      target = tower.get();
+      target = tower;
       break;
     }
   }
 
-  ActionEventType actionType = ActionEventType::MoveAction;
-
-  if (target) actionType = ActionEventType::TargetAction;
-
-  ActionEvent actionEvent(actionType, *m_player, target, position);
-  m_eventDispatcher.emit(actionEvent);
+  if (target) {
+    m_player->setTarget(target);
+  } else {
+    m_player->clearTarget();
+    m_player->setDestination(position);
+  }
 }
 
 void WorldManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {

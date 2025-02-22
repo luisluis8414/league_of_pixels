@@ -8,7 +8,17 @@ Minion::Minion(EventDispatcher& dispatcher,
                sf::Vector2f position,
                sf::Vector2f destination,
                sf::Color healthbarColor)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 100.f, 100.f, 5.f, EntityType::Minion, texturePath),
+    : Entity(dispatcher,
+             192,
+             192,
+             position,
+             0.1f,
+             100.f,
+             100.f,
+             5.f,
+             EntityType::Minion,
+             texturePath,
+             RenderLayer::ENTITIES),
       m_state(MinionAnimationState::WALKING) {
   if (!m_texture.loadFromFile(texturePath)) {
     std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
@@ -21,16 +31,6 @@ Minion::Minion(EventDispatcher& dispatcher,
   m_range.setOutlineColor(sf::Color::Red);
   m_range.setOutlineThickness(1.5f);
 
-  m_texture.setSmooth(false);
-  m_sprite.setTexture(m_texture);
-
-  m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});
-  m_sprite.setTextureRect(m_frameRect);
-
-  m_sprite.setPosition({position.x, position.y});
-
-  m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
-
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
   m_healthBarBackground.setPosition({10.f, 10.f});
@@ -38,10 +38,6 @@ Minion::Minion(EventDispatcher& dispatcher,
   m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarForeground.setFillColor(sf::Color::Green);
   m_healthBarForeground.setPosition({10.f, 10.f});
-
-  m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, RenderLayer::ENTITIES);
-
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { onUpdate(event.getDeltaTime()); });
 
   setDestination(destination);
 
@@ -52,27 +48,28 @@ Minion::Minion(EventDispatcher& dispatcher,
   m_healthBarForeground.setFillColor(healthbarColor);
 }
 
-void Minion::attackEntity(std::shared_ptr<Entity> entity) {
-  if (!hasTarget()) {
-    m_target = entity;
+// void Minion::attackEntity(std::shared_ptr<Entity> entity) {
+//   if (!hasTarget()) {
+//     m_target = entity;
 
-    if (std::shared_ptr<Entity> target = m_target.lock()) {
-      if (target->getPosition().x < getPosition().x) {
-        m_sprite.setScale({-1.f, 1.f});
-      } else {
-        m_sprite.setScale({1.f, 1.});
-      }
-    }
-  }
-}
+//     if (std::shared_ptr<Entity> target = m_target.lock()) {
+//       if (target->getPosition().x < getPosition().x) {
+//         m_sprite.setScale({-1.f, 1.f});
+//       } else {
+//         m_sprite.setScale({1.f, 1.});
+//       }
+//     }
+//   }
+// }
 
-bool Minion::hasTarget() {
-  if (std::shared_ptr<Entity> target = m_target.lock()) {
-    return !m_target.expired() && Utils::isRectInCircle(target->getHitbox(), getRange());
-  } else {
-    return false;
-  }
-}
+// bool Minion::hasTarget() {
+//   if (std::shared_ptr<Entity> target = m_target.lock()) {
+//     return !m_target.expired() &&
+//            Utils::isRectInCircle(target->getHitbox(), getRange());
+//   } else {
+//     return false;
+//   }
+// }
 
 void Minion::onAnimationEnd() {
   if (m_state != MinionAnimationState::WALKING) {
@@ -110,29 +107,19 @@ void Minion::onDraw(DrawEvent& event) {
       attackHitboxShape.setOutlineThickness(1.f);
       window.draw(attackHitboxShape);
     }
-
-    // sf::FloatRect bounds = m_sprite.getGlobalBounds();
-
-    // sf::RectangleShape border;
-    // border.setPosition({bounds.position.x, bounds.position.y});
-    // border.setSize({bounds.size.x, bounds.size.y});
-    // border.setFillColor(sf::Color::Transparent);
-    // border.setOutlineColor(sf::Color::Red);
-    // border.setOutlineThickness(1.f);
-
-    // window.draw(border);
   }
 }
 
 void Minion::setAnimation(MinionAnimationState animationState) {
-  if (m_animationConfigs.count(animationState) > 0) {
-    const auto& config = m_animationConfigs.at(animationState);
+  if (m_state != animationState) {
+    const AnimationConfig& config = m_animationConfigs.at(animationState);
     m_startFrame = config.startFrame;
     m_endFrame = config.endFrame;
     m_frameTime = config.frameTime;
+    m_dmgFrame = config.dmgFrame;
     m_currentFrame = m_startFrame;
+    m_state = animationState;
   }
-  m_state = animationState;
 }
 
 void Minion::onUpdate(const float deltaTime) {
@@ -140,8 +127,8 @@ void Minion::onUpdate(const float deltaTime) {
   updateHitbox();
   updateAnimation(deltaTime);
 
-  if (std::shared_ptr<Entity> target = m_target.lock()) {
-    setDestination(target->getCenter());
+  if (hasTarget()) {
+    setDestination(getTarget()->getCenter());
   }
 
   if (isHitting()) return;
@@ -160,7 +147,7 @@ void Minion::updateHealthBar() {
 
   sf::FloatRect bounds = m_sprite.getGlobalBounds();
   float healthBarX = bounds.position.x + (bounds.size.x / 2.f) - (m_healthBarBackground.getSize().x / 2.f);
-  float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 60.f;  // offset for spacing from top
+  float healthBarY = bounds.position.y - m_healthBarBackground.getSize().y + 60.f;
   m_healthBarBackground.setPosition({healthBarX, healthBarY});
   m_healthBarForeground.setPosition({healthBarX, healthBarY});
 }
@@ -216,4 +203,20 @@ void Minion::setWalking() {
 
 void Minion::setIdle() {
   setWalking();
+}
+
+void Minion::onTargetInRange() {
+  setAnimation(MinionAnimationState::HITTING);
+
+  if (getTarget()->getPosition().x < getPosition().x) {
+    m_sprite.setScale({-1.f, 1.f});
+  } else {
+    m_sprite.setScale({1.f, 1.f});
+  }
+}
+
+void Minion::onDmgFrame() {
+  if (hasTarget()) {
+    getTarget()->takeDmg(m_physicalDmg);
+  }
 }

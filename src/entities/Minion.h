@@ -6,7 +6,7 @@
 #include "../core/Event.h"
 #include "Entity.h"
 
-enum class MinionAnimationState { WALKING, Hitting, Dying };
+enum class MinionAnimationState { WALKING, HITTING, DYING };
 
 class Minion : public Entity {
  public:
@@ -23,8 +23,8 @@ class Minion : public Entity {
   };
 
   bool isHitting() const;
-  void attackEntity(std::shared_ptr<Entity> entity);
-  bool hasTarget();
+  // void attackEntity(std::shared_ptr<Entity> entity); // Removed
+  // bool hasTarget(); // Removed
 
  private:
   MinionAnimationState m_state;
@@ -45,16 +45,19 @@ class Minion : public Entity {
 
   void setAnimation(MinionAnimationState state);
 
-  std::weak_ptr<Entity> m_target;
+  // std::weak_ptr<Entity> m_target; // Removed
 
   const std::unordered_map<MinionAnimationState, AnimationConfig> m_animationConfigs = {
       {MinionAnimationState::WALKING, {0, 5, 0.1f}},
-      {MinionAnimationState::Hitting, {6, 15, 0.1f}},
-      {MinionAnimationState::Dying, {16, 22, 0.1f}},
+      {MinionAnimationState::HITTING, {6, 15, 0.1f, 11}},  
+      {MinionAnimationState::DYING, {16, 22, 0.1f}},
   };
 
   std::unordered_map<MinionAnimationState, HitboxConfig> m_attackHitboxConfigs = {
       //{float widthFactor; heightFactor; offsetXFactor; offsetYFactor; }
-      {MinionAnimationState::Hitting, {0.35f, 0.5f, 0.6f, 0.2f}},
+      {MinionAnimationState::HITTING, {0.35f, 0.5f, 0.6f, 0.2f}},
   };
+
+  virtual void onTargetInRange() override;
+  virtual void onDmgFrame() override;
 };

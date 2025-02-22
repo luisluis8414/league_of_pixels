@@ -9,22 +9,22 @@ Archer::Archer(EventDispatcher& dispatcher,
                sf::Vector2f position,
                const std::string& texturePath,
                std::weak_ptr<Entity>& target)
-    : Entity(dispatcher, 192, 192, position, 0.1f, 200.f, 100.f, 10.f, EntityType::Archer, texturePath),
+    : Entity(dispatcher,
+             192,
+             192,
+             position,
+             0.1f,
+             200.f,
+             100.f,
+             10.f,
+             EntityType::Archer,
+             texturePath,
+             RenderLayer::ENTITIES),
       m_state(ArcherAnimationState::IDLE),
       m_target(target) {
   if (!m_texture.loadFromFile(texturePath)) {
     std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
   }
-
-  m_texture.setSmooth(false);
-  m_sprite.setTexture(m_texture);
-
-  m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});
-  m_sprite.setTextureRect(m_frameRect);
-
-  m_sprite.setPosition({position.x, position.y});
-
-  m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
 
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
@@ -33,10 +33,6 @@ Archer::Archer(EventDispatcher& dispatcher,
   m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarForeground.setFillColor(sf::Color::Green);
   m_healthBarForeground.setPosition({10.f, 10.f});
-  m_eventDispatcher.subscribe<DrawEvent>(
-      this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::ENTITIES);
-
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
 }
 
 void Archer::onUpdate(float deltaTime) {

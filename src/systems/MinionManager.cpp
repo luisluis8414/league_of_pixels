@@ -70,7 +70,7 @@ void MinionManager::checkForTargets() {
     }
 
     if (closestTower) {
-      minion->attackEntity(closestTower);
+      minion->setTarget(closestTower);
     }
   }
 
@@ -87,7 +87,7 @@ void MinionManager::checkForTargets() {
     }
 
     if (closestTower) {
-      minion->attackEntity(closestTower);
+      minion->setTarget(closestTower);
     }
   }
 }

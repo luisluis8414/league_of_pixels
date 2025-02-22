@@ -2,11 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <memory>  // Include for std::weak_ptr and std::shared_ptr
 #include <optional>
 #include <vector>
 
 #include "../components/Map.h"
 #include "../core/Event.h"
+#include "../core/Utils.h"  // Make sure to include Utils here
 
 enum class EntityType { Player, Enemy, Minion, Archer, Building };
 
@@ -35,7 +37,8 @@ class Entity {
          float maxHealth,
          float physicalDmg,
          EntityType type,
-         std::string texturePath);
+         std::string texturePath,
+         RenderLayer renderLayer);
 
   ~Entity();
 
@@ -50,6 +53,13 @@ class Entity {
   const sf::Vector2f getPosition();
 
   void takeDmg(float dmg);
+
+  void setTarget(std::shared_ptr<Entity> target);
+  void clearTarget();
+  std::shared_ptr<Entity> getTarget() const;
+  bool hasTarget() const;
+
+  void setDestination(sf::Vector2f position);
 
  protected:
   EventDispatcher& m_eventDispatcher;
@@ -70,7 +80,7 @@ class Entity {
   int m_frameWidth;
   int m_frameHeight;
 
-  std::optional<Entity*> m_target;
+  std::weak_ptr<Entity> m_target;  // Changed to weak_ptr
   sf::Vector2f m_destination;
   float m_speed;
 
@@ -98,10 +108,12 @@ class Entity {
 
   virtual void onDmgFrame();
 
-  void setDestination(sf::Vector2f position);
-
   EntityType m_type;
 
   virtual void onAnimationEnd() = 0;
   void updateAnimation(float deltaTime);
+
+  // New methods
+  virtual void onTargetInRange() {};  // Virtual function for derived classes to implement
+  bool isTargetInRange(std::shared_ptr<Entity> target);
 };

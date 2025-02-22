@@ -6,7 +6,8 @@
 
 Building::Building(
     EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, float health, float scale)
-    : Entity(dispatcher, 0, 0, position, 0, 0, 1000.f, 0.f, EntityType::Building, texturePath), m_position(position) {
+    : Entity(dispatcher, 0, 0, position, 0, 0, 1000.f, 0.f, EntityType::Building, texturePath, RenderLayer::BUILDINGS),
+      m_position(position) {
   if (!m_texture.loadFromFile(texturePath)) {
     std::cerr << "Failed to load texture: " << texturePath << std::endl;
   }
@@ -32,11 +33,6 @@ Building::Building(
   float hitboxTop = spriteBounds.position.y + (spriteBounds.size.y - hitboxHeight) / 2.f + 20;
 
   m_hitbox = sf::FloatRect({hitboxLeft, hitboxTop}, {hitboxWidth, hitboxHeight});
-
-  m_eventDispatcher.subscribe<DrawEvent>(
-      this, [this](DrawEvent& event) { this->onDraw(event); }, RenderLayer::BUILDINGS);
-
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
 }
 
 void Building::onUpdate(float deltaTime) {
