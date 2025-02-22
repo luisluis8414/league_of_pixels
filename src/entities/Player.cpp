@@ -110,16 +110,6 @@ void Player::onDraw(DrawEvent& event) {
     hitboxShape.setOutlineThickness(1.f);
 
     window.draw(hitboxShape);
-
-    if (isHitting()) {
-      sf::RectangleShape attackHitboxShape;
-      attackHitboxShape.setPosition({m_attackHitbox.position.x, m_attackHitbox.position.y});
-      attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
-      attackHitboxShape.setFillColor(sf::Color::Transparent);
-      attackHitboxShape.setOutlineColor(sf::Color::Green);
-      attackHitboxShape.setOutlineThickness(1.f);
-      window.draw(attackHitboxShape);
-    }
   }
 }
 
@@ -196,13 +186,12 @@ void Player::drawAbilities(sf::RenderWindow& window) {
 }
 
 void Player::setAnimation(PlayerAnimationState animationState) {
-  if (m_animationConfigs.count(animationState) > 0) {
-    const AnimationConfig& config = m_animationConfigs.at(animationState);
-    m_startFrame = config.startFrame;
-    m_endFrame = config.endFrame;
-    m_frameTime = config.frameTime;
-    m_currentFrame = m_startFrame;
-  }
+  if (m_state == animationState) return;
+  const AnimationConfig& config = m_animationConfigs.at(animationState);
+  m_startFrame = config.startFrame;
+  m_endFrame = config.endFrame;
+  m_frameTime = config.frameTime;
+  m_currentFrame = m_startFrame;
   m_state = animationState;
 }
 
@@ -275,10 +264,8 @@ void Player::updateHitbox() {
 }
 
 void Player::onTargetInRange() {
-  autoAttack();
-}
+  if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) return;
 
-void Player::autoAttack() {
   if (Utils::getRandomInt(0, 1) == 1) {
     setAnimation(PlayerAnimationState::AA1);
   } else {

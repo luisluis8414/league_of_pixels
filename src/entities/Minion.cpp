@@ -48,29 +48,6 @@ Minion::Minion(EventDispatcher& dispatcher,
   m_healthBarForeground.setFillColor(healthbarColor);
 }
 
-// void Minion::attackEntity(std::shared_ptr<Entity> entity) {
-//   if (!hasTarget()) {
-//     m_target = entity;
-
-//     if (std::shared_ptr<Entity> target = m_target.lock()) {
-//       if (target->getPosition().x < getPosition().x) {
-//         m_sprite.setScale({-1.f, 1.f});
-//       } else {
-//         m_sprite.setScale({1.f, 1.});
-//       }
-//     }
-//   }
-// }
-
-// bool Minion::hasTarget() {
-//   if (std::shared_ptr<Entity> target = m_target.lock()) {
-//     return !m_target.expired() &&
-//            Utils::isRectInCircle(target->getHitbox(), getRange());
-//   } else {
-//     return false;
-//   }
-// }
-
 void Minion::onAnimationEnd() {
   if (m_state != MinionAnimationState::WALKING) {
     setAnimation(MinionAnimationState::WALKING);
@@ -97,29 +74,18 @@ void Minion::onDraw(DrawEvent& event) {
     window.draw(m_range);
 
     window.draw(hitboxShape);
-
-    if (isHitting()) {
-      sf::RectangleShape attackHitboxShape;
-      attackHitboxShape.setPosition({m_attackHitbox.position.x, m_attackHitbox.position.y});
-      attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
-      attackHitboxShape.setFillColor(sf::Color::Transparent);
-      attackHitboxShape.setOutlineColor(sf::Color::Green);
-      attackHitboxShape.setOutlineThickness(1.f);
-      window.draw(attackHitboxShape);
-    }
   }
 }
 
 void Minion::setAnimation(MinionAnimationState animationState) {
-  if (m_state != animationState) {
-    const AnimationConfig& config = m_animationConfigs.at(animationState);
-    m_startFrame = config.startFrame;
-    m_endFrame = config.endFrame;
-    m_frameTime = config.frameTime;
-    m_dmgFrame = config.dmgFrame;
-    m_currentFrame = m_startFrame;
-    m_state = animationState;
-  }
+  if (m_state == animationState) return;
+  const AnimationConfig& config = m_animationConfigs.at(animationState);
+  m_startFrame = config.startFrame;
+  m_endFrame = config.endFrame;
+  m_frameTime = config.frameTime;
+  m_dmgFrame = config.dmgFrame;
+  m_currentFrame = m_startFrame;
+  m_state = animationState;
 }
 
 void Minion::onUpdate(const float deltaTime) {
@@ -128,7 +94,11 @@ void Minion::onUpdate(const float deltaTime) {
   updateAnimation(deltaTime);
 
   if (hasTarget()) {
-    setDestination(getTarget()->getCenter());
+    if (getTarget()->getType() == EntityType::Building) {
+      setDestination(getTarget()->getCenter() - sf::Vector2f({0.f, -20.f}));
+    } else {
+      setDestination(getTarget()->getPosition());
+    }
   }
 
   if (isHitting()) return;
@@ -164,31 +134,6 @@ void Minion::updateHitbox() {
   float hitboxTop = spriteBounds.position.y + (spriteBounds.size.y - hitboxHeight) / 2.f;
 
   m_hitbox = sf::FloatRect({hitboxLeft, hitboxTop}, {hitboxWidth, hitboxHeight});
-
-  if (isHitting() && m_attackHitboxConfigs.count(m_state) > 0) {
-    const auto& config = m_attackHitboxConfigs.at(m_state);
-
-    if (m_currentFrame >= (m_endFrame - 2)) {
-      float attackHitboxWidth = spriteBounds.size.x * config.widthFactor;
-      float attackHitboxHeight = spriteBounds.size.y * config.heightFactor;
-
-      float attackHitboxLeft = spriteBounds.position.x + spriteBounds.size.x * config.offsetXFactor;
-      float attackHitboxTop = spriteBounds.position.y + spriteBounds.size.y * config.offsetYFactor;
-
-      float direction = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
-      if (direction < 0.f) {
-        float centerX = spriteBounds.position.x + spriteBounds.size.x * 0.5f;
-        float offsetFromCenter = attackHitboxLeft - centerX;
-        attackHitboxLeft = centerX - offsetFromCenter - attackHitboxWidth;
-      }
-
-      m_attackHitbox = sf::FloatRect({attackHitboxLeft, attackHitboxTop}, {attackHitboxWidth, attackHitboxHeight});
-    }
-
-  } else {
-    // reset when not attacking
-    m_attackHitbox = sf::FloatRect({0.f, 0.f}, {0.f, 0.f});
-  }
 }
 
 bool Minion::isHitting() const {
@@ -196,9 +141,7 @@ bool Minion::isHitting() const {
 }
 
 void Minion::setWalking() {
-  if (m_state != MinionAnimationState::WALKING) {
-    setAnimation(MinionAnimationState::WALKING);
-  }
+  setAnimation(MinionAnimationState::WALKING);
 }
 
 void Minion::setIdle() {
@@ -212,11 +155,5 @@ void Minion::onTargetInRange() {
     m_sprite.setScale({-1.f, 1.f});
   } else {
     m_sprite.setScale({1.f, 1.f});
-  }
-}
-
-void Minion::onDmgFrame() {
-  if (hasTarget()) {
-    getTarget()->takeDmg(m_physicalDmg);
   }
 }

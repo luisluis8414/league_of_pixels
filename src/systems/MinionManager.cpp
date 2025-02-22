@@ -58,36 +58,52 @@ void MinionManager::spawnMinions() {
 
 void MinionManager::checkForTargets() {
   for (const std::shared_ptr<Minion>& minion : m_blueSideMinions) {
-    std::shared_ptr<Tower> closestTower = nullptr;
+    std::shared_ptr<Entity> closestTarget = nullptr;
     float closestDistance = std::numeric_limits<float>::max();
 
     for (const std::shared_ptr<Tower>& tower : m_redSideTowers) {
       float distance = Utils::getVectorDistance(tower->getPosition(), minion->getPosition());
       if (Utils::isRectInCircle(tower->getHitbox(), minion->getRange()) && distance < closestDistance) {
-        closestTower = tower;
+        closestTarget = tower;
         closestDistance = distance;
       }
     }
 
-    if (closestTower) {
-      minion->setTarget(closestTower);
+    for (const std::shared_ptr<Minion>& redSideMinion : m_redSideMinions) {
+      float distance = Utils::getVectorDistance(redSideMinion->getPosition(), minion->getPosition());
+      if (Utils::isRectInCircle(redSideMinion->getHitbox(), minion->getRange()) && distance < closestDistance) {
+        closestTarget = redSideMinion;
+        closestDistance = distance;
+      }
+    }
+
+    if (closestTarget) {
+      minion->setTarget(closestTarget);
     }
   }
 
   for (const std::shared_ptr<Minion>& minion : m_redSideMinions) {
-    std::shared_ptr<Tower> closestTower = nullptr;
+    std::shared_ptr<Entity> closestTarget = nullptr;
     float closestDistance = std::numeric_limits<float>::max();
 
     for (const std::shared_ptr<Tower>& tower : m_blueSideTowers) {
       float distance = Utils::getVectorDistance(tower->getPosition(), minion->getPosition());
       if (Utils::isRectInCircle(tower->getHitbox(), minion->getRange()) && distance < closestDistance) {
-        closestTower = tower;
+        closestTarget = tower;
         closestDistance = distance;
       }
     }
 
-    if (closestTower) {
-      minion->setTarget(closestTower);
+    for (const std::shared_ptr<Minion>& blueSideMinion : m_blueSideMinions) {
+      float distance = Utils::getVectorDistance(blueSideMinion->getPosition(), minion->getPosition());
+      if (Utils::isRectInCircle(blueSideMinion->getHitbox(), minion->getRange()) && distance < closestDistance) {
+        closestTarget = blueSideMinion;
+        closestDistance = distance;
+      }
+    }
+
+    if (closestTarget) {
+      minion->setTarget(closestTarget);
     }
   }
 }

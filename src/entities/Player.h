@@ -36,10 +36,6 @@ class Player : public Entity {
 
   ~Player() = default;
 
-  const sf::FloatRect& getAttackHitbox() const {
-    return m_attackHitbox;
-  };
-
   bool isHitting() const;
 
   const bool isAlive() {
@@ -48,7 +44,6 @@ class Player : public Entity {
 
  private:
   PlayerAnimationState m_state;
-  sf::FloatRect m_attackHitbox;
 
   bool m_alive = true;
 
@@ -79,8 +74,6 @@ class Player : public Entity {
 
   void updateAbilities(float deltaTime);
   void drawAbilities(sf::RenderWindow& window);
-
-  void autoAttack();
 
   const std::unordered_map<PlayerAnimationState, AnimationConfig> m_animationConfigs = {
       {PlayerAnimationState::IDLE, {0, 5, 0.1f}},

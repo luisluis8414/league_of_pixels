@@ -80,7 +80,8 @@ class Entity {
   int m_frameWidth;
   int m_frameHeight;
 
-  std::weak_ptr<Entity> m_target;  // Changed to weak_ptr
+  std::weak_ptr<Entity> m_baseTarget;
+  std::weak_ptr<Entity> m_target;
   sf::Vector2f m_destination;
   float m_speed;
 
@@ -103,6 +104,7 @@ class Entity {
 
   virtual void setPosition(sf::Vector2f position);
 
+  void update(float deltaTime);
   virtual void onUpdate(float deltaTime) = 0;
   virtual void onDraw(DrawEvent& event) = 0;
 
@@ -113,7 +115,6 @@ class Entity {
   virtual void onAnimationEnd() = 0;
   void updateAnimation(float deltaTime);
 
-  // New methods
-  virtual void onTargetInRange() {};  // Virtual function for derived classes to implement
+  virtual void onTargetInRange() {};
   bool isTargetInRange(std::shared_ptr<Entity> target);
 };

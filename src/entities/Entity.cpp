@@ -37,7 +37,7 @@ Entity::Entity(EventDispatcher& dispatcher,
 
   m_sprite.setOrigin({m_sprite.getGlobalBounds().size.x / 2.f, m_sprite.getGlobalBounds().size.y / 2.f});
 
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->onUpdate(event.getDeltaTime()); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent& event) { this->update(event.getDeltaTime()); });
 
   m_eventDispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { onDraw(event); }, renderLayer);
 }
@@ -48,6 +48,13 @@ Entity::~Entity() {
 
 EntityType Entity::getType() const {
   return m_type;
+}
+
+void Entity::update(float deltaTime) {
+  if (isTargetInRange(getTarget())) {
+    onTargetInRange();
+  }
+  onUpdate(deltaTime);
 }
 
 const sf::FloatRect& Entity::getHitbox() const {
@@ -124,6 +131,12 @@ void Entity::setPosition(sf::Vector2f position) {
 };
 
 void Entity::onDmgFrame() {
+  if (hasTarget()) {
+    std::shared_ptr<Entity> target = getTarget();
+    if (target) {
+      target->takeDmg(m_physicalDmg);
+    }
+  }
 }
 
 void Entity::setDestination(sf::Vector2f position) {
@@ -168,14 +181,18 @@ void Entity::setTarget(std::shared_ptr<Entity> target) {
 
 void Entity::clearTarget() {
   m_target.reset();
+
+  if (!m_baseTarget.expired()) {
+    m_target = m_baseTarget;
+  }
 }
 
 std::shared_ptr<Entity> Entity::getTarget() const {
-  return m_target.lock();  // Attempt to get a shared_ptr from the weak_ptr
+  return m_target.lock();
 }
 
 bool Entity::hasTarget() const {
-  return !m_target.expired();  // Check if the weak_ptr is still valid
+  return !m_target.expired();
 }
 
 bool Entity::isTargetInRange(std::shared_ptr<Entity> target) {
