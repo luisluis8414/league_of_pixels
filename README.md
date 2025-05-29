@@ -1,5 +1,10 @@
 # League of Pixels
 
+> ⚠️ **Work in Progress**  
+> This project is not finished.
+
+![Demo](assets/demo.gif)
+
 ## Build Instructions
 
 ### Overview
@@ -49,6 +54,7 @@ The generated solution file can then be opened in Visual Studio.
 After building the project, ensure the required SFML DLLs are present in the `bin/<platform>/<configuration>` directory:
 
 - **For Debug**:
+
   - `sfml-graphics-d-2.dll`
   - `sfml-window-d-2.dll`
   - `sfml-system-d-2.dll`
@@ -69,12 +75,12 @@ These DLLs are automatically copied during the build process via `postbuildcomma
 
 - **Manual SFML Configuration for MinGW**  
   If MinGW support is required, follow these steps:
+
   1. Download a MinGW-compatible version of SFML 3.0.0 from the [SFML website](https://www.sfml-dev.org/download/sfml/3.0.0/).
   2. Place the downloaded SFML library files into the `lib` directory of the project.
   3. Place the downloaded SFML include files into the `include` directory of the project.
-  5. Reconfigure the project by running the build script (`.\scripts\build.bat`) to regenerate the solution files or run:
+  4. Reconfigure the project by running the build script (`.\scripts\build.bat`) to regenerate the solution files or run:
 
   ```bash
-  .\vendor\premake5\premake5.exe gmake2  
+  .\vendor\premake5\premake5.exe gmake2
   ```
-

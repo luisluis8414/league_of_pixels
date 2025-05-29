@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../core/Config.h"
+
 Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position)
     : Entity(dispatcher,
              192,
@@ -42,23 +44,25 @@ void Enemy::onDraw(DrawEvent& event) {
   window.draw(m_healthBarBackground);
   window.draw(m_healthBarForeground);
 
-  sf::RectangleShape hitboxShape;
-  hitboxShape.setPosition({m_hitbox.position.x, m_hitbox.position.y});
-  hitboxShape.setSize(sf::Vector2f(m_hitbox.size.x, m_hitbox.size.y));
-  hitboxShape.setFillColor(sf::Color::Transparent);
-  hitboxShape.setOutlineColor(sf::Color::Red);
-  hitboxShape.setOutlineThickness(1.f);
+  if (Config::Settings::showHitboxes) {
+    sf::RectangleShape hitboxShape;
+    hitboxShape.setPosition({m_hitbox.position.x, m_hitbox.position.y});
+    hitboxShape.setSize(sf::Vector2f(m_hitbox.size.x, m_hitbox.size.y));
+    hitboxShape.setFillColor(sf::Color::Transparent);
+    hitboxShape.setOutlineColor(sf::Color::Red);
+    hitboxShape.setOutlineThickness(1.f);
 
-  window.draw(hitboxShape);
+    window.draw(hitboxShape);
 
-  if (isHitting()) {
-    sf::RectangleShape attackHitboxShape;
-    attackHitboxShape.setPosition({m_attackHitbox.position.x, m_attackHitbox.position.y});
-    attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
-    attackHitboxShape.setFillColor(sf::Color::Transparent);
-    attackHitboxShape.setOutlineColor(sf::Color::Green);
-    attackHitboxShape.setOutlineThickness(1.f);
-    window.draw(attackHitboxShape);
+    if (isHitting()) {
+      sf::RectangleShape attackHitboxShape;
+      attackHitboxShape.setPosition({m_attackHitbox.position.x, m_attackHitbox.position.y});
+      attackHitboxShape.setSize(sf::Vector2f(m_attackHitbox.size.x, m_attackHitbox.size.y));
+      attackHitboxShape.setFillColor(sf::Color::Transparent);
+      attackHitboxShape.setOutlineColor(sf::Color::Green);
+      attackHitboxShape.setOutlineThickness(1.f);
+      window.draw(attackHitboxShape);
+    }
   }
 }
 

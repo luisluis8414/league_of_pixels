@@ -29,7 +29,7 @@ WorldManager::WorldManager(EventDispatcher& dispatcher, std::shared_ptr<Player> 
 }
 
 void WorldManager::init() {
-  spawnEnemy(Config::Textures::Troops::TORCH_RED, {200.f, 200.f});
+  // spawnEnemy(Config::Textures::Troops::TORCH_RED, {200.f, 200.f});
   spawnEnemy(Config::Textures::Troops::TNT_RED, {200.f, 300.f});
 }
 
@@ -68,6 +68,10 @@ void WorldManager::checkForTarget(sf::Vector2f position) {
       target = tower;
       break;
     }
+  }
+
+  for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
+    enemy->setDestination(m_player->getPosition());
   }
 
   if (target) {
