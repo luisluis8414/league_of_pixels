@@ -1,7 +1,7 @@
 # League of Pixels
 
-> ⚠️ **Work in Progress**  
-> This project is not finished.
+> ⚠️ **Work Halted**  
+> This project is not finished and work is currently halted. 
 
 ![Demo](assets/demo.gif)
 
