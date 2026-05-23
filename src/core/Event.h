@@ -147,7 +147,7 @@ class MouseRightClickEvent : public Event {
   }
 
  private:
-  const sf::Vector2f& m_position;
+  sf::Vector2f m_position;
 };
 
 class GameOverEvent : public Event {
