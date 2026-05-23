@@ -19,12 +19,12 @@ inline float getRandomFloat(float min, float max) {
 }
 
 // Checks for axis-aligned bounding box (AABB) collision
-inline static bool aabbCollision(const sf::FloatRect& a, const sf::FloatRect& b) {
+inline bool aabbCollision(const sf::FloatRect& a, const sf::FloatRect& b) {
   return (a.position.x + a.size.x > b.position.x && a.position.x < b.position.x + b.size.x &&
           a.position.y + a.size.y > b.position.y && a.position.y < b.position.y + b.size.y);
 };
 
-inline static bool isRectInCircle(const sf::FloatRect& hitbox, const sf::CircleShape& range) {
+inline bool isRectInCircle(const sf::FloatRect& hitbox, const sf::CircleShape& range) {
   sf::Vector2f circleCenter = range.getPosition();
   float radius = range.getRadius();
 
@@ -42,7 +42,7 @@ inline static bool isRectInCircle(const sf::FloatRect& hitbox, const sf::CircleS
   return false;
 };
 
-inline static float getVectorDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2) {
+inline float getVectorDistance(const sf::Vector2f& pos1, const sf::Vector2f& pos2) {
   float dx = pos1.x - pos2.x;
   float dy = pos1.y - pos2.y;
   return std::sqrt(dx * dx + dy * dy);
