@@ -40,7 +40,7 @@ class Entity {
          std::string texturePath,
          RenderLayer renderLayer);
 
-  ~Entity();
+  virtual ~Entity();
 
   EntityType getType() const;
 
