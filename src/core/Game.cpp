@@ -95,9 +95,3 @@ void Game::processSFMLEvents() {
   };
 }
 
-void Game::endGame() {
-  if (m_window.isOpen()) {
-    m_window.close();
-  }
-  std::cout << "Game Over!" << std::endl;
-}

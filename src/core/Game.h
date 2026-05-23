@@ -21,8 +21,6 @@ class Game {
 
   void run();
 
-  void endGame();
-
  private:
   EventDispatcher m_eventDispatcher;
 
