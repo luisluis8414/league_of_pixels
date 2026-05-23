@@ -143,11 +143,29 @@ class MouseRightClickEvent : public Event {
     return m_position;
   }
   const std::string getName() const override {
-    return "Left Mouse Click Event";
+    return "Right Mouse Click Event";
   }
 
  private:
   sf::Vector2f m_position;
+};
+
+class MouseLeftClickEvent : public Event {
+ public:
+  MouseLeftClickEvent(sf::Vector2i pixelPosition)
+      : Event(EventType::MOUSE_CLICKED), m_pixelPosition(pixelPosition) {};
+
+  ~MouseLeftClickEvent() = default;
+
+  sf::Vector2i getPixelPosition() const {
+    return m_pixelPosition;
+  }
+  const std::string getName() const override {
+    return "Left Mouse Click Event";
+  }
+
+ private:
+  sf::Vector2i m_pixelPosition;
 };
 
 class GameOverEvent : public Event {

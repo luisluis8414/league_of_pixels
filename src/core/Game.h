@@ -7,6 +7,7 @@
 #include "../entities/Enemy.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
+#include "../rendering/PauseScreen.h"
 #include "../rendering/TextRenderer.h"
 #include "../systems/BuildingManager.h"
 #include "../systems/ProjectileManager.h"
@@ -30,6 +31,7 @@ class Game {
 
   TextRenderer m_textRenderer;
   WorldManager m_worldManager;
+  PauseScreen m_pauseScreen;
 
   sf::Clock m_clock;
 

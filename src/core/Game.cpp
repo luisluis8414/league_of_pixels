@@ -17,6 +17,7 @@ Game::Game()
                                         Config::Textures::Spells::Garen::R)),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
       m_worldManager(m_eventDispatcher, m_player),
+      m_pauseScreen(m_eventDispatcher, m_window),
       m_map(m_eventDispatcher) {
 }
 
@@ -37,18 +38,26 @@ void Game::run() {
 
     processSFMLEvents();
 
-    m_eventDispatcher.emit(TickEvent(deltaTime.asSeconds()));
+    const bool paused = m_pauseScreen.isPaused();
+
+    if (!paused) {
+      m_eventDispatcher.emit(TickEvent(deltaTime.asSeconds()));
+    }
 
     m_window.clear();
     m_eventDispatcher.emit(DrawEvent(m_window));
     m_window.display();
 
-    if (secondsClock.getElapsedTime().asSeconds() >= 1.0f) {
-      m_eventDispatcher.emit(SecondsEvent());
+    if (!paused) {
+      if (secondsClock.getElapsedTime().asSeconds() >= 1.0f) {
+        m_eventDispatcher.emit(SecondsEvent());
+        secondsClock.restart();
+      }
+
+      m_eventDispatcher.emit(CleanUpEvent());
+    } else {
       secondsClock.restart();
     }
-
-    m_eventDispatcher.emit(CleanUpEvent());
   }
 }
 
@@ -59,8 +68,12 @@ void Game::processSFMLEvents() {
     } else if (const sf::Event::MouseButtonPressed* mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
       if (mouseButton->button == sf::Mouse::Button::Right) {
         sf::Vector2f worldPosition = m_window.mapPixelToCoords({mouseButton->position.x, mouseButton->position.y});
-        MouseRightClickEvent event(worldPosition);
-        m_eventDispatcher.emit(event);
+        MouseRightClickEvent rightClick(worldPosition);
+        m_eventDispatcher.emit(rightClick);
+      } else if (mouseButton->button == sf::Mouse::Button::Left) {
+        sf::Vector2i pixelPosition(mouseButton->position.x, mouseButton->position.y);
+        MouseLeftClickEvent leftClick(pixelPosition);
+        m_eventDispatcher.emit(leftClick);
       }
     } else if (const sf::Event::KeyPressed* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
       sf::Vector2i mousePosition = sf::Mouse::getPosition();
