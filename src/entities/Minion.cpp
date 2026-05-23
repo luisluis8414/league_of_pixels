@@ -54,6 +54,14 @@ void Minion::onAnimationEnd() {
 
 void Minion::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
+  sf::FloatRect bounds = m_sprite.getGlobalBounds();
+  sf::CircleShape shadow(bounds.size.x * 0.11f);
+  shadow.setScale({1.45f, 0.3f});
+  shadow.setOrigin({shadow.getRadius(), shadow.getRadius()});
+  shadow.setPosition({bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y * 0.68f});
+  shadow.setFillColor(sf::Color(0, 0, 0, 55));
+  window.draw(shadow);
+
   drawHoverOutline(window);
   window.draw(m_sprite);
 
