@@ -10,10 +10,10 @@
 
 WorldManager::WorldManager(EventDispatcher& dispatcher, std::shared_ptr<Player> player)
     : m_eventDispatcher(dispatcher),
-      m_buildingManager(dispatcher, player, m_blueSideTowers, m_redSideTowers, m_blueSideMinions, m_redSideMinions),
       m_player(player),
-      m_minionsManager(dispatcher, m_blueSideMinions, m_redSideMinions, m_blueSideTowers, m_redSideTowers),
-      m_projectileManager(m_eventDispatcher) {
+      m_buildingManager(dispatcher, player, m_blueSideTowers, m_redSideTowers, m_blueSideMinions, m_redSideMinions),
+      m_projectileManager(m_eventDispatcher),
+      m_minionsManager(dispatcher, m_blueSideMinions, m_redSideMinions, m_blueSideTowers, m_redSideTowers) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent event) { this->init(); });
 
   m_eventDispatcher.subscribe<MouseRightClickEvent>(

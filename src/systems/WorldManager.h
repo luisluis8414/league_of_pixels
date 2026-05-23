@@ -21,8 +21,6 @@ class WorldManager {
 
  private:
   EventDispatcher& m_eventDispatcher;
-  BuildingManager m_buildingManager;
-  ProjectileManager m_projectileManager;
 
   std::shared_ptr<Player> m_player;
   std::vector<std::shared_ptr<Enemy>> m_enemies;
@@ -31,6 +29,8 @@ class WorldManager {
   std::vector<std::shared_ptr<Tower>> m_blueSideTowers;
   std::vector<std::shared_ptr<Tower>> m_redSideTowers;
 
+  BuildingManager m_buildingManager;
+  ProjectileManager m_projectileManager;
   MinionManager m_minionsManager;
 
   std::vector<Entity*> m_entitiesToDestroy;
