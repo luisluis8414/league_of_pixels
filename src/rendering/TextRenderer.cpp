@@ -48,13 +48,13 @@ void TextRenderer::draw(sf::RenderWindow& window) {
   sf::Vector2u windowSize = window.getSize();
 
   sf::FloatRect fpsBounds = m_fpsText.getLocalBounds();
-  float fpsX = static_cast<float>(windowSize.x) - fpsBounds.size.x - 15.0f;
+  constexpr float margin = 15.0f;
   float yPos = 10.0f;
-  m_fpsText.setPosition({fpsX, yPos});
+  m_fpsText.setPosition({margin - fpsBounds.position.x, yPos - fpsBounds.position.y});
 
   sf::FloatRect timerBounds = m_timerText.getLocalBounds();
-  float timerX = fpsX - timerBounds.size.x - 20.0f;
-  m_timerText.setPosition({timerX, yPos});
+  float timerX = static_cast<float>(windowSize.x) - timerBounds.size.x - margin - timerBounds.position.x;
+  m_timerText.setPosition({timerX, yPos - timerBounds.position.y});
 
   window.draw(m_fpsText);
   window.draw(m_timerText);

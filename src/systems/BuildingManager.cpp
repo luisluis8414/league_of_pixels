@@ -25,17 +25,25 @@ BuildingManager::BuildingManager(EventDispatcher& dispatcher,
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent) { this->initBuildings(); });
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent) { this->checkForTargets(); });
+  m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent) { this->cleanUp(); });
 
   m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
     if (m_redSideNexus && m_redSideNexus.get() == event.getEntity()) {
-      GameOverEvent gameOver;
-      m_eventDispatcher.emit(gameOver);
+      m_gameOverPending = true;
       m_redSideNexus.reset();
     }
     if (m_blueSideNexus && m_blueSideNexus.get() == event.getEntity()) {
       m_blueSideNexus.reset();
     }
   });
+}
+
+void BuildingManager::cleanUp() {
+  if (!m_gameOverPending) return;
+
+  m_gameOverPending = false;
+  GameOverEvent gameOver;
+  m_eventDispatcher.emit(gameOver);
 }
 
 void BuildingManager::checkForTargets() {

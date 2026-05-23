@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
+#include <vector>
 
 #include "../core/Event.h"
 #include "Entity.h"
@@ -19,11 +20,13 @@ class Minion : public Entity {
   ~Minion() = default;
 
   bool isHitting() const;
+  void setMovementBlockers(const std::vector<sf::FloatRect>& blockers);
 
  private:
   MinionAnimationState m_state;
 
   sf::Color m_healthBarColor;
+  std::vector<sf::FloatRect> m_movementBlockers;
 
   void updateHealthBar() override;
   void updateHitbox() override;
@@ -37,6 +40,9 @@ class Minion : public Entity {
   void onDraw(DrawEvent& event) override;
 
   void setAnimation(MinionAnimationState state);
+  void moveAroundBlockers(float deltaTime);
+  bool canOccupy(const sf::FloatRect& hitbox) const;
+  float getBlockerOverlap(const sf::FloatRect& hitbox) const;
 
   const std::unordered_map<MinionAnimationState, AnimationConfig> m_animationConfigs = {
       {MinionAnimationState::WALKING, {0, 5, 0.1f}},

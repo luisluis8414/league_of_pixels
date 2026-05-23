@@ -26,6 +26,8 @@ MinionManager::MinionManager(EventDispatcher& dispatcher,
       checkForTargets();
       m_targetingClock.restart();
     }
+    updateMovementBlockers(m_blueSideMinions);
+    updateMovementBlockers(m_redSideMinions);
   });
 };
 
@@ -116,5 +118,19 @@ void MinionManager::checkForTargets() {
       minion->clearTarget();
       minion->setDestination(Config::Minions::BLUE_SIDE_SPAWN);
     }
+  }
+}
+
+void MinionManager::updateMovementBlockers(std::vector<std::shared_ptr<Minion>>& minions) {
+  for (std::size_t i = 0; i < minions.size(); ++i) {
+    std::vector<sf::FloatRect> blockers;
+    blockers.reserve(minions.size() - 1);
+
+    for (std::size_t j = 0; j < minions.size(); ++j) {
+      if (i == j) continue;
+      blockers.push_back(minions[j]->getHitbox());
+    }
+
+    minions[i]->setMovementBlockers(blockers);
   }
 }

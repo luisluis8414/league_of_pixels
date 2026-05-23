@@ -1,5 +1,6 @@
 #include "Minion.h"
 
+#include "../components/Map.h"
 #include "../core/Config.h"
 #include "../core/Utils.h"
 
@@ -108,7 +109,7 @@ void Minion::onUpdate(const float deltaTime) {
 
   if (isHitting()) return;
 
-  move(deltaTime);
+  moveAroundBlockers(deltaTime);
 }
 
 void Minion::updateHealthBar() {
@@ -143,6 +144,84 @@ void Minion::updateHitbox() {
 
 bool Minion::isHitting() const {
   return (m_state != MinionAnimationState::WALKING);
+}
+
+void Minion::setMovementBlockers(const std::vector<sf::FloatRect>& blockers) {
+  m_movementBlockers = blockers;
+}
+
+bool Minion::canOccupy(const sf::FloatRect& hitbox) const {
+  if (!Map::isTileWalkable(hitbox)) return false;
+
+  for (const sf::FloatRect& blocker : m_movementBlockers) {
+    if (Utils::aabbCollision(hitbox, blocker)) return false;
+  }
+
+  return true;
+}
+
+float Minion::getBlockerOverlap(const sf::FloatRect& hitbox) const {
+  float overlap = 0.f;
+
+  for (const sf::FloatRect& blocker : m_movementBlockers) {
+    const float left = std::max(hitbox.position.x, blocker.position.x);
+    const float right = std::min(hitbox.position.x + hitbox.size.x, blocker.position.x + blocker.size.x);
+    const float top = std::max(hitbox.position.y, blocker.position.y);
+    const float bottom = std::min(hitbox.position.y + hitbox.size.y, blocker.position.y + blocker.size.y);
+
+    if (right > left && bottom > top) {
+      overlap += (right - left) * (bottom - top);
+    }
+  }
+
+  return overlap;
+}
+
+void Minion::moveAroundBlockers(float deltaTime) {
+  sf::Vector2f direction = m_destination - m_sprite.getPosition();
+  float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+  constexpr float epsilon = 2.f;
+
+  if (distance <= epsilon) {
+    setIdle();
+    return;
+  }
+
+  direction /= distance;
+
+  constexpr float minDirectionThreshold = 0.01f;
+  if (std::abs(direction.x) < minDirectionThreshold) direction.x = 0.0f;
+  if (std::abs(direction.y) < minDirectionThreshold) direction.y = 0.0f;
+
+  sf::Vector2f step = direction * m_speed * deltaTime;
+  sf::FloatRect nextHitbox = m_hitbox;
+  nextHitbox.position += step;
+
+  if (canOccupy(nextHitbox)) {
+    m_sprite.move(step);
+    setWalking();
+    return;
+  }
+
+  const float sideStepAmount = std::max(std::abs(step.y), m_speed * deltaTime);
+  const float preferredDirection = getCenter().y >= m_destination.y ? 1.f : -1.f;
+  const float sideDirections[2] = {preferredDirection, -preferredDirection};
+  const float currentOverlap = getBlockerOverlap(m_hitbox);
+
+  for (float sideDirection : sideDirections) {
+    sf::Vector2f sideStep = {0.f, sideDirection * sideStepAmount};
+    sf::FloatRect sideHitbox = m_hitbox;
+    sideHitbox.position += sideStep;
+
+    if (canOccupy(sideHitbox) ||
+        (Map::isTileWalkable(sideHitbox) && currentOverlap > 0.f && getBlockerOverlap(sideHitbox) < currentOverlap)) {
+      m_sprite.move(sideStep);
+      setWalking();
+      return;
+    }
+  }
+
+  setIdle();
 }
 
 void Minion::setWalking() {

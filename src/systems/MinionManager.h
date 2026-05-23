@@ -32,4 +32,5 @@ class MinionManager {
 
   void spawnMinions();
   void checkForTargets();
+  void updateMovementBlockers(std::vector<std::shared_ptr<Minion>>& minions);
 };

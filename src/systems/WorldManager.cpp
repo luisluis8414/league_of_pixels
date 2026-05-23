@@ -110,6 +110,11 @@ void WorldManager::updateHoverHighlights(sf::RenderWindow& window) {
 
   updateEntityHover(m_player, friendlyOutline);
 
+  const std::shared_ptr<Building>& blueNexus = m_buildingManager.getBlueNexus();
+  if (blueNexus) {
+    updateEntityHover(blueNexus, friendlyOutline);
+  }
+
   for (const std::shared_ptr<Minion>& minion : m_blueSideMinions) {
     updateEntityHover(minion, friendlyOutline);
   }
@@ -122,6 +127,12 @@ void WorldManager::updateHoverHighlights(sf::RenderWindow& window) {
   for (const std::shared_ptr<Tower>& tower : m_redSideTowers) {
     updateEntityHover(tower, enemyOutline);
   }
+
+  const std::shared_ptr<Building>& redNexus = m_buildingManager.getRedNexus();
+  if (redNexus) {
+    updateEntityHover(redNexus, enemyOutline);
+  }
+
   for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
     updateEntityHover(enemy, enemyOutline);
   }

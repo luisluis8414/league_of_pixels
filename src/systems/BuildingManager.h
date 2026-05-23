@@ -38,7 +38,10 @@ class BuildingManager {
   std::vector<std::shared_ptr<Minion>>& m_blueSideMinions;
   std::vector<std::shared_ptr<Minion>>& m_redSideMinions;
 
+  bool m_gameOverPending = false;
+
   void initBuildings();
 
   void checkForTargets();
+  void cleanUp();
 };
