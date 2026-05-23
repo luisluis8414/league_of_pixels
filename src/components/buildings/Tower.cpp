@@ -20,8 +20,6 @@ Tower::Tower(EventDispatcher& dispatcher,
   m_range.setFillColor(sf::Color(0, 0, 0, 0));
   m_range.setOutlineColor(sf::Color::Red);
   m_range.setOutlineThickness(1.5f);
-
-  dispatcher.subscribe<DrawEvent>(this, [this](DrawEvent& event) { this->onDraw(event); });
 }
 
 const sf::Vector2f Tower::getPosition() {
