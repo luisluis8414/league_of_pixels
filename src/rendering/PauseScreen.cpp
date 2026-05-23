@@ -8,9 +8,9 @@
 namespace {
 const std::string kPanelPath = "resources/tiny_swords/UI/Banners/Banner_Vertical.png";
 const std::string kResumePath = "resources/tiny_swords/UI/Buttons/Button_Blue.png";
-const std::string kResumePressedPath = "resources/tiny_swords/UI/Buttons/Button_Blue_Pressed.png";
 const std::string kQuitPath = "resources/tiny_swords/UI/Buttons/Button_Red.png";
-const std::string kQuitPressedPath = "resources/tiny_swords/UI/Buttons/Button_Red_Pressed.png";
+const std::string kToggleOffPath = "resources/tiny_swords/UI/Buttons/Button_Blue.png";
+const std::string kToggleOnPath = "resources/tiny_swords/UI/Buttons/Button_Blue_Pressed.png";
 
 constexpr float kPanelScale = 3.f;
 constexpr float kButtonScale = 2.f;
@@ -23,14 +23,16 @@ PauseScreen::PauseScreen(EventDispatcher& dispatcher, Window& window)
       m_window(window),
       m_panelTexture(AssetManager::instance().getTexture(kPanelPath)),
       m_resumeTexture(AssetManager::instance().getTexture(kResumePath)),
-      m_resumePressedTexture(AssetManager::instance().getTexture(kResumePressedPath)),
       m_quitTexture(AssetManager::instance().getTexture(kQuitPath)),
-      m_quitPressedTexture(AssetManager::instance().getTexture(kQuitPressedPath)),
+      m_toggleOffTexture(AssetManager::instance().getTexture(kToggleOffPath)),
+      m_toggleOnTexture(AssetManager::instance().getTexture(kToggleOnPath)),
       m_panel(m_panelTexture),
       m_resumeButton(m_resumeTexture),
+      m_hitboxButton(m_toggleOffTexture),
       m_quitButton(m_quitTexture),
       m_titleText(m_font),
       m_resumeText(m_font),
+      m_hitboxText(m_font),
       m_quitText(m_font) {
   if (!m_font.openFromFile(Config::Fonts::ARIAL)) {
     std::cerr << "Failed to load font for PauseScreen" << std::endl;
@@ -38,28 +40,29 @@ PauseScreen::PauseScreen(EventDispatcher& dispatcher, Window& window)
 
   m_panel.setScale({kPanelScale, kPanelScale});
   m_resumeButton.setScale({kButtonScale, kButtonScale});
+  m_hitboxButton.setScale({kButtonScale, kButtonScale});
   m_quitButton.setScale({kButtonScale, kButtonScale});
 
-  m_titleText.setString("PAUSED");
+  m_titleText.setString("MENU");
   m_titleText.setCharacterSize(64);
   m_titleText.setFillColor(sf::Color::White);
   m_titleText.setOutlineColor(sf::Color::Black);
   m_titleText.setOutlineThickness(3.f);
 
-  m_resumeText.setString("Resume");
-  m_resumeText.setCharacterSize(24);
-  m_resumeText.setFillColor(sf::Color::White);
-  m_resumeText.setOutlineColor(sf::Color::Black);
-  m_resumeText.setOutlineThickness(2.f);
-
-  m_quitText.setString("Quit");
-  m_quitText.setCharacterSize(24);
-  m_quitText.setFillColor(sf::Color::White);
-  m_quitText.setOutlineColor(sf::Color::Black);
-  m_quitText.setOutlineThickness(2.f);
+  auto initButtonText = [](sf::Text& text, const std::string& str) {
+    text.setString(str);
+    text.setCharacterSize(22);
+    text.setFillColor(sf::Color::White);
+    text.setOutlineColor(sf::Color::Black);
+    text.setOutlineThickness(2.f);
+  };
+  initButtonText(m_resumeText, "Resume");
+  initButtonText(m_hitboxText, "Hitboxes");
+  initButtonText(m_quitText, "Quit");
 
   m_dimmer.setFillColor(sf::Color(0, 0, 0, 150));
 
+  refreshHitboxButton();
   layout();
 
   m_eventDispatcher.subscribe<DrawEvent>(
@@ -74,6 +77,10 @@ PauseScreen::~PauseScreen() {
   m_eventDispatcher.unsubscribe(this);
 }
 
+void PauseScreen::refreshHitboxButton() {
+  m_hitboxButton.setTexture(Config::Settings::showHitboxes ? m_toggleOnTexture : m_toggleOffTexture);
+}
+
 void PauseScreen::layout() {
   sf::Vector2u winSize = m_window.getSize();
   sf::Vector2f center(winSize.x / 2.f, winSize.y / 2.f);
@@ -83,31 +90,29 @@ void PauseScreen::layout() {
 
   m_panel.setPosition({center.x - kPanelSize / 2.f, center.y - kPanelSize / 2.f});
 
-  m_resumeButton.setPosition({center.x - kButtonSize / 2.f, center.y - kButtonSize - 10.f});
-  m_quitButton.setPosition({center.x - kButtonSize / 2.f, center.y + 30.f});
+  const float buttonCenterX = center.x - kButtonSize / 2.f;
+  m_resumeButton.setPosition({buttonCenterX, center.y - 90.f - kButtonSize / 2.f});
+  m_hitboxButton.setPosition({buttonCenterX, center.y + 50.f - kButtonSize / 2.f});
+  m_quitButton.setPosition({buttonCenterX, center.y + 190.f - kButtonSize / 2.f});
 
   sf::FloatRect titleBounds = m_titleText.getLocalBounds();
   m_titleText.setPosition({center.x - titleBounds.size.x / 2.f - titleBounds.position.x,
                            center.y - kPanelSize / 2.f + 90.f - titleBounds.position.y});
 
-  sf::FloatRect resumeBounds = m_resumeText.getLocalBounds();
-  m_resumeText.setPosition({center.x - resumeBounds.size.x / 2.f - resumeBounds.position.x,
-                            m_resumeButton.getPosition().y + kButtonSize / 2.f - resumeBounds.size.y / 2.f -
-                                resumeBounds.position.y - 4.f});
-
-  sf::FloatRect quitBounds = m_quitText.getLocalBounds();
-  m_quitText.setPosition({center.x - quitBounds.size.x / 2.f - quitBounds.position.x,
-                          m_quitButton.getPosition().y + kButtonSize / 2.f - quitBounds.size.y / 2.f -
-                              quitBounds.position.y - 4.f});
+  auto centerOnButton = [&](sf::Text& text, const sf::Sprite& button) {
+    sf::FloatRect bounds = text.getLocalBounds();
+    sf::Vector2f pos = button.getPosition();
+    text.setPosition({pos.x + kButtonSize / 2.f - bounds.size.x / 2.f - bounds.position.x,
+                      pos.y + kButtonSize / 2.f - bounds.size.y / 2.f - bounds.position.y - 4.f});
+  };
+  centerOnButton(m_resumeText, m_resumeButton);
+  centerOnButton(m_hitboxText, m_hitboxButton);
+  centerOnButton(m_quitText, m_quitButton);
 }
 
 void PauseScreen::onKeyPressed(KeyPressedEvent& event) {
   if (event.getKeyboardEvent() == sf::Keyboard::Key::Escape) {
     m_paused = !m_paused;
-    m_resumeHeld = false;
-    m_quitHeld = false;
-    m_resumeButton.setTexture(m_resumeTexture);
-    m_quitButton.setTexture(m_quitTexture);
   }
 }
 
@@ -119,6 +124,12 @@ void PauseScreen::onLeftClick(MouseLeftClickEvent& event) {
 
   if (m_resumeButton.getGlobalBounds().contains(click)) {
     m_paused = false;
+    return;
+  }
+
+  if (m_hitboxButton.getGlobalBounds().contains(click)) {
+    Config::Settings::showHitboxes = !Config::Settings::showHitboxes;
+    refreshHitboxButton();
     return;
   }
 
@@ -139,8 +150,10 @@ void PauseScreen::onDraw(DrawEvent& event) {
   window.draw(m_panel);
   window.draw(m_titleText);
   window.draw(m_resumeButton);
+  window.draw(m_hitboxButton);
   window.draw(m_quitButton);
   window.draw(m_resumeText);
+  window.draw(m_hitboxText);
   window.draw(m_quitText);
 
   window.setView(previousView);
