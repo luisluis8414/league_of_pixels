@@ -157,7 +157,7 @@ class GameOverEvent : public Event {
   ~GameOverEvent() = default;
 
   const std::string getName() const override {
-    return "Key Pressed Event";
+    return "Game Over Event";
   }
 };
 
