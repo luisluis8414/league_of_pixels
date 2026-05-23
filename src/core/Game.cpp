@@ -29,42 +29,26 @@ Game::~Game() {
 void Game::run() {
   m_eventDispatcher.emit(InitEvent());
 
-  const float fpsTarget = 120.0f;
-  const float targetFrameTime = 1.0f / fpsTarget;  // 60fps and ticks
-
   sf::Clock clock;
   sf::Clock secondsClock;
 
   while (m_window.isOpen()) {
     sf::Time deltaTime = clock.restart();
 
-    // process SFML events
     processSFMLEvents();
 
-    // game tick
-    // pass deltaTime , hard coded value for debugging 0.016f
     m_eventDispatcher.emit(TickEvent(deltaTime.asSeconds()));
 
-    // render frame
     m_window.clear();
     m_eventDispatcher.emit(DrawEvent(m_window));
     m_window.display();
 
-    // emit event each second
     if (secondsClock.getElapsedTime().asSeconds() >= 1.0f) {
       m_eventDispatcher.emit(SecondsEvent());
       secondsClock.restart();
     }
 
     m_eventDispatcher.emit(CleanUpEvent());
-
-    // cap frame rate loop
-    while (sf::seconds(targetFrameTime) >= clock.getElapsedTime()) {
-      // wait until targetFrameTime is reached
-    }
-    // cap frame rate threads
-    // sf::Time frameEnd = sf::seconds(targetFrameTime) - clock.getElapsedTime();
-    // if (frameEnd > sf::Time::Zero) sf::sleep(frameEnd);
   }
 }
 
