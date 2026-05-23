@@ -73,9 +73,11 @@ void Game::processSFMLEvents() {
     if (event->is<sf::Event::Closed>()) {
       m_window.close();
     } else if (const sf::Event::MouseButtonPressed* mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
-      sf::Vector2f worldPosition = m_window.mapPixelToCoords({mouseButton->position.x, mouseButton->position.y});
-      MouseRightClickEvent event(worldPosition);
-      m_eventDispatcher.emit(event);
+      if (mouseButton->button == sf::Mouse::Button::Right) {
+        sf::Vector2f worldPosition = m_window.mapPixelToCoords({mouseButton->position.x, mouseButton->position.y});
+        MouseRightClickEvent event(worldPosition);
+        m_eventDispatcher.emit(event);
+      }
     } else if (const sf::Event::KeyPressed* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
       sf::Vector2i mousePosition = sf::Mouse::getPosition();
       sf::Vector2f mouseWorldPosition = m_window.mapPixelToCoords(mousePosition);
