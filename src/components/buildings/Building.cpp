@@ -8,13 +8,8 @@ Building::Building(
     EventDispatcher& dispatcher, const std::string& texturePath, sf::Vector2f position, float health, float scale)
     : Entity(dispatcher, 0, 0, position, 0, 0, 1000.f, 0.f, EntityType::Building, texturePath, RenderLayer::BUILDINGS),
       m_position(position) {
-  if (!m_texture.loadFromFile(texturePath)) {
-    std::cerr << "Failed to load texture: " << texturePath << std::endl;
-  }
   m_sprite.setTextureRect(sf::IntRect({0, 0}, {(int)m_texture.getSize().x, (int)m_texture.getSize().y}));
 
-  m_texture.setSmooth(false);
-  m_sprite.setTexture(m_texture);
   m_sprite.setPosition(position);
   m_sprite.setScale({scale, scale});
 

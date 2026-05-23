@@ -1,5 +1,6 @@
 #include "Player.h"
 
+#include "../core/AssetManager.h"
 #include "../core/Config.h"
 #include "../core/Utils.h"
 
@@ -20,11 +21,11 @@ Player::Player(EventDispatcher& dispatcher,
              EntityType::Player,
              Config::Textures::Troops::PLAYER,
              RenderLayer::PLAYER),
-      m_state(PlayerAnimationState::IDLE) {
-  if (!m_texture.loadFromFile(Config::Textures::Troops::PLAYER)) {
-    std::cerr << "Failed to load sprite sheet: " << Config::Textures::Troops::PLAYER << std::endl;
-  }
-
+      m_state(PlayerAnimationState::IDLE),
+      m_qTexture(AssetManager::instance().getTexture(qTexturePath)),
+      m_wTexture(AssetManager::instance().getTexture(wTexturePath)),
+      m_eTexture(AssetManager::instance().getTexture(eTexturePath)),
+      m_rTexture(AssetManager::instance().getTexture(rTexturePath)) {
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
   m_healthBarBackground.setPosition({10.f, 10.f});
@@ -32,22 +33,6 @@ Player::Player(EventDispatcher& dispatcher,
   m_healthBarForeground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarForeground.setFillColor(sf::Color::Green);
   m_healthBarForeground.setPosition({10.f, 10.f});
-
-  if (!m_qTexture.loadFromFile(qTexturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << qTexturePath << std::endl;
-  }
-
-  if (!m_wTexture.loadFromFile(wTexturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << wTexturePath << std::endl;
-  }
-
-  if (!m_eTexture.loadFromFile(eTexturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << eTexturePath << std::endl;
-  }
-
-  if (!m_rTexture.loadFromFile(rTexturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << rTexturePath << std::endl;
-  }
 
   subscribe();
 }

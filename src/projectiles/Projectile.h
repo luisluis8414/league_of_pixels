@@ -19,7 +19,7 @@ class Projectile {
  private:
   EventDispatcher& m_eventDispatcher;
 
-  sf::Texture m_texture;
+  const sf::Texture& m_texture;
   sf::Sprite m_sprite;
 
   sf::Vector2f m_position;

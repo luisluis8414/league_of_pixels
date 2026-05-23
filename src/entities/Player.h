@@ -47,10 +47,10 @@ class Player : public Entity {
 
   bool m_alive = true;
 
-  sf::Texture m_qTexture;
-  sf::Texture m_wTexture;
-  sf::Texture m_eTexture;
-  sf::Texture m_rTexture;
+  const sf::Texture& m_qTexture;
+  const sf::Texture& m_wTexture;
+  const sf::Texture& m_eTexture;
+  const sf::Texture& m_rTexture;
 
   std::vector<Ability> m_activeAbilities;
 

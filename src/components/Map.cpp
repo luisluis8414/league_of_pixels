@@ -2,12 +2,11 @@
 
 #include <stdexcept>
 
-namespace Map {
-Rift::Rift(EventDispatcher& dispatcher) : m_eventDispatcher(dispatcher) {
-  if (!m_texture.loadFromFile(Map::filePath)) {
-    throw std::runtime_error("Failed to load texture from " + Map::filePath);
-  }
+#include "../core/AssetManager.h"
 
+namespace Map {
+Rift::Rift(EventDispatcher& dispatcher)
+    : m_texture(AssetManager::instance().getTexture(Map::filePath)), m_eventDispatcher(dispatcher) {
   m_waterVertices.setPrimitiveType(sf::PrimitiveType::Triangles);
   m_tileVertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 

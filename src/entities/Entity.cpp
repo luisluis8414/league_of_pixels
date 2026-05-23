@@ -1,5 +1,7 @@
 #include "Entity.h"
 
+#include "../core/AssetManager.h"
+
 Entity::Entity(EventDispatcher& dispatcher,
                int frameWidth,
                int frameHeight,
@@ -26,8 +28,8 @@ Entity::Entity(EventDispatcher& dispatcher,
       m_type(type),
       m_destination(position),
       m_target(),
+      m_texture(AssetManager::instance().getTexture(texturePath)),
       m_sprite(m_texture) {
-  m_texture.setSmooth(false);
   m_sprite.setTexture(m_texture);
 
   m_frameRect = sf::IntRect({0, 0}, {m_frameWidth, m_frameHeight});

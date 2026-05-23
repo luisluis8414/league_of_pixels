@@ -3,22 +3,20 @@
 #include <cmath>
 #include <iostream>
 
+#include "../core/AssetManager.h"
+
 Projectile::Projectile(EventDispatcher& dispatcher,
                        const std::string& texturePath,
                        sf::Vector2f position,
                        std::shared_ptr<Entity> target,
                        float velocity)
     : m_eventDispatcher(dispatcher),
-      m_position(position),
+      m_texture(AssetManager::instance().getTexture(texturePath)),
       m_sprite(m_texture),
+      m_position(position),
       m_velocity(velocity),
       m_initialVelocity(velocity),
       m_target(target) {
-  if (!m_texture.loadFromFile(texturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
-  }
-
-  m_texture.setSmooth(false);
   m_sprite.setTexture(m_texture);
 
   m_sprite.setTextureRect(sf::IntRect({0, 0}, {(int)m_texture.getSize().x, (int)m_texture.getSize().y / 2}));

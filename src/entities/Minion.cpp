@@ -20,10 +20,6 @@ Minion::Minion(EventDispatcher& dispatcher,
              texturePath,
              RenderLayer::ENTITIES),
       m_state(MinionAnimationState::WALKING) {
-  if (!m_texture.loadFromFile(texturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
-  }
-
   m_range.setRadius(120.f);
   m_range.setOrigin({m_range.getRadius(), m_range.getRadius()});
   m_range.setPosition(getCenter());

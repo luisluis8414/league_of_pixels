@@ -68,7 +68,7 @@ class Entity {
 
   sf::FloatRect m_hitbox;
 
-  sf::Texture m_texture;
+  const sf::Texture& m_texture;
   sf::Sprite m_sprite;
   sf::IntRect m_frameRect;
 

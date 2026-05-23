@@ -98,7 +98,7 @@ class Rift {
 
  private:
   sf::Vector2u m_tileSize;
-  sf::Texture m_texture;
+  const sf::Texture& m_texture;
   std::map<int, sf::IntRect> m_tileData;
   sf::VertexArray m_waterVertices;
   sf::VertexArray m_tileVertices;

@@ -17,9 +17,6 @@ Enemy::Enemy(EventDispatcher& dispatcher, const std::string& texturePath, sf::Ve
              texturePath,
              RenderLayer::ENTITIES),
       m_state(EnemyAnimationState::IDLE) {
-  if (!m_texture.loadFromFile(texturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
-  }
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
   m_healthBarBackground.setPosition({10.f, 10.f});

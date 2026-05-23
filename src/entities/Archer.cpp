@@ -22,10 +22,6 @@ Archer::Archer(EventDispatcher& dispatcher,
              RenderLayer::ENTITIES),
       m_state(ArcherAnimationState::IDLE),
       m_target(target) {
-  if (!m_texture.loadFromFile(texturePath)) {
-    std::cerr << "Failed to load sprite sheet: " << texturePath << std::endl;
-  }
-
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
   m_healthBarBackground.setPosition({10.f, 10.f});

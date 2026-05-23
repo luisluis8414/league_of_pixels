@@ -10,7 +10,7 @@ struct AbilityLocationData {
 
 class Ability {
  public:
-  Ability(sf::Texture& texture,
+  Ability(const sf::Texture& texture,
           int frameWidth,
           int frameHeight,
           int totalFrames,
