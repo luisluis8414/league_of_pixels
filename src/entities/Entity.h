@@ -16,7 +16,7 @@ struct AnimationConfig {
   int startFrame;
   int endFrame;
   float frameTime;
-  int dmgFrame;
+  int dmgFrame = -1;
 };
 
 struct HitboxConfig {
@@ -77,7 +77,7 @@ class Entity {
   int m_currentFrame;
   float m_frameTime;
   float m_elapsedTime;
-  int m_dmgFrame = 0;
+  int m_dmgFrame = -1;
 
   int m_frameWidth;
   int m_frameHeight;
