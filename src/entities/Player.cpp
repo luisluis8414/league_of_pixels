@@ -192,6 +192,7 @@ void Player::setAnimation(PlayerAnimationState animationState) {
   m_startFrame = config.startFrame;
   m_endFrame = config.endFrame;
   m_frameTime = config.frameTime;
+  m_dmgFrame = config.dmgFrame;
   m_currentFrame = m_startFrame;
   m_state = animationState;
 }
@@ -215,14 +216,6 @@ void Player::onUpdate(const float deltaTime) {
   updateAbilities(deltaTime);
 
   if (isHitting()) {
-    if (m_state == PlayerAnimationState::AA1 || m_state == PlayerAnimationState::AA2) {
-      if (m_currentFrame == m_animationConfigs.at(m_state).dmgFrame) {
-        std::shared_ptr<Entity> target = getTarget();
-        if (target) {
-          target->takeDmg(m_physicalDmg);
-        }
-      }
-    }
     return;
   }
 
