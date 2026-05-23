@@ -21,7 +21,7 @@ enum class EventType {
   DESTROY_PROJECTILE,
   KEYPRESSED,
   MOUSE_CLICKED,
-  REGISER_PROJECTILE,
+  REGISTER_PROJECTILE,
   ACTION_EVENT,
   CURSOR_ON_EDGE_EVENT,
   ABILITY_DMG_EVENT,
@@ -95,19 +95,19 @@ class CleanUpEvent : public Event {
 
 class TickEvent : public Event {
  public:
-  TickEvent(const float& deltaTime) : Event(EventType::TICK), m_detlaTime(deltaTime) {};
+  TickEvent(const float& deltaTime) : Event(EventType::TICK), m_deltaTime(deltaTime) {};
 
   ~TickEvent() = default;
 
   const float getDeltaTime() const {
-    return m_detlaTime;
+    return m_deltaTime;
   }
   const std::string getName() const override {
     return "Update Event";
   }
 
  private:
-  const float m_detlaTime;
+  const float m_deltaTime;
 };
 
 class KeyPressedEvent : public Event {
@@ -200,7 +200,7 @@ class DestroyProjectileEvent : public Event {
 class RegisterProjectileEvent : public Event {
  public:
   RegisterProjectileEvent(std::shared_ptr<Projectile> projectile)
-      : Event(EventType::REGISER_PROJECTILE), m_projectile(projectile) {};
+      : Event(EventType::REGISTER_PROJECTILE), m_projectile(projectile) {};
 
   ~RegisterProjectileEvent() = default;
 

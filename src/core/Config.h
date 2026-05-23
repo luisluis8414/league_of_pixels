@@ -68,7 +68,7 @@ namespace Camera {
 inline static const float MAX_ZOOM = 2.0f;
 inline static const float MIN_ZOOM = 0.1f;
 
-inline static const float SCOLLSPEED = 20.f;
+inline static const float SCROLLSPEED = 20.f;
 }  // namespace Camera
 
 namespace Minions {
