@@ -18,6 +18,7 @@ Game::Game()
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
       m_worldManager(m_eventDispatcher, m_player),
       m_pauseScreen(m_eventDispatcher, m_window),
+      m_victoryScreen(m_eventDispatcher, m_window),
       m_map(m_eventDispatcher) {
 }
 

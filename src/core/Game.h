@@ -9,6 +9,7 @@
 #include "../entities/Player.h"
 #include "../rendering/PauseScreen.h"
 #include "../rendering/TextRenderer.h"
+#include "../rendering/VictoryScreen.h"
 #include "../systems/BuildingManager.h"
 #include "../systems/ProjectileManager.h"
 #include "../systems/WorldManager.h"
@@ -32,6 +33,7 @@ class Game {
   TextRenderer m_textRenderer;
   WorldManager m_worldManager;
   PauseScreen m_pauseScreen;
+  VictoryScreen m_victoryScreen;
 
   sf::Clock m_clock;
 

@@ -17,13 +17,20 @@ class BuildingManager {
 
   ~BuildingManager() = default;
 
+  const std::shared_ptr<Building>& getRedNexus() const {
+    return m_redSideNexus;
+  }
+  const std::shared_ptr<Building>& getBlueNexus() const {
+    return m_blueSideNexus;
+  }
+
  private:
   EventDispatcher& m_eventDispatcher;
 
   std::shared_ptr<Player> m_player;
 
-  Building m_blueSideNexus;
-  Building m_redSideNexus;
+  std::shared_ptr<Building> m_blueSideNexus;
+  std::shared_ptr<Building> m_redSideNexus;
 
   std::vector<std::shared_ptr<Tower>>& m_blueSideTowers;
   std::vector<std::shared_ptr<Tower>>& m_redSideTowers;

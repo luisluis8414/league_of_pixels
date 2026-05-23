@@ -73,6 +73,13 @@ void WorldManager::checkForTarget(sf::Vector2f position) {
     }
   }
 
+  if (!target) {
+    const std::shared_ptr<Building>& redNexus = m_buildingManager.getRedNexus();
+    if (redNexus && redNexus->getHitbox().contains(position)) {
+      target = redNexus;
+    }
+  }
+
   for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
     enemy->setDestination(m_player->getPosition());
   }

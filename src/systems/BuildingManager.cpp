@@ -14,13 +14,28 @@ BuildingManager::BuildingManager(EventDispatcher& dispatcher,
       m_player(player),
       m_blueSideTowers(blueSideTowers),
       m_redSideTowers(redSideTowers),
-      m_blueSideNexus(m_eventDispatcher, Config::Textures::Buildings::BLUE_SIDE_NEXUS, {300.f, 400.f}),
-      m_redSideNexus(m_eventDispatcher, Config::Textures::Buildings::RED_SIDE_NEXUS, {3500.f, 400.f}),
+      m_blueSideNexus(std::make_shared<Building>(m_eventDispatcher,
+                                                 Config::Textures::Buildings::BLUE_SIDE_NEXUS,
+                                                 sf::Vector2f{300.f, 400.f})),
+      m_redSideNexus(std::make_shared<Building>(m_eventDispatcher,
+                                                Config::Textures::Buildings::RED_SIDE_NEXUS,
+                                                sf::Vector2f{3500.f, 400.f})),
       m_blueSideMinions(blueSideMinions),
       m_redSideMinions(redSideMinions) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent) { this->initBuildings(); });
 
   m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent) { this->checkForTargets(); });
+
+  m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
+    if (m_redSideNexus && m_redSideNexus.get() == event.getEntity()) {
+      GameOverEvent gameOver;
+      m_eventDispatcher.emit(gameOver);
+      m_redSideNexus.reset();
+    }
+    if (m_blueSideNexus && m_blueSideNexus.get() == event.getEntity()) {
+      m_blueSideNexus.reset();
+    }
+  });
 }
 
 void BuildingManager::checkForTargets() {
