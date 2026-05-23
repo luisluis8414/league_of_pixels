@@ -164,7 +164,7 @@ void Entity::updateAnimation(float deltaTime) {
       onAnimationEnd();
     }
 
-    if (m_currentFrame == m_dmgFrame) {
+    if (m_dmgFrame >= 0 && m_currentFrame == m_dmgFrame) {
       onDmgFrame();
     }
 
