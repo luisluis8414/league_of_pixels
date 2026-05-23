@@ -16,6 +16,16 @@ Window::Window(EventDispatcher& dispatcher)
     return;
   }
 
+  sf::Image cursorImage;
+  if (cursorImage.loadFromFile(Config::Window::CURSOR_PATH)) {
+    m_cursor = sf::Cursor::createFromPixels(cursorImage.getPixelsPtr(), cursorImage.getSize(), {0, 0});
+    if (m_cursor) {
+      setMouseCursor(*m_cursor);
+    }
+  } else {
+    std::cerr << "failed to load cursor!" << std::endl;
+  }
+
   setVerticalSyncEnabled(true);
   setFramerateLimit(240);
 

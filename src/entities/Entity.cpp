@@ -195,6 +195,28 @@ bool Entity::hasTarget() const {
   return !m_target.expired();
 }
 
+void Entity::setHoverOutline(sf::Color color) {
+  m_hasHoverOutline = true;
+  m_hoverOutlineColor = color;
+}
+
+void Entity::clearHoverOutline() {
+  m_hasHoverOutline = false;
+}
+
+void Entity::drawHoverOutline(sf::RenderWindow& window) const {
+  if (!m_hasHoverOutline) return;
+
+  sf::FloatRect bounds = m_sprite.getGlobalBounds();
+  sf::RectangleShape outline({bounds.size.x, bounds.size.y});
+  outline.setPosition(bounds.position);
+  outline.setFillColor(sf::Color::Transparent);
+  outline.setOutlineColor(m_hoverOutlineColor);
+  outline.setOutlineThickness(2.f);
+
+  window.draw(outline);
+}
+
 bool Entity::isTargetInRange(std::shared_ptr<Entity> target) {
   if (!target) return false;
 

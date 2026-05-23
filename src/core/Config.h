@@ -61,6 +61,7 @@ constexpr int HEIGHT = 1080;
 inline static const std::string TITLE = "League of Pixels";
 
 inline static const std::string ICON_PATH = "resources/leagueOfPixelsLogo.png";
+inline static const std::string CURSOR_PATH = "resources/tiny_swords/UI/Pointers/01.png";
 }  // namespace Window
 
 namespace Camera {

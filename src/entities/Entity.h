@@ -58,6 +58,8 @@ class Entity {
   void clearTarget();
   std::shared_ptr<Entity> getTarget() const;
   bool hasTarget() const;
+  void setHoverOutline(sf::Color color);
+  void clearHoverOutline();
 
   void setDestination(sf::Vector2f position);
 
@@ -94,6 +96,9 @@ class Entity {
   sf::RectangleShape m_healthBarBackground;
   sf::RectangleShape m_healthBarForeground;
 
+  bool m_hasHoverOutline = false;
+  sf::Color m_hoverOutlineColor;
+
   virtual void updateHealthBar() = 0;
   virtual void updateHitbox() = 0;
 
@@ -109,6 +114,7 @@ class Entity {
   virtual void onDraw(DrawEvent& event) = 0;
 
   virtual void onDmgFrame();
+  void drawHoverOutline(sf::RenderWindow& window) const;
 
   EntityType m_type;
 

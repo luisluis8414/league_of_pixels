@@ -26,6 +26,9 @@ WorldManager::WorldManager(EventDispatcher& dispatcher, std::shared_ptr<Player> 
       this, [this](DestroyEntityEvent& event) { m_entitiesToDestroy.push_back(event.getEntity()); });
 
   m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent& event) { this->cleanUp(); });
+
+  m_eventDispatcher.subscribe<DrawEvent>(
+      this, [this](DrawEvent& event) { this->updateHoverHighlights(event.getWindow()); }, RenderLayer::BACKGROUND);
 }
 
 void WorldManager::init() {
@@ -84,6 +87,37 @@ void WorldManager::checkForTarget(sf::Vector2f position) {
 
 void WorldManager::spawnEnemy(const std::string& texturePath, sf::Vector2f position) {
   m_enemies.push_back(std::make_shared<Enemy>(m_eventDispatcher, texturePath, position));
+}
+
+void WorldManager::updateHoverHighlights(sf::RenderWindow& window) {
+  const sf::Color friendlyOutline(80, 150, 255, 190);
+  const sf::Color enemyOutline(255, 80, 80, 190);
+  const sf::Vector2f mousePosition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+  auto updateEntityHover = [mousePosition](const std::shared_ptr<Entity>& entity, sf::Color outlineColor) {
+    entity->clearHoverOutline();
+    if (entity->getHitbox().contains(mousePosition)) {
+      entity->setHoverOutline(outlineColor);
+    }
+  };
+
+  updateEntityHover(m_player, friendlyOutline);
+
+  for (const std::shared_ptr<Minion>& minion : m_blueSideMinions) {
+    updateEntityHover(minion, friendlyOutline);
+  }
+  for (const std::shared_ptr<Tower>& tower : m_blueSideTowers) {
+    updateEntityHover(tower, friendlyOutline);
+  }
+  for (const std::shared_ptr<Minion>& minion : m_redSideMinions) {
+    updateEntityHover(minion, enemyOutline);
+  }
+  for (const std::shared_ptr<Tower>& tower : m_redSideTowers) {
+    updateEntityHover(tower, enemyOutline);
+  }
+  for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
+    updateEntityHover(enemy, enemyOutline);
+  }
 }
 
 void WorldManager::cleanUp() {

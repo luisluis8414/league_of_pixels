@@ -39,6 +39,7 @@ class WorldManager {
 
   void checkForTarget(sf::Vector2f position);
   void checkAbilityDmg(sf::FloatRect hitbox, float spellDmg);
+  void updateHoverHighlights(sf::RenderWindow& window);
 
   void spawnEnemy(const std::string& texturePath, sf::Vector2f position);
 
