@@ -36,8 +36,8 @@ void Enemy::onAnimationEnd() {
 
 void Enemy::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
-  window.draw(m_sprite);
   drawHoverOutline(window);
+  window.draw(m_sprite);
 
   window.draw(m_healthBarBackground);
   window.draw(m_healthBarForeground);

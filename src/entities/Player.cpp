@@ -79,8 +79,8 @@ void Player::onAnimationEnd() {
 
 void Player::onDraw(DrawEvent& event) {
   sf::RenderWindow& window = event.getWindow();
-  window.draw(m_sprite);
   drawHoverOutline(window);
+  window.draw(m_sprite);
 
   drawAbilities(window);
 

@@ -1,6 +1,37 @@
 #include "Entity.h"
 
+#include <iostream>
+
 #include "../core/AssetManager.h"
+
+namespace {
+const std::string kOutlineFragmentShader = R"(
+uniform sampler2D texture;
+uniform vec4 outlineColor;
+void main() {
+  vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
+  if (pixel.a < 0.1) discard;
+  gl_FragColor = vec4(outlineColor.rgb, pixel.a * outlineColor.a);
+}
+)";
+
+sf::Shader* getOutlineShader() {
+  static sf::Shader shader;
+  static bool loaded = false;
+  static bool failed = false;
+  if (failed) return nullptr;
+  if (!loaded) {
+    if (!sf::Shader::isAvailable() ||
+        !shader.loadFromMemory(kOutlineFragmentShader, sf::Shader::Type::Fragment)) {
+      std::cerr << "Outline shader unavailable; falling back to no outline" << std::endl;
+      failed = true;
+      return nullptr;
+    }
+    loaded = true;
+  }
+  return &shader;
+}
+}  // namespace
 
 Entity::Entity(EventDispatcher& dispatcher,
                int frameWidth,
@@ -209,14 +240,29 @@ void Entity::clearHoverOutline() {
 void Entity::drawHoverOutline(sf::RenderWindow& window) const {
   if (!m_hasHoverOutline) return;
 
-  sf::FloatRect bounds = m_sprite.getGlobalBounds();
-  sf::RectangleShape outline({bounds.size.x, bounds.size.y});
-  outline.setPosition(bounds.position);
-  outline.setFillColor(sf::Color::Transparent);
-  outline.setOutlineColor(m_hoverOutlineColor);
-  outline.setOutlineThickness(2.f);
+  sf::Shader* shader = getOutlineShader();
+  if (!shader) return;
 
-  window.draw(outline);
+  shader->setUniform("texture", sf::Shader::CurrentTexture);
+  shader->setUniform("outlineColor",
+                     sf::Glsl::Vec4(m_hoverOutlineColor.r / 255.f,
+                                    m_hoverOutlineColor.g / 255.f,
+                                    m_hoverOutlineColor.b / 255.f,
+                                    m_hoverOutlineColor.a / 255.f));
+
+  sf::RenderStates states;
+  states.shader = shader;
+
+  constexpr float t = 2.f;
+  const sf::Vector2f offsets[] = {{-t, 0.f}, {t, 0.f}, {0.f, -t}, {0.f, t},
+                                  {-t, -t},  {t, -t},  {-t, t},   {t, t}};
+
+  sf::Sprite copy = m_sprite;
+  const sf::Vector2f originalPos = m_sprite.getPosition();
+  for (const sf::Vector2f& offset : offsets) {
+    copy.setPosition(originalPos + offset);
+    window.draw(copy, states);
+  }
 }
 
 bool Entity::isTargetInRange(std::shared_ptr<Entity> target) {
