@@ -19,4 +19,7 @@ class TextRenderer {
 
   int m_fps = 0;
   sf::Text m_fpsText;
+
+  int m_elapsedSeconds = 0;
+  sf::Text m_timerText;
 };
