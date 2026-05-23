@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "League of Pixels (Debug)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\bin\\Debug\\LeagueOfPixels.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}\\bin\\Debug",
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "Build League of Pixels Debug"
+    }
+  ]
+}

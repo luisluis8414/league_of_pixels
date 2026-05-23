@@ -1,7 +1,7 @@
 # League of Pixels
 
-> ⚠️ **Work Halted**  
-> This project is not finished and work is currently halted. 
+> **Work Halted**
+> This project is not finished and work is currently halted.
 
 ![Demo](assets/demo.gif)
 
@@ -9,78 +9,84 @@
 
 ### Overview
 
-This project uses **Premake** for generating build files and **SFML** for rendering. The build process has been streamlined using a batch script located in the `scripts` folder. Currently, **Visual Studio** is the only supported compiler due to SFML compatibility issues with MinGW. Using MinGW requires downloading and configuring a different version of SFML, which is not supported at this time.
+This project uses Premake to generate Visual Studio project files and SFML for rendering. The repository includes Premake and SFML 3.0.0 binaries configured for Visual Studio on Windows.
 
-### Steps to Build
+Visual Studio is the supported compiler on Windows. MinGW needs a different SFML build and is not wired up here.
 
-#### 1. Prerequisites
+### Prerequisites
 
-- **Premake**: The project includes a local version of Premake located in `vendor/premake5`.
-- **SFML**: The project uses SFML 3.0.0, provided in the `vendor/SFML-3.0.0` directory. This version is pre-configured for Visual Studio compilers.
+- Visual Studio 2022
+- The **Desktop development with C++** workload
+- Windows SDK, installed through the Visual Studio installer
 
-#### 2. Generate Build Files
+### Build on Windows
 
-Run the batch script to generate the Visual Studio solution:
+From the repository root, run:
 
-```bash
+```bat
 .\scripts\build.bat
 ```
 
-### This script
+This generates `LeagueOfPixels.sln` with Premake and builds the default `Debug` configuration with MSBuild.
 
-1. **Navigates to the `vendor/premake5` directory**  
-   The script changes to the directory containing `premake5.exe`.
+To build `Release` instead:
 
-2. **Runs `premake5.exe vs2022`**  
-   This generates a Visual Studio 2022 solution file.
+```bat
+.\scripts\build.bat Release
+```
 
-3. **Returns to the root directory**  
-   Once the solution is generated, the script navigates back to the root directory and confirms the process.
+### Run on Windows
 
-The generated solution file can then be opened in Visual Studio.
+From the repository root, run:
 
----
+```bat
+.\scripts\run.bat
+```
 
-### 3. Build the Project in Visual Studio
+To run `Release` instead:
 
-1. Open the generated `.sln` file in Visual Studio.
-2. Select the desired build configuration (`Debug` or `Release`).
-3. Build the project.
+```bat
+.\scripts\run.bat Release
+```
 
----
+The run script starts the executable from `bin\<configuration>` so the game's relative `resources/...` paths resolve correctly.
 
-### 4. Run the Application
+### Output
 
-After building the project, ensure the required SFML DLLs are present in the `bin/<platform>/<configuration>` directory:
+Build outputs are written to:
 
-- **For Debug**:
+```text
+bin\Debug\LeagueOfPixels.exe
+bin\Release\LeagueOfPixels.exe
+```
 
-  - `sfml-graphics-d-2.dll`
-  - `sfml-window-d-2.dll`
-  - `sfml-system-d-2.dll`
+Premake's post-build step copies the required resources and SFML DLLs into the output directory.
 
-- **For Release**:
-  - `sfml-graphics-2.dll`
-  - `sfml-window-2.dll`
-  - `sfml-system-2.dll`
+Debug DLLs:
 
-These DLLs are automatically copied during the build process via `postbuildcommands` in the `premake5.lua` file. If any DLLs are missing, verify the `postbuildcommands` section or manually copy the required DLLs.
+- `sfml-graphics-d-3.dll`
+- `sfml-window-d-3.dll`
+- `sfml-system-d-3.dll`
 
----
+Release DLLs:
 
-### 5. Limitations
+- `sfml-graphics-3.dll`
+- `sfml-window-3.dll`
+- `sfml-system-3.dll`
 
-- **Only Visual Studio is Supported**  
-  The provided version of SFML is configured for Visual Studio compilers. MinGW is not supported due to the need for a MinGW-compatible version of SFML.
+### Opening in Visual Studio
 
-- **Manual SFML Configuration for MinGW**  
-  If MinGW support is required, follow these steps:
+If you prefer building manually:
 
-  1. Download a MinGW-compatible version of SFML 3.0.0 from the [SFML website](https://www.sfml-dev.org/download/sfml/3.0.0/).
-  2. Place the downloaded SFML library files into the `lib` directory of the project.
-  3. Place the downloaded SFML include files into the `include` directory of the project.
-  4. Reconfigure the project by running the build script (`.\scripts\build.bat`) to regenerate the solution files or run:
+1. Run `.\vendor\premake5\premake5.exe vs2022`.
+2. Open `LeagueOfPixels.sln`.
+3. Select `Debug|x64` or `Release|x64`.
+4. Build the project.
 
-  ```bash
-  .\vendor\premake5\premake5.exe gmake2
-  ```
+### MinGW Note
+
+The vendored SFML libraries are Visual Studio libraries. To use MinGW, download an SFML 3.0.0 MinGW package, replace the `include` and `lib` files with compatible ones, then generate Makefiles with:
+
+```bat
+.\vendor\premake5\premake5.exe gmake2
+```
