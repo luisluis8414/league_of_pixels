@@ -79,6 +79,9 @@ void MinionManager::checkForTargets() {
 
     if (closestTarget) {
       minion->setTarget(closestTarget);
+    } else {
+      minion->clearTarget();
+      minion->setDestination(Config::Minions::RED_SIDE_SPAWN);
     }
   }
 
@@ -104,6 +107,9 @@ void MinionManager::checkForTargets() {
 
     if (closestTarget) {
       minion->setTarget(closestTarget);
+    } else {
+      minion->clearTarget();
+      minion->setDestination(Config::Minions::BLUE_SIDE_SPAWN);
     }
   }
 }
