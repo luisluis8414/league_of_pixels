@@ -120,32 +120,20 @@ void WorldManager::updateHoverHighlights(sf::RenderWindow& window) {
   }
 }
 
+namespace {
+template <typename T>
+void eraseDead(std::vector<std::shared_ptr<T>>& v, Entity* dead) {
+  auto it = std::find_if(v.begin(), v.end(), [dead](const std::shared_ptr<T>& p) { return p.get() == dead; });
+  if (it != v.end()) v.erase(it);
+}
+}  // namespace
+
 void WorldManager::cleanUp() {
-  for (int i = 0; i < m_entitiesToDestroy.size(); ++i) {
-    for (int j = 0; j < m_enemies.size(); ++j) {
-      if (m_enemies[j].get() == m_entitiesToDestroy[i]) {
-        m_enemies.erase(m_enemies.begin() + j);
-        break;
-      }
-    }
-    for (int j = 0; j < m_redSideMinions.size(); ++j) {
-      if (m_redSideMinions[j].get() == m_entitiesToDestroy[i]) {
-        m_redSideMinions.erase(m_redSideMinions.begin() + j);
-        break;
-      }
-    }
-    for (int j = 0; j < m_blueSideMinions.size(); ++j) {
-      if (m_blueSideMinions[j].get() == m_entitiesToDestroy[i]) {
-        m_blueSideMinions.erase(m_blueSideMinions.begin() + j);
-        break;
-      }
-    }
-    for (int j = 0; j < m_redSideTowers.size(); ++j) {
-      if (m_redSideTowers[j].get() == m_entitiesToDestroy[i]) {
-        m_redSideTowers.erase(m_redSideTowers.begin() + j);
-        break;
-      }
-    }
+  for (Entity* dead : m_entitiesToDestroy) {
+    eraseDead(m_enemies, dead);
+    eraseDead(m_redSideMinions, dead);
+    eraseDead(m_blueSideMinions, dead);
+    eraseDead(m_redSideTowers, dead);
   }
   m_entitiesToDestroy.clear();
 }
