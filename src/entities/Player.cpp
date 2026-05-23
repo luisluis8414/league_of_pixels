@@ -26,6 +26,13 @@ Player::Player(EventDispatcher& dispatcher,
       m_wTexture(AssetManager::instance().getTexture(wTexturePath)),
       m_eTexture(AssetManager::instance().getTexture(eTexturePath)),
       m_rTexture(AssetManager::instance().getTexture(rTexturePath)) {
+  m_cooldowns = {{
+      {PlayerAbilities::Q, 'Q', &m_qTexture, sf::IntRect({0, 0}, {64, 128}), 6.f, 0.f},
+      {PlayerAbilities::W, 'W', &m_wTexture, sf::IntRect({0, 0}, {64, 64}), 10.f, 0.f},
+      {PlayerAbilities::E, 'E', &m_eTexture, sf::IntRect({0, 0}, {32, 32}), 8.f, 0.f},
+      {PlayerAbilities::R, 'R', &m_rTexture, sf::IntRect({0, 0}, {64, 88}), 60.f, 0.f},
+  }};
+
   m_healthBarBackground.setSize(sf::Vector2f(100.f, 10.f));
   m_healthBarBackground.setFillColor(sf::Color::Red);
   m_healthBarBackground.setPosition({10.f, 10.f});
@@ -35,6 +42,10 @@ Player::Player(EventDispatcher& dispatcher,
   m_healthBarForeground.setPosition({10.f, 10.f});
 
   subscribe();
+}
+
+const std::array<AbilityCooldownView, 4>& Player::getAbilityCooldowns() const {
+  return m_cooldowns;
 }
 
 void Player::subscribe() {
@@ -100,6 +111,10 @@ void Player::onDraw(DrawEvent& event) {
 }
 
 void Player::castAbility(PlayerAbilities ability, sf::Vector2f mousePosition) {
+  AbilityCooldownView& cooldown = getCooldown(ability);
+  if (cooldown.cooldownRemaining > 0.f) return;
+
+  bool didCast = true;
   switch (ability) {
     case PlayerAbilities::Q:
       m_activeAbilities.emplace_back(
@@ -129,7 +144,12 @@ void Player::castAbility(PlayerAbilities ability, sf::Vector2f mousePosition) {
                                      4.f);
       break;
     default:
+      didCast = false;
       break;
+  }
+
+  if (didCast) {
+    cooldown.cooldownRemaining = cooldown.cooldownDuration;
   }
 }
 
@@ -146,6 +166,12 @@ void Player::updateAbilities(float deltaTime) {
     } else {
       ++it;
     }
+  }
+}
+
+void Player::updateCooldowns(float deltaTime) {
+  for (AbilityCooldownView& cooldown : m_cooldowns) {
+    cooldown.cooldownRemaining = std::max(0.f, cooldown.cooldownRemaining - deltaTime);
   }
 }
 
@@ -169,6 +195,10 @@ void Player::drawAbilities(sf::RenderWindow& window) {
       window.draw(attackHitboxShape);
     }
   }
+}
+
+AbilityCooldownView& Player::getCooldown(PlayerAbilities ability) {
+  return m_cooldowns[static_cast<std::size_t>(ability)];
 }
 
 void Player::setAnimation(PlayerAnimationState animationState) {
@@ -199,6 +229,7 @@ void Player::onUpdate(const float deltaTime) {
   updateHitbox();
   updateAnimation(deltaTime);
   updateAbilities(deltaTime);
+  updateCooldowns(deltaTime);
 
   if (isHitting()) {
     return;

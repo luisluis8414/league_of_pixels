@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <array>
 #include <unordered_map>
 
 #include "../core/Event.h"
@@ -15,6 +16,15 @@ enum class PlayerAnimationState {
 };
 
 enum class PlayerAbilities { Q, W, E, R };
+
+struct AbilityCooldownView {
+  PlayerAbilities ability;
+  char key;
+  const sf::Texture* texture;
+  sf::IntRect iconRect;
+  float cooldownDuration;
+  float cooldownRemaining;
+};
 
 struct AbilityAnimationState {
   bool isAbilityActive = false;
@@ -42,6 +52,8 @@ class Player : public Entity {
     return m_alive;
   }
 
+  const std::array<AbilityCooldownView, 4>& getAbilityCooldowns() const;
+
  private:
   PlayerAnimationState m_state;
 
@@ -55,6 +67,7 @@ class Player : public Entity {
   std::vector<Ability> m_activeAbilities;
 
   AbilityAnimationState m_qAnimationState;
+  std::array<AbilityCooldownView, 4> m_cooldowns;
 
   void subscribe();
 
@@ -73,7 +86,9 @@ class Player : public Entity {
   void castAbility(PlayerAbilities ability, sf::Vector2f position);
 
   void updateAbilities(float deltaTime);
+  void updateCooldowns(float deltaTime);
   void drawAbilities(sf::RenderWindow& window);
+  AbilityCooldownView& getCooldown(PlayerAbilities ability);
 
   const std::unordered_map<PlayerAnimationState, AnimationConfig> m_animationConfigs = {
       {PlayerAnimationState::IDLE, {0, 5, 0.1f}},

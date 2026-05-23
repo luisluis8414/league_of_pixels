@@ -7,6 +7,7 @@
 #include "../entities/Enemy.h"
 #include "../entities/Minion.h"
 #include "../entities/Player.h"
+#include "../rendering/AbilityBar.h"
 #include "../rendering/PauseScreen.h"
 #include "../rendering/TextRenderer.h"
 #include "../rendering/VictoryScreen.h"
@@ -31,6 +32,7 @@ class Game {
   std::shared_ptr<Player> m_player;
 
   TextRenderer m_textRenderer;
+  AbilityBar m_abilityBar;
   WorldManager m_worldManager;
   PauseScreen m_pauseScreen;
   VictoryScreen m_victoryScreen;

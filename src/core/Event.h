@@ -307,6 +307,8 @@ class EventDispatcher {
   }
 
   void emit(Event& event) {
+    m_emitDepth++;
+
     auto it = m_subscriptions.find(std::type_index(typeid(event)));
     if (it != m_subscriptions.end()) {
       for (Subscription& subscription : it->second) {
@@ -314,7 +316,10 @@ class EventDispatcher {
       }
     }
 
-    processPendingUnsubscribes();
+    m_emitDepth--;
+    if (m_emitDepth == 0) {
+      processPendingUnsubscribes();
+    }
   }
 
  private:
@@ -326,6 +331,7 @@ class EventDispatcher {
 
   std::unordered_map<std::type_index, std::vector<Subscription>> m_subscriptions;
   std::vector<void*> m_pendingUnsubscribes;
+  int m_emitDepth = 0;
 
   void processPendingUnsubscribes() {
     for (void* ref : m_pendingUnsubscribes) {

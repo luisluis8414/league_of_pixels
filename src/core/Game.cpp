@@ -16,6 +16,7 @@ Game::Game()
                                         Config::Textures::Spells::Garen::E,
                                         Config::Textures::Spells::Garen::R)),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
+      m_abilityBar(m_eventDispatcher, *m_player, Config::Fonts::ARIAL),
       m_worldManager(m_eventDispatcher, m_player),
       m_pauseScreen(m_eventDispatcher, m_window),
       m_victoryScreen(m_eventDispatcher, m_window),

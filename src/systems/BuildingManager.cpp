@@ -24,8 +24,14 @@ BuildingManager::BuildingManager(EventDispatcher& dispatcher,
       m_redSideMinions(redSideMinions) {
   m_eventDispatcher.subscribe<InitEvent>(this, [this](InitEvent) { this->initBuildings(); });
 
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent) { this->checkForTargets(); });
-  m_eventDispatcher.subscribe<CleanUpEvent>(this, [this](CleanUpEvent) { this->cleanUp(); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent) {
+    if (m_gameOverPending) {
+      cleanUp();
+      return;
+    }
+
+    this->checkForTargets();
+  });
 
   m_eventDispatcher.subscribe<DestroyEntityEvent>(this, [this](DestroyEntityEvent& event) {
     if (m_redSideNexus && m_redSideNexus.get() == event.getEntity()) {
