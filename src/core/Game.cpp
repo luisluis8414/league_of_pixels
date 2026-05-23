@@ -15,9 +15,9 @@ Game::Game()
                                         Config::Textures::Spells::Garen::W,
                                         Config::Textures::Spells::Garen::E,
                                         Config::Textures::Spells::Garen::R)),
-      m_map(m_eventDispatcher),
       m_textRenderer(m_eventDispatcher, Config::Fonts::ARIAL),
-      m_worldManager(m_eventDispatcher, m_player) {
+      m_worldManager(m_eventDispatcher, m_player),
+      m_map(m_eventDispatcher) {
 }
 
 Game::~Game() {
