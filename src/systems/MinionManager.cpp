@@ -21,7 +21,12 @@ MinionManager::MinionManager(EventDispatcher& dispatcher,
     }
   });
 
-  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent) { this->checkForTargets(); });
+  m_eventDispatcher.subscribe<TickEvent>(this, [this](TickEvent) {
+    if (m_targetingClock.getElapsedTime().asSeconds() >= TARGETING_INTERVAL) {
+      checkForTargets();
+      m_targetingClock.restart();
+    }
+  });
 };
 
 void MinionManager::spawnMinions() {

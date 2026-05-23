@@ -27,6 +27,9 @@ class MinionManager {
   int m_minionsSpawned = 0;
   bool m_spawnCycleActive = false;
 
+  sf::Clock m_targetingClock;
+  static constexpr float TARGETING_INTERVAL = 0.25f;
+
   void spawnMinions();
   void checkForTargets();
 };
