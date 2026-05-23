@@ -38,26 +38,18 @@ void Game::run() {
 
     processSFMLEvents();
 
-    const bool paused = m_pauseScreen.isPaused();
-
-    if (!paused) {
-      m_eventDispatcher.emit(TickEvent(deltaTime.asSeconds()));
-    }
+    m_eventDispatcher.emit(TickEvent(deltaTime.asSeconds()));
 
     m_window.clear();
     m_eventDispatcher.emit(DrawEvent(m_window));
     m_window.display();
 
-    if (!paused) {
-      if (secondsClock.getElapsedTime().asSeconds() >= 1.0f) {
-        m_eventDispatcher.emit(SecondsEvent());
-        secondsClock.restart();
-      }
-
-      m_eventDispatcher.emit(CleanUpEvent());
-    } else {
+    if (secondsClock.getElapsedTime().asSeconds() >= 1.0f) {
+      m_eventDispatcher.emit(SecondsEvent());
       secondsClock.restart();
     }
+
+    m_eventDispatcher.emit(CleanUpEvent());
   }
 }
 
