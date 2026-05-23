@@ -118,6 +118,10 @@ void WorldManager::updateHoverHighlights(sf::RenderWindow& window) {
   for (const std::shared_ptr<Enemy>& enemy : m_enemies) {
     updateEntityHover(enemy, enemyOutline);
   }
+
+  if (std::shared_ptr<Entity> focused = m_player->getTarget()) {
+    focused->setHoverOutline(enemyOutline);
+  }
 }
 
 namespace {
