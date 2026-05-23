@@ -9,7 +9,7 @@
 
 Window::Window(EventDispatcher& dispatcher)
     : m_eventDispatcher(dispatcher),
-      sf::RenderWindow(sf::VideoMode::getFullscreenModes().at(1), Config::Window::TITLE, sf::State::Fullscreen) {
+      sf::RenderWindow(sf::VideoMode::getDesktopMode(), Config::Window::TITLE, sf::State::Fullscreen) {
   sf::Image icon;
   if (!icon.loadFromFile(Config::Window::ICON_PATH)) {
     std::cerr << "failed to load icon!" << std::endl;
